@@ -78,4 +78,4 @@ private:
 	std::unique_ptr< TileStreamer > m_pTileStreamer;
 };
 
-} // namespace Watcher
+} // namespace Turbine

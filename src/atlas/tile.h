@@ -57,4 +57,4 @@ private:
 	GLuint m_Texture;
 };
 
-} // namespace Watcher
+} // namespace Turbine

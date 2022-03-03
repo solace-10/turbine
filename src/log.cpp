@@ -168,4 +168,4 @@ void VisualStudioLogger::Log( const std::string& text, LogLevel level )
 }
 #endif
 
-} // namespace Watcher
+} // namespace Turbine

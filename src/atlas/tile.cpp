@@ -79,4 +79,4 @@ void Tile::AssignTexture( GLuint texture )
 	m_Texture = texture;
 }
 
-} // namespace Watcher
+} // namespace Turbine

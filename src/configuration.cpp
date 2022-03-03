@@ -71,12 +71,12 @@ void Configuration::CreateStorage()
 	std::wstring folder(pKnownFolderPath);
 	CoTaskMemFree(pKnownFolderPath);
 	m_StoragePath = folder;
-	m_StoragePath.append("watcher");
+	m_StoragePath.append("turbine");
 	std::filesystem::create_directories(m_StoragePath);
 #else
 	struct passwd* pw = getpwuid(getuid());
 	const char* pHomeDir = pw->pw_dir;
-	m_StoragePath = std::filesystem::path(pHomeDir) / ".local" / "share" / "watcher";
+	m_StoragePath = std::filesystem::path(pHomeDir) / ".local" / "share" / "turbine";
 #endif
 }
 
@@ -117,4 +117,4 @@ void Configuration::Load()
 	}
 }
 
-} // namespace Watcher
+} // namespace Turbine

@@ -97,4 +97,4 @@ inline float GeolocationData::GetLongitude() const
 	return m_Longitude;
 }
 
-} // namespace Watcher
+} // namespace Turbine

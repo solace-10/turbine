@@ -38,7 +38,6 @@ CommandBar::CommandBar()
     m_AnimTimer = 0.0f;
     m_ShowAtlasTileStreamer = false;
     m_ShowDemoWindow = false;
-    m_ShowGoogleQueries = false;
 }
 
 void CommandBar::Render()
@@ -56,13 +55,6 @@ void CommandBar::Render()
         }
         if (ImGui::BeginMenu("View"))
         {
-            if (ImGui::MenuItem("Google queries", nullptr, m_ShowGoogleQueries))
-            {
-                m_ShowGoogleQueries = !m_ShowGoogleQueries;
-            }
-
-            ImGui::Separator();
-
             if (ImGui::BeginMenu("Development"))
             {
                 if (ImGui::MenuItem("Atlas tile streamer", nullptr, m_ShowAtlasTileStreamer))
@@ -94,15 +86,6 @@ void CommandBar::Render()
     if (m_ShowDemoWindow)
     {
         ImGui::ShowDemoWindow(&m_ShowDemoWindow);
-    }
-
-    if (m_ShowGoogleQueries)
-    {
-        Tasks::GoogleSearch* pTask = reinterpret_cast<Tasks::GoogleSearch*>(g_pTurbine->GetTask("Google search"));
-        if (pTask != nullptr)
-        {
-            pTask->ShowQueriesUI(&m_ShowGoogleQueries);
-        }
     }
 
     RenderSearchWidget();
@@ -194,4 +177,4 @@ void CommandBar::RenderTasks()
     }
 }
 
-} // namespace Watcher
+} // namespace Turbine

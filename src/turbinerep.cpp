@@ -210,7 +210,7 @@ void TurbineRep::Render()
 
 	ImGui::SetNextWindowPos(ImGui::GetMainViewport()->Pos);
 	ImGui::SetNextWindowSize(windowSize);
-	ImGui::Begin("Watcher", nullptr, flags);
+	ImGui::Begin("Turbine", nullptr, flags);
 	ImDrawList* pDrawList = ImGui::GetWindowDrawList();
 	m_pAtlas->Render();
     m_pCommandBar->Render();
@@ -335,4 +335,4 @@ CameraVector TurbineRep::GetHoveredCameras()
 	return hoveredCameras;
 }
 
-} // namespace Watcher
+} // namespace Turbine

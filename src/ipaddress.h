@@ -48,4 +48,4 @@ inline const std::string& IPAddress::ToString() const
 	return m_Address;
 }
 
-} // namespace Watcher
+} // namespace Turbine

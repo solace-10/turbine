@@ -44,4 +44,4 @@ GLuint Icons::GetIcon(IconId id)
 	return m_Icons[static_cast<size_t>(id)];
 }
 
-} // namespace Watcher
+} // namespace Turbine

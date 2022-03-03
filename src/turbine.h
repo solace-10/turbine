@@ -31,7 +31,6 @@ SOFTWARE.
 
 #include <SDL.h>
 
-#include "database/database.h"
 #include "camera.h"
 #include "geolocationdata.h"
 
@@ -44,12 +43,14 @@ namespace Turbine
 {
 
 class Configuration;
+class Provider;
 class Task;
 class TurbineRep;
 
+using ConfigurationUniquePtr = std::unique_ptr<Configuration>;
+using ProviderUniquePtr = std::unique_ptr<Provider>;
 using TurbineRepUniquePtr = std::unique_ptr<TurbineRep>;
 using GeolocationDataMap = std::unordered_map<std::string, GeolocationDataSharedPtr>;
-using ConfigurationUniquePtr = std::unique_ptr<Configuration>;
 using TaskUniquePtr = std::unique_ptr<Task>;
 using TaskVector = std::vector<TaskUniquePtr>;
 
@@ -74,23 +75,16 @@ public:
 	Database* GetDatabase() const;
 
 private:
-	static void GeolocationRequestCallback(const QueryResult& result, void* pData);
-	static void LoadGeolocationDataCallback(const QueryResult& result, void* pData);
-	static void LoadCamerasCallback(const QueryResult& result, void* pData);
-
-	void InitialiseDatabase();
 	void InitialiseGeolocation();
 	void InitialiseCameras();
+	void InitialiseProviders();
     void InitialiseTasks();
 	void AddGeolocationData(const json& message);
-	void AddCamera(const json& message);
-	std::string GetDate() const;
 	CameraSharedPtr FindCamera(const std::string& url);
 	void ChangeCameraState(CameraSharedPtr pCamera, Camera::State state);
 
     bool m_Searching;
 	bool m_Active;
-	DatabaseUniquePtr m_pDatabase;
 
 	std::mutex m_GeolocationDataMutex;
 	GeolocationDataMap m_GeolocationData;
@@ -101,6 +95,7 @@ private:
 	TurbineRepUniquePtr m_pRep;
 	ConfigurationUniquePtr m_pConfiguration;
     TaskVector m_Tasks;
+	std::vector<ProviderUniquePtr> m_Providers;
 };
 
 extern Turbine* g_pTurbine;
@@ -129,11 +124,6 @@ inline CameraVector Turbine::GetCameras() const
 {
 	std::scoped_lock lock(m_CamerasMutex);
 	return m_Cameras;
-}
-
-inline Database* Turbine::GetDatabase() const
-{
-	return m_pDatabase.get();
 }
 
 } // namespace Turbine

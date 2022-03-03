@@ -176,4 +176,4 @@ void Atlas::GetScreenCoordinates( float longitude, float latitude, float& x, flo
 	y = y * sTileSize + m_OffsetY + viewportPos.y;
 }
 
-} // namespace Watcher
+} // namespace Turbine

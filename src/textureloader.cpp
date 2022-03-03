@@ -110,7 +110,7 @@ GLuint TextureLoader::LoadTexture(const std::filesystem::path& path)
 	SDL_assert(pSurface != nullptr);
 	if (pSurface == nullptr)
 	{
-		Log::Error("WatcherRep::LoadTexture error: %s", IMG_GetError());
+		Log::Error("TurbineRep::LoadTexture error: %s", IMG_GetError());
 		return 0;
 	}
 
@@ -161,4 +161,4 @@ void TextureLoader::UnloadTexture(GLuint texture)
 	}
 }
 
-} // namespace Watcher
+} // namespace Turbine

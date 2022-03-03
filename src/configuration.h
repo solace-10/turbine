@@ -77,4 +77,4 @@ inline void Configuration::SetGoogleCSEId(const std::string& value)
 	m_GoogleCSEId = value;
 }
 
-} // namespace Watcher
+} // namespace Turbine

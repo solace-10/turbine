@@ -112,4 +112,4 @@ inline void Camera::SetState(State state)
 	m_State = state;
 }
 
-} // namespace Watcher
+} // namespace Turbine
