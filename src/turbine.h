@@ -1,19 +1,26 @@
-///////////////////////////////////////////////////////////////////////////////
-// This file is part of watcher.
-//
-// watcher is free software: you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// watcher is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with watcher. If not, see <https://www.gnu.org/licenses/>.
-///////////////////////////////////////////////////////////////////////////////
+/*
+MIT License
+
+Copyright (c) 2022 Pedro Nunes
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+*/
 
 #pragma once
 
@@ -33,26 +40,24 @@ using json = nlohmann::json;
 
 struct SDL_Window;
 
-namespace Watcher
+namespace Turbine
 {
 
-class CodecManager;
 class Configuration;
 class Task;
-class WatcherRep;
+class TurbineRep;
 
-using CodecManagerUniquePtr = std::unique_ptr<CodecManager>;
-using WatcherRepUniquePtr = std::unique_ptr<WatcherRep>;
+using TurbineRepUniquePtr = std::unique_ptr<TurbineRep>;
 using GeolocationDataMap = std::unordered_map<std::string, GeolocationDataSharedPtr>;
 using ConfigurationUniquePtr = std::unique_ptr<Configuration>;
 using TaskUniquePtr = std::unique_ptr<Task>;
 using TaskVector = std::vector<TaskUniquePtr>;
 
-class Watcher
+class Turbine
 {
 public:
-	Watcher(SDL_Window* pWindow, unsigned int scannerCount);
-	~Watcher();
+	Turbine(SDL_Window* pWindow, unsigned int scannerCount);
+	~Turbine();
 	void ProcessEvent(const SDL_Event& event);
 	void Update();
     bool IsSearching() const;
@@ -65,7 +70,6 @@ public:
 	void OnMessageReceived(const json& message);
 
 	CameraVector GetCameras() const;
-    CodecManager* GetCodecManager() const;
 
 	Database* GetDatabase() const;
 
@@ -94,48 +98,42 @@ private:
 	mutable std::mutex m_CamerasMutex;
 	CameraVector m_Cameras;
 
-	WatcherRepUniquePtr m_pRep;
+	TurbineRepUniquePtr m_pRep;
 	ConfigurationUniquePtr m_pConfiguration;
     TaskVector m_Tasks;
-    CodecManagerUniquePtr m_pCodecManager;
 };
 
-extern Watcher* g_pWatcher;
+extern Turbine* g_pTurbine;
 
-inline bool Watcher::IsSearching() const
+inline bool Turbine::IsSearching() const
 {
     return m_Searching;
 }
 
-inline bool Watcher::IsActive() const
+inline bool Turbine::IsActive() const
 {
 	return m_Active;
 }
 
-inline Configuration* Watcher::GetConfiguration() const
+inline Configuration* Turbine::GetConfiguration() const
 {
 	return m_pConfiguration.get();
 }
 
-inline const TaskVector& Watcher::GetTasks() const
+inline const TaskVector& Turbine::GetTasks() const
 {
     return m_Tasks;
 }
 
-inline CameraVector Watcher::GetCameras() const
+inline CameraVector Turbine::GetCameras() const
 {
 	std::scoped_lock lock(m_CamerasMutex);
 	return m_Cameras;
 }
 
-inline CodecManager* Watcher::GetCodecManager() const
-{
-    return m_pCodecManager.get();
-}
-
-inline Database* Watcher::GetDatabase() const
+inline Database* Turbine::GetDatabase() const
 {
 	return m_pDatabase.get();
 }
 
-} // namespace Watcher
+} // namespace Turbine

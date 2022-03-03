@@ -22,7 +22,7 @@
 #include "log.h"
 #include "preparedstatement.h"
 
-namespace Watcher
+namespace Turbine
 {
 
 PreparedStatement::PreparedStatement(Database* pDatabase, const std::string& query, QueryResultCallback pCallback /* = nullptr */, void* pCallbackData /* = nullptr */) :

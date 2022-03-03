@@ -1,19 +1,26 @@
-///////////////////////////////////////////////////////////////////////////////
-// This file is part of watcher.
-//
-// watcher is free software: you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// watcher is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with watcher. If not, see <https://www.gnu.org/licenses/>.
-///////////////////////////////////////////////////////////////////////////////
+/*
+MIT License
+
+Copyright (c) 2022 Pedro Nunes
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+*/
 
 #include <imgui/imgui.h>
 
@@ -21,9 +28,9 @@
 #include "tasks/googlesearch/googlesearch.h"
 #include "tasks/task.h"
 #include "commandbar.h"
-#include "watcher.h"
+#include "turbine.h"
 
-namespace Watcher
+namespace Turbine
 {
 
 CommandBar::CommandBar()
@@ -91,7 +98,7 @@ void CommandBar::Render()
 
     if (m_ShowGoogleQueries)
     {
-        Tasks::GoogleSearch* pTask = reinterpret_cast<Tasks::GoogleSearch*>(g_pWatcher->GetTask("Google search"));
+        Tasks::GoogleSearch* pTask = reinterpret_cast<Tasks::GoogleSearch*>(g_pTurbine->GetTask("Google search"));
         if (pTask != nullptr)
         {
             pTask->ShowQueriesUI(&m_ShowGoogleQueries);
@@ -116,7 +123,7 @@ void CommandBar::RenderSearchWidget()
 
 void CommandBar::RenderSearchBackground()
 {
-    const bool isSearching = g_pWatcher->IsSearching();
+    const bool isSearching = g_pTurbine->IsSearching();
     ImVec2 p = ImGui::GetCursorScreenPos();
     ImDrawList* pDrawList = ImGui::GetWindowDrawList();
 
@@ -143,7 +150,7 @@ void CommandBar::RenderSearchBackground()
         );
     }
 
-    if (g_pWatcher->IsSearching())
+    if (g_pTurbine->IsSearching())
     {
         m_AnimTimer += ImGui::GetIO().DeltaTime * 5.0f;
         if (m_AnimTimer > stripeWidth * 2.0f)
@@ -160,7 +167,7 @@ void CommandBar::RenderSearchButton()
 
     if (ImGui::InvisibleButton("SearchWidgetButton", ImGui::GetWindowSize()))
     {
-        g_pWatcher->SetSearching(!g_pWatcher->IsSearching());
+        g_pTurbine->SetSearching(!g_pTurbine->IsSearching());
     }
 
     const float width = ImGui::GetWindowWidth();
@@ -173,14 +180,14 @@ void CommandBar::RenderSearchButton()
     pDrawList->AddRectFilled(tl, br, IM_COL32(20, 20, 20, 200));
     pDrawList->AddRect(tl, br, borderColor);
 
-    const std::string& text = g_pWatcher->IsSearching() ? "Searching" : "Begin search";
+    const std::string& text = g_pTurbine->IsSearching() ? "Searching" : "Begin search";
     ImVec2 textSize = ImGui::CalcTextSize(text.c_str());
     pDrawList->AddText(ImVec2(p.x + (width - textSize.x) / 2.0f, p.y + (height - ImGui::GetTextLineHeight()) / 2.0f), IM_COL32(255, 255, 255, 255), text.c_str());
 }
 
 void CommandBar::RenderTasks()
 {
-    const TaskVector& tasks = g_pWatcher->GetTasks();
+    const TaskVector& tasks = g_pTurbine->GetTasks();
     for (auto&& pTask : tasks)
     {
         pTask->Render();

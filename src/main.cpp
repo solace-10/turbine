@@ -12,7 +12,7 @@
 #include <SDL_image.h>
 #include <SDL_opengl.h>
 #include <curl/curl.h>
-#include "watcher.h"
+#include "turbine.h"
 
 int main(int, char**)
 {
@@ -53,7 +53,7 @@ int main(int, char**)
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 2);
 
     SDL_WindowFlags window_flags = (SDL_WindowFlags)(SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI);
-    SDL_Window* window = SDL_CreateWindow("watcher", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1280, 720, window_flags);
+    SDL_Window* window = SDL_CreateWindow("Turbine", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1280, 720, window_flags);
     SDL_GLContext gl_context = SDL_GL_CreateContext(window);
 	SDL_GL_MakeCurrent(window, gl_context);
 	SDL_GL_SetSwapInterval(1); // Enable vsync
@@ -102,7 +102,7 @@ int main(int, char**)
 
     ImVec4 clear_color = ImVec4(0.00f, 0.00f, 0.00f, 1.00f);
 
-	Watcher::Watcher watcher(window, 64);
+	Turbine::Turbine turbine(window, 64);
 
     // Main loop
     bool done = false;
@@ -126,7 +126,7 @@ int main(int, char**)
 				done = true;
             }
 
-			watcher.ProcessEvent( event );
+			turbine.ProcessEvent( event );
         }
 
 		// Start the Dear ImGui frame
@@ -134,7 +134,7 @@ int main(int, char**)
 		ImGui_ImplSDL2_NewFrame();
 		ImGui::NewFrame();
 
-		watcher.Update();
+		turbine.Update();
 
 		// Rendering
 		ImGui::Render();

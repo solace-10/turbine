@@ -1,4 +1,4 @@
-set(NAME "watcher")
+set(NAME "turbine")
 project(${NAME})
  
 file(GLOB_RECURSE SOURCE_FILES CONFIGURE_DEPENDS *.cpp *.hpp *.c *.h *.rc)

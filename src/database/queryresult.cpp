@@ -17,7 +17,7 @@
 
 #include "database/queryresult.h"
 
-namespace Watcher
+namespace Turbine
 {
 
 QueryResultType::QueryResultType( int value ) :

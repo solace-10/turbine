@@ -1,19 +1,26 @@
-///////////////////////////////////////////////////////////////////////////////
-// This file is part of watcher.
-//
-// watcher is free software: you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// watcher is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with watcher. If not, see <https://www.gnu.org/licenses/>.
-///////////////////////////////////////////////////////////////////////////////
+/*
+MIT License
+
+Copyright (c) 2022 Pedro Nunes
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+*/
 
 #include <SDL.h>
 #include "imgui/imgui.h"
@@ -23,17 +30,17 @@
 #include "icons.h"
 #include "log.h"
 #include "textureloader.h"
-#include "watcherrep.h"
-#include "watcher.h"
+#include "turbinerep.h"
+#include "turbine.h"
 
-namespace Watcher
+namespace Turbine
 {
 
 static unsigned int sPinWidth = 16;
 static unsigned int sPinHeight = 26;
 static unsigned int sPinHalfWidth = sPinWidth / 2;
 
-WatcherRep::WatcherRep(SDL_Window* pWindow) :
+TurbineRep::TurbineRep(SDL_Window* pWindow) :
 m_pWindow(pWindow),
 m_CellSize(128.0f),
 m_SelectCamera(false)
@@ -53,12 +60,12 @@ m_SelectCamera(false)
 	m_PinColor[static_cast<size_t>(Camera::State::Unauthorised)]	= ImColor(255,   0, 0);
 }
 
-WatcherRep::~WatcherRep()
+TurbineRep::~TurbineRep()
 {
 
 }
 
-void WatcherRep::SetUserInterfaceStyle()
+void TurbineRep::SetUserInterfaceStyle()
 {
 	ImGuiStyle &st = ImGui::GetStyle();
 	st.FrameBorderSize = 1.0f;
@@ -127,7 +134,7 @@ void WatcherRep::SetUserInterfaceStyle()
 	//colors[ImGuiCol_ModalWindowDimBg] = ImVec4(0.80f, 0.80f, 0.80f, 0.35f);
 }
 
-void WatcherRep::ProcessEvent(const SDL_Event& event)
+void TurbineRep::ProcessEvent(const SDL_Event& event)
 {
 	if (event.type == SDL_MOUSEMOTION && ImGui::GetIO().WantCaptureMouse == false)
 	{
@@ -165,7 +172,7 @@ void WatcherRep::ProcessEvent(const SDL_Event& event)
 	}
 }
 
-void WatcherRep::Update(float delta)
+void TurbineRep::Update(float delta)
 {
 	static const float sBaseCellSize = 128.0f;
 	m_CellSize = sBaseCellSize;
@@ -178,12 +185,12 @@ void WatcherRep::Update(float delta)
     }
 }
 
-const ImColor& WatcherRep::GetPinColor(Camera::State state) const
+const ImColor& TurbineRep::GetPinColor(Camera::State state) const
 {
 	return m_PinColor[static_cast<size_t>(state)];
 }
 
-void WatcherRep::Render()
+void TurbineRep::Render()
 {
 	unsigned int flags = 0;
 	flags |= ImGuiWindowFlags_NoResize;
@@ -209,7 +216,7 @@ void WatcherRep::Render()
     m_pCommandBar->Render();
 	ImGui::End();
 
-	CameraVector cameras = g_pWatcher->GetCameras();
+	CameraVector cameras = g_pTurbine->GetCameras();
 	for (CameraSharedPtr& camera : cameras)
 	{
 		GeolocationData* pGeolocationData = camera->GetGeolocationData();
@@ -233,7 +240,7 @@ void WatcherRep::Render()
 	FlushClosedCameras();
 }
 
-void WatcherRep::OpenPickedCamera()
+void TurbineRep::OpenPickedCamera()
 {
 	if (ImGui::GetIO().WantCaptureMouse == false)
 	{
@@ -275,7 +282,7 @@ void WatcherRep::OpenPickedCamera()
 					{ "url", hoveredCameras.front()->GetURL() },
 					{ "texture_id", m_CameraReps.back().GetTexture() }
 				};
-				g_pWatcher->OnMessageReceived(message);
+				g_pTurbine->OnMessageReceived(message);
 			}
 		}
 
@@ -283,7 +290,7 @@ void WatcherRep::OpenPickedCamera()
 	}
 }
 
-void WatcherRep::RenderCameras()
+void TurbineRep::RenderCameras()
 {
 	for (auto& cameraDisplay : m_CameraReps)
 	{
@@ -291,7 +298,7 @@ void WatcherRep::RenderCameras()
 	}
 }
 
-void WatcherRep::FlushClosedCameras()
+void TurbineRep::FlushClosedCameras()
 {
 	auto ifClosed = [&](const CameraRep& cameraRep) -> bool
 	{
@@ -301,10 +308,10 @@ void WatcherRep::FlushClosedCameras()
 	m_CameraReps.remove_if(ifClosed);
 }
 
-CameraVector WatcherRep::GetHoveredCameras()
+CameraVector TurbineRep::GetHoveredCameras()
 {
 	CameraVector hoveredCameras;
-	CameraVector cameras = g_pWatcher->GetCameras();
+	CameraVector cameras = g_pTurbine->GetCameras();
 
 	int mx, my;
 	SDL_GetMouseState(&mx, &my);

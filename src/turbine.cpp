@@ -1,19 +1,26 @@
-///////////////////////////////////////////////////////////////////////////////
-// This file is part of watcher.
-//
-// watcher is free software: you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// watcher is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with watcher. If not, see <https://www.gnu.org/licenses/>.
-///////////////////////////////////////////////////////////////////////////////
+/*
+MIT License
+
+Copyright (c) 2022 Pedro Nunes
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+*/
 
 #include <chrono>
 #include <iostream>
@@ -23,7 +30,6 @@
 #include <curl/curl.h>
 #include <SDL.h>
 
-#include "codecs/codecmanager.h"
 #include "ext/json.h"
 #include "imgui/imgui.h"
 #include "tasks/googlesearch/googlesearch.h"
@@ -31,23 +37,23 @@
 #include "configuration.h"
 #include "geolocationdata.h"
 #include "log.h"
-#include "watcher.h"
-#include "watcherrep.h"
+#include "turbine.h"
+#include "turbinerep.h"
 #include "textureloader.h"
 
 extern IMGUI_API ImGuiContext* GImGui;
 
-namespace Watcher
+namespace Turbine
 {
 
-Watcher* g_pWatcher = nullptr;
+Turbine* g_pTurbine = nullptr;
 
-Watcher::Watcher(SDL_Window* pWindow, unsigned int scannerCount) :
+Turbine::Turbine(SDL_Window* pWindow, unsigned int scannerCount) :
 m_Searching(false),
 m_Active(true),
 m_pDatabase(nullptr)
 {
-	g_pWatcher = this;
+	g_pTurbine = this;
 
 	Log::AddLogTarget(std::make_shared<FileLogger>("log.txt"));
 #ifdef _WIN32
@@ -57,8 +63,7 @@ m_pDatabase(nullptr)
 	TextureLoader::Initialise();
 
 	m_pConfiguration = std::make_unique<Configuration>();
-	m_pRep = std::make_unique<WatcherRep>(pWindow);
-    m_pCodecManager = std::make_unique<CodecManager>();
+	m_pRep = std::make_unique<TurbineRep>(pWindow);
 
 	InitialiseDatabase();
 
@@ -69,13 +74,13 @@ m_pDatabase(nullptr)
     InitialiseTasks();
 }
 
-Watcher::~Watcher()
+Turbine::~Turbine()
 {
 	m_Tasks.clear();
 	m_Active = false;
 }
 
-void Watcher::InitialiseDatabase()
+void Turbine::InitialiseDatabase()
 {
     DatabaseUniquePtr pDatabase = std::make_unique<Database>();
     if (pDatabase->Initialise())
@@ -88,27 +93,27 @@ void Watcher::InitialiseDatabase()
 	}
 }
 
-void Watcher::GeolocationRequestCallback(const QueryResult& result, void* pData)
+void Turbine::GeolocationRequestCallback(const QueryResult& result, void* pData)
 {
 
 }
 
-void Watcher::InitialiseGeolocation()
+void Turbine::InitialiseGeolocation()
 {
-	PreparedStatement statement(m_pDatabase.get(), "SELECT * FROM Geolocation", &Watcher::LoadGeolocationDataCallback);
+	PreparedStatement statement(m_pDatabase.get(), "SELECT * FROM Geolocation", &Turbine::LoadGeolocationDataCallback);
 	m_pDatabase->Execute(statement);
 
-	PreparedStatement query(m_pDatabase.get(), "SELECT IP FROM Cameras WHERE GeolocationId IS NULL", &Watcher::GeolocationRequestCallback);
+	PreparedStatement query(m_pDatabase.get(), "SELECT IP FROM Cameras WHERE GeolocationId IS NULL", &Turbine::GeolocationRequestCallback);
 	m_pDatabase->Execute(query);
 }
 
-void Watcher::InitialiseCameras()
+void Turbine::InitialiseCameras()
 {
-	PreparedStatement query(m_pDatabase.get(), "SELECT * FROM Cameras", &Watcher::LoadCamerasCallback);
+	PreparedStatement query(m_pDatabase.get(), "SELECT * FROM Cameras", &Turbine::LoadCamerasCallback);
 	m_pDatabase->Execute(query);
 }
 
-void Watcher::InitialiseTasks()
+void Turbine::InitialiseTasks()
 {
     m_Tasks.emplace_back(std::make_unique<Task>("Geolocation"));
     m_Tasks.emplace_back(std::make_unique<Tasks::GoogleSearch>());
@@ -123,12 +128,12 @@ void Watcher::InitialiseTasks()
 	}
 }
 
-void Watcher::ProcessEvent(const SDL_Event& event)
+void Turbine::ProcessEvent(const SDL_Event& event)
 {
 	m_pRep->ProcessEvent(event);
 }
 
-void Watcher::Update()
+void Turbine::Update()
 {
 	TextureLoader::Update();
 
@@ -143,7 +148,7 @@ void Watcher::Update()
 	m_pRep->Render();
 }
 
-Task* Watcher::GetTask(const std::string& name) const
+Task* Turbine::GetTask(const std::string& name) const
 {
 	for (auto&& pTask : m_Tasks)
 	{
@@ -156,7 +161,7 @@ Task* Watcher::GetTask(const std::string& name) const
 	return nullptr;
 }
 
-void Watcher::OnMessageReceived(const json& message)
+void Turbine::OnMessageReceived(const json& message)
 {
 	const std::string& messageType = message["type"];
 	if (messageType == "log")
@@ -186,7 +191,7 @@ void Watcher::OnMessageReceived(const json& message)
 	}
 }
 
-CameraSharedPtr Watcher::FindCamera(const std::string& url)
+CameraSharedPtr Turbine::FindCamera(const std::string& url)
 {
 	std::scoped_lock lock(m_CamerasMutex);
 	for (CameraSharedPtr& pCamera : m_Cameras)
@@ -199,7 +204,7 @@ CameraSharedPtr Watcher::FindCamera(const std::string& url)
 	return CameraSharedPtr();
 }
 
-void Watcher::ChangeCameraState(CameraSharedPtr pCamera, Camera::State state)
+void Turbine::ChangeCameraState(CameraSharedPtr pCamera, Camera::State state)
 {
 	pCamera->SetState(state);
 
@@ -210,7 +215,7 @@ void Watcher::ChangeCameraState(CameraSharedPtr pCamera, Camera::State state)
 	m_pDatabase->Execute(statement);
 }
 
-void Watcher::LoadGeolocationDataCallback(const QueryResult& result, void* pData)
+void Turbine::LoadGeolocationDataCallback(const QueryResult& result, void* pData)
 {
 	for (auto& row : result.Get())
 	{
@@ -221,7 +226,7 @@ void Watcher::LoadGeolocationDataCallback(const QueryResult& result, void* pData
 			continue;
 		}
 
-		std::scoped_lock lock(g_pWatcher->m_GeolocationDataMutex);
+		std::scoped_lock lock(g_pTurbine->m_GeolocationDataMutex);
 		IPAddress address(row[0]->GetString());
 		std::string city = row[1]->GetString();
 		std::string region = row[2]->GetString();
@@ -231,11 +236,11 @@ void Watcher::LoadGeolocationDataCallback(const QueryResult& result, void* pData
 		float longitude = static_cast<float>(row[6]->GetDouble());
 		GeolocationDataSharedPtr pGeolocationData = std::make_shared<GeolocationData>(address);
 		pGeolocationData->LoadFromDatabase(city, region, country, organisation, latitude, longitude);
-		g_pWatcher->m_GeolocationData[address.ToString()] = pGeolocationData; // No need to lock map here as only the main thread is working on it at this point.
+		g_pTurbine->m_GeolocationData[address.ToString()] = pGeolocationData; // No need to lock map here as only the main thread is working on it at this point.
 	}
 }
 
-void Watcher::LoadCamerasCallback(const QueryResult& result, void* pData)
+void Turbine::LoadCamerasCallback(const QueryResult& result, void* pData)
 {
 	for (auto& row : result.Get())
 	{
@@ -246,24 +251,24 @@ void Watcher::LoadCamerasCallback(const QueryResult& result, void* pData)
 			continue;
 		}
 
-		std::scoped_lock lock(g_pWatcher->m_CamerasMutex, g_pWatcher->m_GeolocationDataMutex);
+		std::scoped_lock lock(g_pTurbine->m_CamerasMutex, g_pTurbine->m_GeolocationDataMutex);
 		std::string ip(row[1]->GetString());
 		IPAddress address(ip);
 		// address.SetPort(row[2]->GetInt()); // TODO: pass port directly into camera constructor?
 
 		CameraSharedPtr camera = std::make_shared<Camera>(row[3]->GetString(), row[0]->GetString(), address, Camera::State::Unknown);
-		if (g_pWatcher->m_GeolocationData.find(ip) != g_pWatcher->m_GeolocationData.cend())
+		if (g_pTurbine->m_GeolocationData.find(ip) != g_pTurbine->m_GeolocationData.cend())
 		{
-			camera->SetGeolocationData(g_pWatcher->m_GeolocationData[ip]);
+			camera->SetGeolocationData(g_pTurbine->m_GeolocationData[ip]);
 		}
 
 		camera->SetState(static_cast<Camera::State>(row[6]->GetInt()));
 
-		g_pWatcher->m_Cameras.push_back(camera);
+		g_pTurbine->m_Cameras.push_back(camera);
 	}
 }
 
-void Watcher::AddGeolocationData(const json& message)
+void Turbine::AddGeolocationData(const json& message)
 {
 	std::string addressStr = message["address"];
 	const IPAddress address(addressStr);
@@ -289,7 +294,7 @@ void Watcher::AddGeolocationData(const json& message)
 
 // Returns the current timestamp in a format which can be understood by sqlite as a date (YYYY-MM-DD HH:MM:SS.SSS).
 // See https://www.sqlitetutorial.net/sqlite-date/
-std::string Watcher::GetDate() const
+std::string Turbine::GetDate() const
 {
 	time_t rawTime;
 	static char buffer[128];
@@ -313,7 +318,7 @@ std::string Watcher::GetDate() const
 #endif
 }
 
-void Watcher::AddCamera(const json& message)
+void Turbine::AddCamera(const json& message)
 {
 	if (message["type"] != "http_server_scan_result")
 	{
@@ -351,7 +356,7 @@ void Watcher::AddCamera(const json& message)
 	}
 }
 
-void Watcher::SetSearching(bool state)
+void Turbine::SetSearching(bool state)
 {
 	m_Searching = state;
 
@@ -368,4 +373,4 @@ void Watcher::SetSearching(bool state)
 	}
 }
 
-} // namespace Watcher
+} // namespace Turbine

@@ -2,7 +2,7 @@
 imgui.ini
 bin/config.json
 bin/log.txt
-bin/watcher*.exe
-bin/watcher*.ilk
-bin/watcher*.pdb
+bin/turbine*.exe
+bin/turbine*.ilk
+bin/turbine*.pdb
 build/

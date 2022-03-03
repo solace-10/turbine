@@ -21,9 +21,9 @@
 #include "configuration.h"
 #include "database.h"
 #include "log.h"
-#include "watcher.h"
+#include "turbine.h"
 
-namespace Watcher
+namespace Turbine
 {
 
 Database::Database() :
@@ -50,7 +50,7 @@ Database::~Database()
 
 bool Database::Initialise()
 {   
-    std::filesystem::path filename = g_pWatcher->GetConfiguration()->GetStoragePath() / "watcher.db";
+    std::filesystem::path filename = g_pTurbine->GetConfiguration()->GetStoragePath() / "watcher.db";
     const bool createTables = (std::filesystem::exists(filename) == false);
     if (sqlite3_open(filename.string().c_str(), &m_pDatabase) != SQLITE_OK)
     {

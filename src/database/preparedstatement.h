@@ -23,7 +23,7 @@
 
 struct sqlite3_stmt;
 
-namespace Watcher
+namespace Turbine
 {
 
 class Database;

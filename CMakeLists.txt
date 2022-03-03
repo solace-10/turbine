@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.8)
-project(watcher)
+project(turbine)
 
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 

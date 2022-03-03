@@ -22,21 +22,57 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-#include "ipaddress.h"
+#pragma once
+
+#include <array>
+#include <memory>
+#include <string>
+
+#include <SDL_opengl.h>
+
+#include "camera.h"
+#include "camerarep.h"
+
+struct SDL_Surface;
+struct SDL_Window;
 
 namespace Turbine
 {
 
-IPAddress::IPAddress() :
-m_Address("0.0.0.0")
+class Atlas;
+using AtlasUniquePtr = std::unique_ptr<Atlas>;
+class CommandBar;
+using CommandBarUniquePtr = std::unique_ptr<CommandBar>;
+
+class TurbineRep
 {
+public:
+	TurbineRep(SDL_Window* pWindow);
+	~TurbineRep();
 
-}
+	void ProcessEvent(const SDL_Event& event);
+	void Update(float delta);
+	void Render();
 
-IPAddress::IPAddress(const std::string& address) :
-m_Address(address)
-{
+private:
+	void SetUserInterfaceStyle();
+	CameraVector GetHoveredCameras();
 
-}
+	void RenderCameras();
+	void OpenPickedCamera();
+	void FlushClosedCameras();
+	const ImColor& GetPinColor(Camera::State state) const;
 
-} // namespace Watcher
+	SDL_Window* m_pWindow;
+	AtlasUniquePtr m_pAtlas;
+	float m_CellSize;
+    CommandBarUniquePtr m_pCommandBar;
+	
+	using CameraRepList = std::list<CameraRep>;
+	CameraRepList m_CameraReps;
+	bool m_SelectCamera;
+
+	std::array<ImColor, static_cast<size_t>(Camera::State::Count)> m_PinColor;
+};
+
+} // namespace Turbine
