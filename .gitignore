@@ -1,0 +1,8 @@
+.vs/
+imgui.ini
+bin/config.json
+bin/log.txt
+bin/watcher*.exe
+bin/watcher*.ilk
+bin/watcher*.pdb
+build/
