@@ -36,6 +36,7 @@ SOFTWARE.
 #include "tasks/googlesearch/googlesearch.h"
 #include "tasks/task.h"
 #include "geolocationdata.h"
+#include "httpclient.h"
 #include "log.h"
 #include "turbine.h"
 #include "turbinerep.h"
@@ -62,6 +63,7 @@ m_Active(true)
 
 	TextureLoader::Initialise();
 
+	m_pHTTPClient = std::make_unique<HTTPClient>();
 	m_pConfiguration = std::make_unique<Settings>();
 	m_pRep = std::make_unique<TurbineRep>(pWindow);
 
@@ -110,6 +112,13 @@ void Turbine::Update()
 	TextureLoader::Update();
 
 	const float delta = ImGui::GetIO().DeltaTime;
+
+	m_pHTTPClient->Update();
+
+	for (auto& pProvider : m_Providers)
+	{
+		pProvider->Update(delta);
+	}
 
 	for (auto& pTask : m_Tasks)
 	{

@@ -39,9 +39,9 @@ public:
 	Provider() {}
 	virtual ~Provider() {}
 
+	virtual void Update(float delta) = 0;
+
 	virtual const std::string& GetName() const = 0;
-	virtual void SetAPIKey(const std::string& key) = 0;
-	virtual const std::string& GetAPIKey() const = 0;
 	virtual bool IsAuthenticated() const = 0;
 	virtual void Authenticate() = 0;
 };

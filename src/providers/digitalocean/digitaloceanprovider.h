@@ -38,16 +38,18 @@ public:
 	DigitalOceanProvider();
 	virtual ~DigitalOceanProvider() override;
 
+	virtual void Update(float delta) override;
+
 	virtual const std::string& GetName() const override;
-	virtual void SetAPIKey(const std::string& key) override;
-	virtual const std::string& GetAPIKey() const override;
 	virtual bool IsAuthenticated() const override;
 	virtual void Authenticate() override;
 
 private:
+	void TryAuthenticate();
+
 	std::string m_Name;
-	std::string m_Key;
 	bool m_Authenticated;
+	bool m_AuthenticationInFlight;
 };
 
 } // namespace Turbine

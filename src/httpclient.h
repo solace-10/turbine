@@ -24,63 +24,52 @@ SOFTWARE.
 
 #pragma once
 
-#include "providers/digitalocean/digitaloceanprovider.h"
-#include "httpclient.h"
-#include "settings.h"
-#include "turbine.h"
+#include <functional>
+#include <list>
+#include <string>
+
+#include <curl/curl.h>
 
 namespace Turbine
 {
 
-DigitalOceanProvider::DigitalOceanProvider() :
-	m_Name("Digital Ocean"),
-	m_Authenticated(false),
-	m_AuthenticationInFlight(false)
+class HTTPRequestResult
 {
-	
-}
+public:
+	HTTPRequestResult(int statusCode, const std::string& data);
+	int GetStatusCode() const;
+	const std::string& GetData() const;
 
-DigitalOceanProvider::~DigitalOceanProvider()
+private:
+	int m_StatusCode;
+	std::string m_Data;
+};
+
+using HTTPRequestCallback = std::function<void(const HTTPRequestResult& result)>;
+
+class HTTPClient
 {
+public:
+	HTTPClient();
+	~HTTPClient();
 
-}
+	void Update();
+	void Request(const std::string& url, HTTPRequestCallback pCallback);
 
-void DigitalOceanProvider::Update(float delta)
-{
-	TryAuthenticate();
-}
+	void AppendData(uint32_t id, const std::string& data);
 
-const std::string& DigitalOceanProvider::GetName() const
-{
-	return m_Name;
-}
+private:
+	CURLM* m_MultiHandler;
 
-bool DigitalOceanProvider::IsAuthenticated() const
-{
-	return m_Authenticated;
-}
-
-void DigitalOceanProvider::Authenticate()
-{
-
-}
-
-void DigitalOceanProvider::TryAuthenticate()
-{
-	const std::string& token = g_pTurbine->GetSettings()->GetDigitalOceanAPIKey();
-	if (IsAuthenticated() == false && m_AuthenticationInFlight == false && token.empty() == false)
+	struct PendingRequest
 	{
-		m_AuthenticationInFlight = true;
-
-		g_pTurbine->GetHTTPClient()->Request("https://api.digitalocean.com/v2/account",
-			[this](const HTTPRequestResult& result)
-			{
-				int a = 0;
-
-				this->m_AuthenticationInFlight = false;
-			}
-		);
-	}
-}
+		uint32_t id;
+		std::string url;
+		HTTPRequestCallback pCallback;
+		CURL* pHandle;
+		std::string data;
+	};
+	std::list<PendingRequest> m_PendingRequests;
+};
 
 } // namespace Turbine

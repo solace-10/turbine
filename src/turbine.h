@@ -42,11 +42,13 @@ struct SDL_Window;
 namespace Turbine
 {
 
+class HTTPClient;
 class Settings;
 class Provider;
 class Task;
 class TurbineRep;
 
+using HTTPClientUniquePtr = std::unique_ptr<HTTPClient>;
 using SettingsUniquePtr = std::unique_ptr<Settings>;
 using ProviderUniquePtr = std::unique_ptr<Provider>;
 using TurbineRepUniquePtr = std::unique_ptr<TurbineRep>;
@@ -64,6 +66,7 @@ public:
     bool IsSearching() const;
     void SetSearching(bool state);
 	bool IsActive() const;
+	HTTPClient* GetHTTPClient();
 	Settings* GetSettings() const;
     const TaskVector& GetTasks() const;
 	Task* GetTask(const std::string& name) const;
@@ -90,6 +93,7 @@ private:
 	mutable std::mutex m_CamerasMutex;
 	CameraVector m_Cameras;
 
+	HTTPClientUniquePtr m_pHTTPClient;
 	TurbineRepUniquePtr m_pRep;
 	SettingsUniquePtr m_pConfiguration;
     TaskVector m_Tasks;
@@ -106,6 +110,11 @@ inline bool Turbine::IsSearching() const
 inline bool Turbine::IsActive() const
 {
 	return m_Active;
+}
+
+inline HTTPClient* Turbine::GetHTTPClient()
+{
+	return m_pHTTPClient.get();
 }
 
 inline Settings* Turbine::GetSettings() const
