@@ -24,37 +24,21 @@ SOFTWARE.
 
 #pragma once
 
-#include "providers/provider.h"
-#include "webclient/webclient.h"
+#include <string>
 
 namespace Turbine
 {
 
-class DigitalOceanProvider;
-using DigitalOceanProviderUniquePtr = std::unique_ptr<DigitalOceanProvider>;
-
-class DigitalOceanProvider : public Provider
+class WebClientRequestResult
 {
 public:
-	DigitalOceanProvider();
-	virtual ~DigitalOceanProvider() override;
-
-	virtual void Update(float delta) override;
-
-	virtual const std::string& GetName() const override;
-	virtual bool IsAuthenticated() const override;
-	virtual void Authenticate() override;
+	WebClientRequestResult(int statusCode, const std::string& data);
+	int GetStatusCode() const;
+	const std::string& GetData() const;
 
 private:
-	bool HasAPIKeyChanged();
-	void TryAuthenticate();
-	void RebuildHeaders();
-
-	std::string m_Name;
-	std::string m_APIKey;
-	bool m_Authenticated;
-	bool m_AuthenticationInFlight;
-	WebClient::Headers m_Headers;
+	int m_StatusCode;
+	std::string m_Data;
 };
 
 } // namespace Turbine

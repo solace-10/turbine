@@ -22,39 +22,26 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-#pragma once
-
-#include "providers/provider.h"
-#include "webclient/webclient.h"
+#include "webclient/webclientrequestresult.h"
 
 namespace Turbine
 {
 
-class DigitalOceanProvider;
-using DigitalOceanProviderUniquePtr = std::unique_ptr<DigitalOceanProvider>;
-
-class DigitalOceanProvider : public Provider
+WebClientRequestResult::WebClientRequestResult(int statusCode, const std::string& data) :
+m_StatusCode(statusCode),
+m_Data(data)
 {
-public:
-	DigitalOceanProvider();
-	virtual ~DigitalOceanProvider() override;
 
-	virtual void Update(float delta) override;
+}
 
-	virtual const std::string& GetName() const override;
-	virtual bool IsAuthenticated() const override;
-	virtual void Authenticate() override;
+const std::string& WebClientRequestResult::GetData() const
+{
+	return m_Data;
+}
 
-private:
-	bool HasAPIKeyChanged();
-	void TryAuthenticate();
-	void RebuildHeaders();
-
-	std::string m_Name;
-	std::string m_APIKey;
-	bool m_Authenticated;
-	bool m_AuthenticationInFlight;
-	WebClient::Headers m_Headers;
-};
+int WebClientRequestResult::GetStatusCode() const
+{
+	return m_StatusCode;
+}
 
 } // namespace Turbine

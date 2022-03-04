@@ -42,19 +42,19 @@ struct SDL_Window;
 namespace Turbine
 {
 
-class HTTPClient;
 class Settings;
 class Provider;
 class Task;
 class TurbineRep;
+class WebClient;
 
-using HTTPClientUniquePtr = std::unique_ptr<HTTPClient>;
 using SettingsUniquePtr = std::unique_ptr<Settings>;
 using ProviderUniquePtr = std::unique_ptr<Provider>;
 using TurbineRepUniquePtr = std::unique_ptr<TurbineRep>;
 using GeolocationDataMap = std::unordered_map<std::string, GeolocationDataSharedPtr>;
 using TaskUniquePtr = std::unique_ptr<Task>;
 using TaskVector = std::vector<TaskUniquePtr>;
+using WebClientUniquePtr = std::unique_ptr<WebClient>;
 
 class Turbine
 {
@@ -66,10 +66,10 @@ public:
     bool IsSearching() const;
     void SetSearching(bool state);
 	bool IsActive() const;
-	HTTPClient* GetHTTPClient();
 	Settings* GetSettings() const;
     const TaskVector& GetTasks() const;
 	Task* GetTask(const std::string& name) const;
+	WebClient* GetWebClient();
 
 	void OnMessageReceived(const json& message);
 
@@ -93,7 +93,7 @@ private:
 	mutable std::mutex m_CamerasMutex;
 	CameraVector m_Cameras;
 
-	HTTPClientUniquePtr m_pHTTPClient;
+	WebClientUniquePtr m_pWebClient;
 	TurbineRepUniquePtr m_pRep;
 	SettingsUniquePtr m_pConfiguration;
     TaskVector m_Tasks;
@@ -112,9 +112,9 @@ inline bool Turbine::IsActive() const
 	return m_Active;
 }
 
-inline HTTPClient* Turbine::GetHTTPClient()
+inline WebClient* Turbine::GetWebClient()
 {
-	return m_pHTTPClient.get();
+	return m_pWebClient.get();
 }
 
 inline Settings* Turbine::GetSettings() const

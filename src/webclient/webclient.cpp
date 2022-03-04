@@ -22,7 +22,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-#include "httpclient.h"
+#include "webclient/webclient.h"
 #include "turbine.h"
 
 namespace Turbine
@@ -34,36 +34,27 @@ static size_t CURLWriteCallback(void* pBuffer, size_t size, size_t nmemb, void* 
 	{
 		std::string data(reinterpret_cast<unsigned char*>(pBuffer), reinterpret_cast<unsigned char*>(pBuffer) + nmemb);
 		uint32_t id = reinterpret_cast<uint32_t>(pUserData);
-		g_pTurbine->GetHTTPClient()->AppendData(id, data);
+		g_pTurbine->GetWebClient()->AppendData(id, data);
 	}
 
 	return nmemb;
 }
 
-HTTPRequestResult::HTTPRequestResult(int statusCode, const std::string& data) :
-m_StatusCode(statusCode),
-m_Data(data)
-{
-
-}
-
-const std::string& HTTPRequestResult::GetData() const
-{
-	return m_Data;
-}
-
-int HTTPRequestResult::GetStatusCode() const
-{
-	return m_StatusCode;
-}
-
-HTTPClient::HTTPClient()
+WebClient::WebClient()
 {
 	m_MultiHandler = curl_multi_init();
+	m_ThreadRunning = true;
+	m_CURLThread = std::move(std::thread(&CURLThreadMain, this));
 }
 
-HTTPClient::~HTTPClient()
+WebClient::~WebClient()
 {
+	m_ThreadRunning = false;
+	if (m_CURLThread.joinable())
+	{
+		m_CURLThread.join();
+	}
+
 	for (auto& pr : m_PendingRequests)
 	{
 		curl_multi_remove_handle(m_MultiHandler, pr.pHandle);
@@ -73,33 +64,58 @@ HTTPClient::~HTTPClient()
 	curl_multi_cleanup(m_MultiHandler);
 }
 
-void HTTPClient::Update()
+void WebClient::Update()
 {
-	int inProgress = 0;
-	curl_multi_perform(m_MultiHandler, &inProgress);
+	for (std::list<PendingRequest>::iterator it = m_PendingRequests.begin(); it != m_PendingRequests.end();)
+	{
+		PendingRequest& pr = *it;
+		if (pr.done)
+		{
+			pr.pCallback(WebClientRequestResult(0, pr.data));
+			it = m_PendingRequests.erase(it);
+		}
+		else
+		{
+			it++;
+		}
+	}
+}
 
-	CURLMsg* pMessage = nullptr;
-	int messagesLeft = 0;
-	while ((pMessage = curl_multi_info_read(m_MultiHandler, &messagesLeft))) {
-		if (pMessage->msg == CURLMSG_DONE) {
+void WebClient::CURLThreadMain(WebClient* pWebClient)
+{
+	while (pWebClient->m_ThreadRunning)
+	{
+		int inProgress = 0;
+		curl_multi_perform(pWebClient->m_MultiHandler, &inProgress);
 
-			for (std::list<PendingRequest>::iterator it = m_PendingRequests.begin(); it != m_PendingRequests.end(); it++)
-			{
-				PendingRequest& pr = *it;
-				if (pMessage->easy_handle == pr.pHandle)
+		curl_multi_poll(pWebClient->m_MultiHandler, nullptr, 0, 1000, nullptr);
+
+		CURLMsg* pMessage = nullptr;
+		int messagesLeft = 0;
+		while ((pMessage = curl_multi_info_read(pWebClient->m_MultiHandler, &messagesLeft))) {
+			if (pMessage->msg == CURLMSG_DONE) {
+
+				for (auto& pr : pWebClient->m_PendingRequests)
 				{
-					pr.pCallback(HTTPRequestResult(pMessage->data.result, pr.data));
-					curl_multi_remove_handle(m_MultiHandler, pr.pHandle);
-					curl_easy_cleanup(pr.pHandle);
-					m_PendingRequests.erase(it);
-					break;
+					if (pMessage->easy_handle == pr.pHandle)
+					{
+						curl_multi_remove_handle(pWebClient->m_MultiHandler, pr.pHandle);
+						curl_easy_cleanup(pr.pHandle);
+						if (pr.pHeaders != nullptr)
+						{
+							curl_slist_free_all(pr.pHeaders);
+						}
+						pr.pHandle = nullptr;
+						pr.done = true;
+						break;
+					}
 				}
 			}
 		}
 	}
 }
 
-void HTTPClient::Request(const std::string& url, HTTPRequestCallback pCallback)
+void WebClient::Get(const std::string& url, Headers headers, RequestCallback pCallback)
 {
 	static uint32_t sId = 0;
 	PendingRequest pr;
@@ -107,16 +123,27 @@ void HTTPClient::Request(const std::string& url, HTTPRequestCallback pCallback)
 	pr.url = url;
 	pr.pCallback = pCallback;
 	pr.pHandle = curl_easy_init();
+
 	curl_easy_setopt(pr.pHandle, CURLOPT_URL, url.c_str());
 	curl_easy_setopt(pr.pHandle, CURLOPT_USERAGENT, "libcurl-agent/1.0");
 	curl_easy_setopt(pr.pHandle, CURLOPT_CAINFO, "cacert.pem");
 	curl_easy_setopt(pr.pHandle, CURLOPT_WRITEFUNCTION, &CURLWriteCallback);
 	curl_easy_setopt(pr.pHandle, CURLOPT_WRITEDATA, pr.id);
+
+	if (headers.empty() == false)
+	{
+		for (auto& header : headers)
+		{
+			pr.pHeaders = curl_slist_append(pr.pHeaders, header.c_str());
+		}
+		curl_easy_setopt(pr.pHandle, CURLOPT_HTTPHEADER, pr.pHeaders);
+	}
+
 	curl_multi_add_handle(m_MultiHandler, pr.pHandle);
 	m_PendingRequests.push_back(pr);
 }
 
-void HTTPClient::AppendData(uint32_t id, const std::string& data)
+void WebClient::AppendData(uint32_t id, const std::string& data)
 {
 	for (auto& pr : m_PendingRequests)
 	{

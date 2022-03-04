@@ -24,50 +24,60 @@ SOFTWARE.
 
 #pragma once
 
+#include <atomic>
 #include <functional>
 #include <list>
 #include <string>
+#include <thread>
+#include <vector>
 
 #include <curl/curl.h>
+
+#include "webclient/webclientrequestresult.h"
 
 namespace Turbine
 {
 
-class HTTPRequestResult
+class WebClient
 {
 public:
-	HTTPRequestResult(int statusCode, const std::string& data);
-	int GetStatusCode() const;
-	const std::string& GetData() const;
+	using RequestCallback = std::function<void(const WebClientRequestResult& result)>;
+	using Headers = std::vector<std::string>;
 
-private:
-	int m_StatusCode;
-	std::string m_Data;
-};
-
-using HTTPRequestCallback = std::function<void(const HTTPRequestResult& result)>;
-
-class HTTPClient
-{
-public:
-	HTTPClient();
-	~HTTPClient();
+	WebClient();
+	~WebClient();
 
 	void Update();
-	void Request(const std::string& url, HTTPRequestCallback pCallback);
+
+	void Get(const std::string& url, Headers headers, RequestCallback pCallback);
 
 	void AppendData(uint32_t id, const std::string& data);
 
 private:
+	static void CURLThreadMain(WebClient* pWebClient);
+
 	CURLM* m_MultiHandler;
+	std::thread m_CURLThread;
+	std::atomic_bool m_ThreadRunning;
 
 	struct PendingRequest
 	{
+		PendingRequest()
+		{
+			id = 0;
+			pCallback = nullptr;
+			pHandle = nullptr;
+			done = false;
+			pHeaders = nullptr;
+		}
+
 		uint32_t id;
 		std::string url;
-		HTTPRequestCallback pCallback;
+		RequestCallback pCallback;
 		CURL* pHandle;
 		std::string data;
+		bool done;
+		curl_slist* pHeaders;
 	};
 	std::list<PendingRequest> m_PendingRequests;
 };

@@ -24,8 +24,11 @@ SOFTWARE.
 
 #pragma once
 
+#include <sstream>
+
 #include "providers/digitalocean/digitaloceanprovider.h"
-#include "httpclient.h"
+#include "webclient/webclient.h"
+#include "json.h"
 #include "settings.h"
 #include "turbine.h"
 
@@ -47,7 +50,16 @@ DigitalOceanProvider::~DigitalOceanProvider()
 
 void DigitalOceanProvider::Update(float delta)
 {
-	TryAuthenticate();
+	if (HasAPIKeyChanged())
+	{
+		RebuildHeaders();
+		m_Authenticated = false;
+	}
+
+	if (!IsAuthenticated())
+	{
+		TryAuthenticate();
+	}
 }
 
 const std::string& DigitalOceanProvider::GetName() const
@@ -65,6 +77,20 @@ void DigitalOceanProvider::Authenticate()
 
 }
 
+bool DigitalOceanProvider::HasAPIKeyChanged()
+{
+	const std::string& settingsKey = g_pTurbine->GetSettings()->GetDigitalOceanAPIKey();
+	if (m_APIKey != settingsKey)
+	{
+		m_APIKey = settingsKey;
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}
+
 void DigitalOceanProvider::TryAuthenticate()
 {
 	const std::string& token = g_pTurbine->GetSettings()->GetDigitalOceanAPIKey();
@@ -72,15 +98,31 @@ void DigitalOceanProvider::TryAuthenticate()
 	{
 		m_AuthenticationInFlight = true;
 
-		g_pTurbine->GetHTTPClient()->Request("https://api.digitalocean.com/v2/account",
-			[this](const HTTPRequestResult& result)
+		g_pTurbine->GetWebClient()->Get("https://api.digitalocean.com/v2/account", m_Headers,
+			[this](const WebClientRequestResult& result)
 			{
-				int a = 0;
+				json data = json::parse(result.GetData());
+				if (data.is_object() && data.find("account") != data.end())
+				{
+					std::string status = data["account"]["status"].get<std::string>();
+					m_Authenticated = (status == "active");
+				}
+				else
+				{
+					m_Authenticated = false;
+				}
 
 				this->m_AuthenticationInFlight = false;
 			}
 		);
 	}
+}
+
+void DigitalOceanProvider::RebuildHeaders()
+{
+	m_Headers.clear();
+	m_Headers.emplace_back("Content-Type: application/json");
+	m_Headers.emplace_back("Authorization: Bearer " + m_APIKey);
 }
 
 } // namespace Turbine

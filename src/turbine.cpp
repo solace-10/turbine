@@ -35,8 +35,8 @@ SOFTWARE.
 #include "providers/digitalocean/digitaloceanprovider.h"
 #include "tasks/googlesearch/googlesearch.h"
 #include "tasks/task.h"
+#include "webclient/webclient.h"
 #include "geolocationdata.h"
-#include "httpclient.h"
 #include "log.h"
 #include "turbine.h"
 #include "turbinerep.h"
@@ -63,7 +63,7 @@ m_Active(true)
 
 	TextureLoader::Initialise();
 
-	m_pHTTPClient = std::make_unique<HTTPClient>();
+	m_pWebClient = std::make_unique<WebClient>();
 	m_pConfiguration = std::make_unique<Settings>();
 	m_pRep = std::make_unique<TurbineRep>(pWindow);
 
@@ -113,7 +113,7 @@ void Turbine::Update()
 
 	const float delta = ImGui::GetIO().DeltaTime;
 
-	m_pHTTPClient->Update();
+	m_pWebClient->Update();
 
 	for (auto& pProvider : m_Providers)
 	{
