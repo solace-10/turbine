@@ -33,9 +33,9 @@ SOFTWARE.
 #include "atlas/tilestreamer.h"
 #include "atlas/tile.h"
 #include "imgui/imgui.h"
-#include "configuration.h"
-#include "textureloader.h"
 #include "log.h"
+#include "settings.h"
+#include "textureloader.h"
 #include "turbine.h"
 
 namespace Turbine
@@ -220,7 +220,7 @@ bool TileStreamer::LoadFromFile(Tile& tile)
 	std::stringstream filename;
 	filename << tile.X() << "_" << tile.Y() << ".png";
 
-	std::filesystem::path path = g_pTurbine->GetConfiguration()->GetStoragePath() / "atlas" / std::to_string(tile.ZoomLevel()) / filename.str();
+	std::filesystem::path path = g_pTurbine->GetSettings()->GetStoragePath() / "atlas" / std::to_string(tile.ZoomLevel()) / filename.str();
 
 	if (std::filesystem::exists(path) == false)
 	{
@@ -255,7 +255,7 @@ bool TileStreamer::DownloadFromTileServer(Tile& tile)
 	std::stringstream filename;
 	filename << tile.X() << "_" << tile.Y() << ".png";
 
-	std::filesystem::path path = g_pTurbine->GetConfiguration()->GetStoragePath() / "atlas" / std::to_string(tile.ZoomLevel()) / filename.str();
+	std::filesystem::path path = g_pTurbine->GetSettings()->GetStoragePath() / "atlas" / std::to_string(tile.ZoomLevel()) / filename.str();
 	FILE* pTileFile = nullptr;
 
 	pCurlHandle = curl_easy_init();
@@ -289,7 +289,7 @@ void TileStreamer::CreateDirectories()
 {
 	for (int zoomLevel = 0; zoomLevel < sMaxZoomLevels; ++zoomLevel)
 	{
-		std::filesystem::path path = g_pTurbine->GetConfiguration()->GetStoragePath() / "atlas" / std::to_string(zoomLevel);
+		std::filesystem::path path = g_pTurbine->GetSettings()->GetStoragePath() / "atlas" / std::to_string(zoomLevel);
 		std::filesystem::create_directories(path);
 	}
 }

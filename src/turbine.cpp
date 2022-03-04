@@ -35,12 +35,12 @@ SOFTWARE.
 #include "providers/digitalocean/digitaloceanprovider.h"
 #include "tasks/googlesearch/googlesearch.h"
 #include "tasks/task.h"
-#include "configuration.h"
 #include "geolocationdata.h"
 #include "log.h"
 #include "turbine.h"
 #include "turbinerep.h"
 #include "textureloader.h"
+#include "settings.h"
 
 extern IMGUI_API ImGuiContext* GImGui;
 
@@ -62,7 +62,7 @@ m_Active(true)
 
 	TextureLoader::Initialise();
 
-	m_pConfiguration = std::make_unique<Configuration>();
+	m_pConfiguration = std::make_unique<Settings>();
 	m_pRep = std::make_unique<TurbineRep>(pWindow);
 
 	// All the geolocation data needs to be loaded before the cameras are, as every 

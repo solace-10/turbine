@@ -24,72 +24,43 @@ SOFTWARE.
 
 #pragma once
 
-#include <string>
+#include <filesystem>
 
 namespace Turbine
 {
 
-///////////////////////////////////////////////////////////////////////////////
-// Task
-// A background task, performing work over time without requiring interaction
-// by the user. These are used to discover new cameras in various ways, as well
-// as where they're located, etc.
-///////////////////////////////////////////////////////////////////////////////
-
-class Task
+class Settings
 {
 public:
-	enum class State
-	{
-		Disabled,
-		Idle,
-		Running,
-		Error
-	};
+	Settings();
+	~Settings();
 
-	Task(const std::string& name);
-	virtual ~Task();
-	virtual void Update(float delta);
-
-	virtual void Start();
-	virtual void Stop();
-
-	void Enable();
-	void Disable();
-	void Render();
-
-	const std::string& GetName() const;
-
-protected:
-	State GetState() const;
-	void SetState(State state);
-	void SetErrorString(const std::string& error);
+	std::filesystem::path GetStoragePath() const;
+	const std::string& GetDigitalOceanAPIKey() const;
+	void SetDigitalOceanAPIKey(const std::string& value);
 
 private:
-	std::string m_Name;
-	State m_State;
-	std::string m_Error;
-	float m_SpinnerTimer;
+	void CreateStorage();
+	void Save();
+	void Load();
+
+	std::filesystem::path m_StoragePath;
+	std::string m_DigitalOceanAPIKey;
 };
 
-inline const std::string& Task::GetName() const
+inline std::filesystem::path Settings::GetStoragePath() const
 {
-	return m_Name;
+	return m_StoragePath;
 }
 
-inline Task::State Task::GetState() const
+inline const std::string& Settings::GetDigitalOceanAPIKey() const
 {
-	return m_State;
+	return m_DigitalOceanAPIKey;
 }
 
-inline void Task::SetState(State state)
+inline void Settings::SetDigitalOceanAPIKey(const std::string& value)
 {
-	m_State = state;
-}
-
-inline void Task::SetErrorString(const std::string& error)
-{
-	m_Error = error;
+	m_DigitalOceanAPIKey = value;
 }
 
 } // namespace Turbine

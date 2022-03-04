@@ -24,57 +24,13 @@ SOFTWARE.
 
 #pragma once
 
-#include <filesystem>
-#include <vector>
-
 namespace Turbine
 {
 
-class Configuration
+class SettingsWindow
 {
 public:
-	Configuration();
-	~Configuration();
-
-	std::filesystem::path GetStoragePath() const;
-	const std::string& GetGoogleCSEApiKey() const;
-	void SetGoogleCSEApiKey(const std::string& value);
-	const std::string& GetGoogleCSEId() const;
-	void SetGoogleCSEId(const std::string& value);
-
-private:
-	void CreateStorage();
-	void Save();
-	void Load();
-
-	std::filesystem::path m_StoragePath;
-	std::string m_GoogleCSEApiKey;
-	std::string m_GoogleCSEId;
+	static void Render(bool* pOpen);
 };
-
-inline std::filesystem::path Configuration::GetStoragePath() const
-{
-	return m_StoragePath;
-}
-
-inline const std::string& Configuration::GetGoogleCSEApiKey() const
-{
-	return m_GoogleCSEApiKey;
-}
-
-inline void Configuration::SetGoogleCSEApiKey(const std::string& value)
-{
-	m_GoogleCSEApiKey = value;
-}
-
-inline const std::string& Configuration::GetGoogleCSEId() const
-{
-	return m_GoogleCSEId;
-}
-
-inline void Configuration::SetGoogleCSEId(const std::string& value)
-{
-	m_GoogleCSEId = value;
-}
 
 } // namespace Turbine

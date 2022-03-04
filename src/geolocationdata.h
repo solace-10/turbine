@@ -32,7 +32,6 @@ using json = nlohmann::json;
 namespace Turbine
 {
 
-class Database;
 class GeolocationData;
 using GeolocationDataSharedPtr = std::shared_ptr<GeolocationData>;
 
@@ -40,9 +39,7 @@ class GeolocationData
 {
 public:
 	GeolocationData(IPAddress address);
-	bool LoadFromDatabase(const std::string& city, const std::string& region, const std::string& country, const std::string& organisation, float x, float y);
 	bool LoadFromJSON(const json& message);
-	void SaveToDatabase(Database* pDatabase);
 
 	const IPAddress& GetIPAddress() const;
 	const std::string& GetCity() const;

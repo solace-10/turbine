@@ -39,28 +39,23 @@ SOFTWARE.
 #include <string>
 #include <SDL.h>
 #include "ext/json.h"
-#include "configuration.h"
+#include "settings.h"
 
 namespace Turbine
 {
 
-static const std::string sGoogleCSEApiKey("google_cse_api_key");
-static const std::string sGoogleCSEId("google_cse_id");
-
-Configuration::Configuration() :
-m_GoogleCSEApiKey("AIzaSyBHnMEOSkTM7Lazvou27FXgJb6M4hjn9uE"),
-m_GoogleCSEId("016794710981670214596:sgntarey42m")
+Settings::Settings()
 {
 	CreateStorage();
 	Load();
 }
 
-Configuration::~Configuration()
+Settings::~Settings()
 {
 	Save();
 }
 
-void Configuration::CreateStorage()
+void Settings::CreateStorage()
 {
 #ifdef _WIN32
 	// Return %USERPROFILE%\Saved Games for Windows Vista or newer
@@ -80,39 +75,46 @@ void Configuration::CreateStorage()
 #endif
 }
 
-void Configuration::Save()
+void Settings::Save()
 {
 	using json = nlohmann::json;
-	json config;
-	config[sGoogleCSEApiKey] = m_GoogleCSEApiKey;
-	config[sGoogleCSEId] = m_GoogleCSEId;
+	json settings = {
+		{ "providers", {
+			{ "digital_ocean", {
+				{"api_key", m_DigitalOceanAPIKey }
+			}}
+		}}
+	};
 
-	std::filesystem::path filePath = m_StoragePath / "config.json";
-	std::ofstream file( filePath );
-	file << config;
+	std::filesystem::path filePath = m_StoragePath / "settings.json";
+	std::ofstream file(filePath);
+	file << settings;
 	file.close();
 }
 
-void Configuration::Load()
+void Settings::Load()
 {
 	using json = nlohmann::json;
-	std::ifstream file( "config.json" );
-	if ( file.is_open() )
+	std::filesystem::path filePath = m_StoragePath / "settings.json";
+	std::ifstream file(filePath);
+	if (file.is_open())
 	{
-		json config;
-		file >> config;
+		json settings;
+		file >> settings;
 		file.close();
 
-		json jGoogleCSEApiKey = config[sGoogleCSEApiKey];
-		if (jGoogleCSEApiKey.is_string())
+		const json& providers = settings["providers"];
+		if (providers.is_object())
 		{
-			m_GoogleCSEApiKey = jGoogleCSEApiKey.get<std::string>();
-		}
-
-		json jGoogleCSEId = config[sGoogleCSEId];
-		if (jGoogleCSEId.is_string())
-		{
-			m_GoogleCSEId = jGoogleCSEId.get<std::string>();
+			const json& digitalOcean = providers["digital_ocean"];
+			if (digitalOcean.is_object())
+			{
+				const json& digitalOceanAPIKey = digitalOcean["api_key"];
+				if (digitalOceanAPIKey.is_string())
+				{
+					m_DigitalOceanAPIKey = digitalOceanAPIKey.get<std::string>();
+				}
+			}
 		}
 	}
 }

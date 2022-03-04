@@ -42,12 +42,12 @@ struct SDL_Window;
 namespace Turbine
 {
 
-class Configuration;
+class Settings;
 class Provider;
 class Task;
 class TurbineRep;
 
-using ConfigurationUniquePtr = std::unique_ptr<Configuration>;
+using SettingsUniquePtr = std::unique_ptr<Settings>;
 using ProviderUniquePtr = std::unique_ptr<Provider>;
 using TurbineRepUniquePtr = std::unique_ptr<TurbineRep>;
 using GeolocationDataMap = std::unordered_map<std::string, GeolocationDataSharedPtr>;
@@ -64,15 +64,13 @@ public:
     bool IsSearching() const;
     void SetSearching(bool state);
 	bool IsActive() const;
-	Configuration* GetConfiguration() const;
+	Settings* GetSettings() const;
     const TaskVector& GetTasks() const;
 	Task* GetTask(const std::string& name) const;
 
 	void OnMessageReceived(const json& message);
 
 	CameraVector GetCameras() const;
-
-	Database* GetDatabase() const;
 
 private:
 	void InitialiseGeolocation();
@@ -93,7 +91,7 @@ private:
 	CameraVector m_Cameras;
 
 	TurbineRepUniquePtr m_pRep;
-	ConfigurationUniquePtr m_pConfiguration;
+	SettingsUniquePtr m_pConfiguration;
     TaskVector m_Tasks;
 	std::vector<ProviderUniquePtr> m_Providers;
 };
@@ -110,7 +108,7 @@ inline bool Turbine::IsActive() const
 	return m_Active;
 }
 
-inline Configuration* Turbine::GetConfiguration() const
+inline Settings* Turbine::GetSettings() const
 {
 	return m_pConfiguration.get();
 }

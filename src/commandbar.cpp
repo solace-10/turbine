@@ -27,6 +27,7 @@ SOFTWARE.
 #include "atlas/tilestreamer.h"
 #include "tasks/googlesearch/googlesearch.h"
 #include "tasks/task.h"
+#include "windows/settingswindow.h"
 #include "commandbar.h"
 #include "turbine.h"
 
@@ -38,6 +39,7 @@ CommandBar::CommandBar()
     m_AnimTimer = 0.0f;
     m_ShowAtlasTileStreamer = false;
     m_ShowDemoWindow = false;
+    m_ShowSettingsWindow = false;
 }
 
 void CommandBar::Render()
@@ -50,31 +52,36 @@ void CommandBar::Render()
     {
         if (ImGui::BeginMenu("File"))
         {
-            ImGui::MenuItem("Quit");
-            ImGui::EndMenu();
-        }
-        if (ImGui::BeginMenu("View"))
-        {
-            if (ImGui::BeginMenu("Development"))
+            ImGui::MenuItem("Bridges", nullptr, nullptr, false);
+
+            if (ImGui::MenuItem("Settings"))
             {
-                if (ImGui::MenuItem("Atlas tile streamer", nullptr, m_ShowAtlasTileStreamer))
-                {
-                    m_ShowAtlasTileStreamer = !m_ShowAtlasTileStreamer;
-                }
-                if (ImGui::MenuItem("ImGui demo window", nullptr, m_ShowDemoWindow))
-                {
-                    m_ShowDemoWindow = !m_ShowDemoWindow;
-                }
-                ImGui::EndMenu();
+                m_ShowSettingsWindow = !m_ShowSettingsWindow;
             }
 
+			if (ImGui::BeginMenu("Development"))
+			{
+				if (ImGui::MenuItem("Atlas tile streamer", nullptr, m_ShowAtlasTileStreamer))
+				{
+					m_ShowAtlasTileStreamer = !m_ShowAtlasTileStreamer;
+				}
+				if (ImGui::MenuItem("ImGui demo window", nullptr, m_ShowDemoWindow))
+				{
+					m_ShowDemoWindow = !m_ShowDemoWindow;
+				}
+				ImGui::EndMenu();
+			}
+
+            ImGui::MenuItem("Quit", nullptr, nullptr, false);
             ImGui::EndMenu();
         }
+
         if (ImGui::BeginMenu("Help"))
         {
-            ImGui::MenuItem("About");
+            ImGui::MenuItem("About", nullptr, nullptr, false);
             ImGui::EndMenu();
         }
+
         ImGui::EndMenuBar();
     }
 
@@ -86,6 +93,11 @@ void CommandBar::Render()
     if (m_ShowDemoWindow)
     {
         ImGui::ShowDemoWindow(&m_ShowDemoWindow);
+    }
+
+    if (m_ShowSettingsWindow)
+    {
+        SettingsWindow::Render(&m_ShowSettingsWindow);
     }
 
     RenderSearchWidget();
