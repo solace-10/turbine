@@ -128,7 +128,7 @@ void CameraRep::Render()
 		}
 
 		ImDrawList* pDrawList = ImGui::GetWindowDrawList();
-		ImTextureID cameraTexture = reinterpret_cast<ImTextureID>(GetTexture());
+		ImTextureID cameraTexture = reinterpret_cast<ImTextureID>(uintptr_t(GetTexture()));
 		pDrawList->AddImage(cameraTexture, windowPos, ImVec2(windowPos.x + m_WindowWidth, windowPos.y + m_WindowHeight));
 
 		GeolocationData* pGeo = pCamera->GetGeolocationData();

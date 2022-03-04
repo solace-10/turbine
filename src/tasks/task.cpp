@@ -97,7 +97,7 @@ void Task::Render()
 	else if (GetState() == State::Disabled)
 	{
 		SetCursorScreenPos(ImVec2(pos.x + 6, pos.y + 6));
-        Image(reinterpret_cast<ImTextureID>(Icons::GetIcon(IconId::TaskDisabled)), ImVec2(26, 26));
+        Image(reinterpret_cast<ImTextureID>(uintptr_t(Icons::GetIcon(IconId::TaskDisabled))), ImVec2(26, 26));
 		SetCursorScreenPos(ImVec2(pos.x + 38, pos.y + 4));
 		TextDisabled("%s", m_Name.c_str());
 		SetCursorScreenPos(ImVec2(pos.x + 38, pos.y + 20));
@@ -106,7 +106,7 @@ void Task::Render()
 	else if (GetState() == State::Error)
 	{
 		SetCursorScreenPos(ImVec2(pos.x + 6, pos.y + 6));
-        Image(reinterpret_cast<ImTextureID>(Icons::GetIcon(IconId::TaskError)), ImVec2(26, 26), ImVec2(0, 0), ImVec2(1, 1), ImVec4(1, 1, 1, 1));
+        Image(reinterpret_cast<ImTextureID>(uintptr_t(Icons::GetIcon(IconId::TaskError))), ImVec2(26, 26), ImVec2(0, 0), ImVec2(1, 1), ImVec4(1, 1, 1, 1));
 		SetCursorScreenPos(ImVec2(pos.x + 38, pos.y + 4));
 		TextColored(ImVec4(1, 0, 0, 1), "%s", m_Name.c_str());
 		SetCursorScreenPos(ImVec2(pos.x + 38, pos.y + 20));

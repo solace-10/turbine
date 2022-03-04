@@ -225,7 +225,7 @@ void TurbineRep::Render()
 			float locationX, locationY;
 			m_pAtlas->GetScreenCoordinates(pGeolocationData->GetLongitude(), pGeolocationData->GetLatitude(), locationX, locationY);
 			pDrawList->AddImage(
-				reinterpret_cast<ImTextureID>(Icons::GetIcon(IconId::Pin)),
+				reinterpret_cast<ImTextureID>(uintptr_t(Icons::GetIcon(IconId::Pin))),
 				ImVec2(locationX - sPinHalfWidth, locationY - sPinHeight),
 				ImVec2(locationX + sPinHalfWidth, locationY),
 				ImVec2(0, 0),

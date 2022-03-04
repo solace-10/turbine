@@ -101,7 +101,7 @@ bool Spinner(float radius, int thickness, const ImU32& color, float* pTimer /* =
     const int num_detents = 5;                       // how many rotations we want before a repeat
     const int skip_detents = 3;                      // how many steps we skip each rotation
     const float period = 5.0f;                       // in seconds
-    const float t = ImFmod((pTimer == nullptr) ? g.Time : *pTimer, period) / period; // map period into [0, 1]
+    const float t = ImFmod((pTimer == nullptr) ? static_cast<float>(g.Time) : *pTimer, period) / period; // map period into [0, 1]
 
     // Tweening functions for each part of the spinner
     auto stroke_head_tween = [num_detents](float t) {

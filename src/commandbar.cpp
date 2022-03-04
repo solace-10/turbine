@@ -72,6 +72,7 @@ void CommandBar::Render()
 				ImGui::EndMenu();
 			}
 
+            ImGui::Separator();
             ImGui::MenuItem("Quit", nullptr, nullptr, false);
             ImGui::EndMenu();
         }
