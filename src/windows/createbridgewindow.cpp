@@ -22,39 +22,38 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-#pragma once
+#include "imgui/imgui.h"
+#include "imgui/imgui_stdlib.h"
 
 #include "providers/provider.h"
-#include "webclient/webclient.h"
+#include "windows/createbridgewindow.h"
+#include "settings.h"
+#include "turbine.h"
 
 namespace Turbine
 {
 
-class DigitalOceanProvider;
-using DigitalOceanProviderUniquePtr = std::unique_ptr<DigitalOceanProvider>;
-
-class DigitalOceanProvider : public Provider
+void CreateBridgeWindow::Render()
 {
-public:
-	DigitalOceanProvider();
-	virtual ~DigitalOceanProvider() override;
+	if (IsOpen() == false)
+	{
+		return;
+	}
 
-	virtual void Update(float delta) override;
+	ImGui::SetNextWindowSize(ImVec2(650, 400), ImGuiCond_FirstUseEver);
+	if (!ImGui::Begin("Settings", &m_IsOpen))
+	{
+		ImGui::End();
+		return;
+	}
 
-	virtual const std::string& GetName() const override;
-	virtual bool IsAuthenticated() const override;
-	virtual void CreateBridge(const std::string& name, bool isPublic) override;
+	if (ImGui::Button("Create"))
+	{
+		ProviderVector& providers = g_pTurbine->GetProviders();
+		providers[0]->CreateBridge("test", true);
+	}
 
-private:
-	bool HasAPIKeyChanged();
-	void TryAuthenticate();
-	void RebuildHeaders();
-
-	std::string m_Name;
-	std::string m_APIKey;
-	bool m_Authenticated;
-	bool m_AuthenticationInFlight;
-	WebClient::Headers m_Headers;
-};
+	ImGui::End();
+}
 
 } // namespace Turbine

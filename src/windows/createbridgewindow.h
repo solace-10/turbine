@@ -24,37 +24,15 @@ SOFTWARE.
 
 #pragma once
 
-#include "providers/provider.h"
-#include "webclient/webclient.h"
+#include "windows/window.h"
 
 namespace Turbine
 {
 
-class DigitalOceanProvider;
-using DigitalOceanProviderUniquePtr = std::unique_ptr<DigitalOceanProvider>;
-
-class DigitalOceanProvider : public Provider
+class CreateBridgeWindow : public Window
 {
 public:
-	DigitalOceanProvider();
-	virtual ~DigitalOceanProvider() override;
-
-	virtual void Update(float delta) override;
-
-	virtual const std::string& GetName() const override;
-	virtual bool IsAuthenticated() const override;
-	virtual void CreateBridge(const std::string& name, bool isPublic) override;
-
-private:
-	bool HasAPIKeyChanged();
-	void TryAuthenticate();
-	void RebuildHeaders();
-
-	std::string m_Name;
-	std::string m_APIKey;
-	bool m_Authenticated;
-	bool m_AuthenticationInFlight;
-	WebClient::Headers m_Headers;
+	virtual void Render() override;
 };
 
 } // namespace Turbine

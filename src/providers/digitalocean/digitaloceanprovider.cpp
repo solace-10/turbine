@@ -73,8 +73,26 @@ bool DigitalOceanProvider::IsAuthenticated() const
 	return m_Authenticated;
 }
 
-void DigitalOceanProvider::Authenticate()
+void DigitalOceanProvider::CreateBridge(const std::string& name, bool isPublic)
 {
+	Log::Info("Creating %s bridge '%s'...", isPublic ? "public" : "private", name.c_str());
+	json payload;
+	payload["name"] = name;
+	payload["region"] = "nyc3";
+	payload["size"] = "s-1vcpu-1gb";
+	payload["image"] = "ubuntu-20-04-x64";
+	//payload["ssh_keys"] = { "fa:50:a6:d0:48:12:41:a8:0a:c5:31:37:32:1a:ec:b5" };
+	//payload["ipv6"] = true;
+	//payload["tags"] = { "turbine" };
+
+	std::string payloadDumped = payload.dump();
+
+	g_pTurbine->GetWebClient()->Post("https://api.digitalocean.com/v2/droplets", m_Headers, payloadDumped,
+		[this](const WebClientRequestResult& result)
+		{
+			int a = 0;
+		}
+	);
 
 }
 

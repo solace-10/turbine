@@ -117,6 +117,16 @@ void WebClient::CURLThreadMain(WebClient* pWebClient)
 
 void WebClient::Get(const std::string& url, Headers headers, RequestCallback pCallback)
 {
+	Request(RequestType::Get, url, headers, "", pCallback);
+}
+
+void WebClient::Post(const std::string& url, Headers headers, const std::string& postData, RequestCallback pCallback)
+{
+	Request(RequestType::Post, url, headers, postData, pCallback);
+}
+
+void WebClient::Request(RequestType requestType, const std::string& url, Headers headers, const std::string& postData, RequestCallback pCallback)
+{
 	static uint32_t sId = 0;
 	PendingRequest pr;
 	pr.id = sId++;
@@ -129,6 +139,13 @@ void WebClient::Get(const std::string& url, Headers headers, RequestCallback pCa
 	curl_easy_setopt(pr.pHandle, CURLOPT_CAINFO, "cacert.pem");
 	curl_easy_setopt(pr.pHandle, CURLOPT_WRITEFUNCTION, &CURLWriteCallback);
 	curl_easy_setopt(pr.pHandle, CURLOPT_WRITEDATA, pr.id);
+
+	if (requestType == RequestType::Post)
+	{
+		curl_easy_setopt(pr.pHandle, CURLOPT_POSTFIELDS, postData.c_str());
+		curl_easy_setopt(pr.pHandle, CURLOPT_POSTFIELDSIZE, postData.size());
+		curl_easy_setopt(pr.pHandle, CURLOPT_POST, 1L);
+	}
 
 	if (headers.empty() == false)
 	{

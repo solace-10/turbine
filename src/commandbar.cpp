@@ -114,7 +114,7 @@ void CommandBar::RenderSearchWidget()
 
 void CommandBar::RenderSearchBackground()
 {
-    const bool isSearching = g_pTurbine->IsSearching();
+    const bool isSearching = true;
     ImVec2 p = ImGui::GetCursorScreenPos();
     ImDrawList* pDrawList = ImGui::GetWindowDrawList();
 
@@ -123,8 +123,8 @@ void CommandBar::RenderSearchBackground()
 
     ImVec2 tl(p);
     ImVec2 br(p.x + width, p.y + height);
-    ImU32 bg = isSearching ? IM_COL32(0, 128, 128, 255) : IM_COL32(40, 40, 40, 255);
-    ImU32 fg = isSearching ? IM_COL32(0, 255, 255, 255) : IM_COL32(80, 80, 80, 255);
+    ImU32 bg = IM_COL32(128, 64, 0, 255);
+    ImU32 fg = IM_COL32(255, 128, 0, 255);
     pDrawList->AddRectFilled(tl, br, bg);
 
     const float stripeWidth = 15.0f;
@@ -141,13 +141,10 @@ void CommandBar::RenderSearchBackground()
         );
     }
 
-    if (g_pTurbine->IsSearching())
+    m_AnimTimer += ImGui::GetIO().DeltaTime * 5.0f;
+    if (m_AnimTimer > stripeWidth * 2.0f)
     {
-        m_AnimTimer += ImGui::GetIO().DeltaTime * 5.0f;
-        if (m_AnimTimer > stripeWidth * 2.0f)
-        {
-            m_AnimTimer = 0.0f;
-        }
+        m_AnimTimer = 0.0f;
     }
 }
 
@@ -158,7 +155,7 @@ void CommandBar::RenderSearchButton()
 
     if (ImGui::InvisibleButton("SearchWidgetButton", ImGui::GetWindowSize()))
     {
-        g_pTurbine->SetSearching(!g_pTurbine->IsSearching());
+        g_pTurbine->GetCreateBridgeWindow()->Show(true);
     }
 
     const float width = ImGui::GetWindowWidth();
@@ -171,7 +168,7 @@ void CommandBar::RenderSearchButton()
     pDrawList->AddRectFilled(tl, br, IM_COL32(20, 20, 20, 200));
     pDrawList->AddRect(tl, br, borderColor);
 
-    const std::string& text = g_pTurbine->IsSearching() ? "Searching" : "Begin search";
+    const std::string& text("Create bridge");
     ImVec2 textSize = ImGui::CalcTextSize(text.c_str());
     pDrawList->AddText(ImVec2(p.x + (width - textSize.x) / 2.0f, p.y + (height - ImGui::GetTextLineHeight()) / 2.0f), IM_COL32(255, 255, 255, 255), text.c_str());
 }

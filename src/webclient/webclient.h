@@ -50,11 +50,19 @@ public:
 	void Update();
 
 	void Get(const std::string& url, Headers headers, RequestCallback pCallback);
+	void Post(const std::string& url, Headers headers, const std::string& postData, RequestCallback pCallback);
 
 	void AppendData(uint32_t id, const std::string& data);
 
 private:
 	static void CURLThreadMain(WebClient* pWebClient);
+	
+	enum class RequestType
+	{
+		Get,
+		Post
+	};
+	void Request(RequestType requestType, const std::string& url, Headers headers, const std::string& postData, RequestCallback pCallback);
 
 	CURLM* m_MultiHandler;
 	std::thread m_CURLThread;

@@ -54,6 +54,7 @@ using SettingsUniquePtr = std::unique_ptr<Settings>;
 using ProviderUniquePtr = std::unique_ptr<Provider>;
 using TurbineRepUniquePtr = std::unique_ptr<TurbineRep>;
 using GeolocationDataMap = std::unordered_map<std::string, GeolocationDataSharedPtr>;
+using ProviderVector = std::vector<ProviderUniquePtr>;
 using TaskUniquePtr = std::unique_ptr<Task>;
 using TaskVector = std::vector<TaskUniquePtr>;
 using WebClientUniquePtr = std::unique_ptr<WebClient>;
@@ -73,11 +74,13 @@ public:
     const TaskVector& GetTasks() const;
 	Task* GetTask(const std::string& name) const;
 	WebClient* GetWebClient();
+	Window* GetCreateBridgeWindow();
 	Window* GetSettingsWindow();
 
 	void OnMessageReceived(const json& message);
 
 	CameraVector GetCameras() const;
+	ProviderVector& GetProviders();
 
 private:
 	void InitialiseLoggers(SDL_Window* pWindow);
@@ -104,6 +107,7 @@ private:
     TaskVector m_Tasks;
 	std::vector<ProviderUniquePtr> m_Providers;
 	std::shared_ptr<NotificationLogger> m_pNotificationLogger;
+	WindowUniquePtr m_pCreateBridgeWindow;
 	WindowUniquePtr m_pSettingsWindow;
 };
 
@@ -138,6 +142,16 @@ inline CameraVector Turbine::GetCameras() const
 {
 	std::scoped_lock lock(m_CamerasMutex);
 	return m_Cameras;
+}
+
+inline ProviderVector& Turbine::GetProviders()
+{
+	return m_Providers;
+}
+
+inline Window* Turbine::GetCreateBridgeWindow()
+{
+	return m_pCreateBridgeWindow.get();
 }
 
 inline Window* Turbine::GetSettingsWindow()
