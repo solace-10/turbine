@@ -34,6 +34,8 @@ SOFTWARE.
 #include <string>
 #include <vector>
 
+#include <SDL.h>
+
 namespace Turbine
 {
 
@@ -134,5 +136,39 @@ public:
 	virtual void Log( const std::string& text, LogLevel type ) override;
 };
 #endif
+
+
+//////////////////////////////////////////////////////////////////////////
+// NotificationLogger
+//////////////////////////////////////////////////////////////////////////
+
+class NotificationLogger : public ILogTarget
+{
+public:
+    NotificationLogger(SDL_Window* pWindow);
+
+	virtual void Log(const std::string& text, LogLevel type) override;
+
+    void Update(float delta);
+    void Render();
+
+private:
+	struct Entry
+    {
+        Entry(const std::string& text, LogLevel level)
+        {
+            m_Text = text;
+            m_Level = level;
+            m_Timer = 10.0f;
+        }
+
+        std::string m_Text;
+        LogLevel m_Level;
+        float m_Timer;
+    };
+    using Entries = std::list<Entry>;
+    Entries m_Entries;
+    SDL_Window* m_pWindow;
+};
 
 } // namespace Turbine

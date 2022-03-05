@@ -56,15 +56,12 @@ m_Active(true)
 {
 	g_pTurbine = this;
 
-	Log::AddLogTarget(std::make_shared<FileLogger>("log.txt"));
-#ifdef _WIN32
-	Log::AddLogTarget(std::make_shared<VisualStudioLogger>());
-#endif
+	m_pConfiguration = std::make_unique<Settings>();
+	InitialiseLoggers(pWindow);
 
 	TextureLoader::Initialise();
 
 	m_pWebClient = std::make_unique<WebClient>();
-	m_pConfiguration = std::make_unique<Settings>();
 	m_pRep = std::make_unique<TurbineRep>(pWindow);
 
 	// All the geolocation data needs to be loaded before the cameras are, as every 
@@ -79,6 +76,17 @@ Turbine::~Turbine()
 {
 	m_Tasks.clear();
 	m_Active = false;
+}
+
+void Turbine::InitialiseLoggers(SDL_Window* pWindow)
+{
+	Log::AddLogTarget(std::make_shared<FileLogger>("log.txt"));
+#ifdef _WIN32
+	Log::AddLogTarget(std::make_shared<VisualStudioLogger>());
+#endif
+
+	m_pNotificationLogger = std::make_shared<NotificationLogger>(pWindow);
+	Log::AddLogTarget(m_pNotificationLogger);
 }
 
 void Turbine::InitialiseProviders()
@@ -126,7 +134,9 @@ void Turbine::Update()
 	}
 
 	m_pRep->Update(delta);
+	m_pNotificationLogger->Update(delta);
 	m_pRep->Render();
+	m_pNotificationLogger->Render();
 }
 
 Task* Turbine::GetTask(const std::string& name) const

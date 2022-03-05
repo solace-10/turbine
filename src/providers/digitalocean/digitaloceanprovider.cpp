@@ -28,6 +28,7 @@ SOFTWARE.
 
 #include "providers/digitalocean/digitaloceanprovider.h"
 #include "webclient/webclient.h"
+#include "log.h"
 #include "json.h"
 #include "settings.h"
 #include "turbine.h"
@@ -97,7 +98,6 @@ void DigitalOceanProvider::TryAuthenticate()
 	if (IsAuthenticated() == false && m_AuthenticationInFlight == false && token.empty() == false)
 	{
 		m_AuthenticationInFlight = true;
-
 		g_pTurbine->GetWebClient()->Get("https://api.digitalocean.com/v2/account", m_Headers,
 			[this](const WebClientRequestResult& result)
 			{
@@ -106,6 +106,7 @@ void DigitalOceanProvider::TryAuthenticate()
 				{
 					std::string status = data["account"]["status"].get<std::string>();
 					m_Authenticated = (status == "active");
+					Log::Info("Authenticated with Digital Ocean.");
 				}
 				else
 				{

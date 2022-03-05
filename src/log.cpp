@@ -23,11 +23,13 @@ SOFTWARE.
 */
 
 #include <algorithm>
+#include <sstream>
 
 #ifdef _WIN32
 #include "windows.h"
 #endif
 
+#include "imgui/imgui.h"
 #include "log.h"
 
 namespace Turbine
@@ -144,17 +146,17 @@ void FileLogger::Log( const std::string& text, LogLevel level )
 // MessageBoxLogger
 //////////////////////////////////////////////////////////////////////////
 
-//void MessageBoxLogger::Log( char* pText, LogMessageType type )
-//{
-//    if ( type == LOG_WARNING )
-//    {
-//        SDL_ShowSimpleMessageBox( SDL_MESSAGEBOX_WARNING, "Warning", pText, nullptr );
-//    }
-//    else if ( type == LOG_ERROR )
-//    {
-//        SDL_ShowSimpleMessageBox( SDL_MESSAGEBOX_ERROR, "Error", pText, nullptr );
-//    }
-//}
+void MessageBoxLogger::Log(const std::string& text, LogLevel type)
+{
+	if (type == LogLevel::Warning)
+	{
+		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_WARNING, "Warning", text.c_str(), nullptr);
+	}
+	else if (type == LogLevel::Error)
+	{
+		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Error", text.c_str(), nullptr);
+	}
+}
 
 
 //////////////////////////////////////////////////////////////////////////
@@ -167,5 +169,70 @@ void VisualStudioLogger::Log( const std::string& text, LogLevel level )
     OutputDebugStringA( text.c_str() );
 }
 #endif
+
+
+//////////////////////////////////////////////////////////////////////////
+// NotificationLogger
+//////////////////////////////////////////////////////////////////////////
+
+NotificationLogger::NotificationLogger(SDL_Window* pWindow) :
+m_pWindow(pWindow)
+{
+
+}
+
+
+void NotificationLogger::Log(const std::string& text, LogLevel level)
+{
+	m_Entries.emplace_front(text, level);
+    if (m_Entries.size() > 10)
+    {
+        m_Entries.pop_back();
+    }
+}
+
+void NotificationLogger::Update(float delta)
+{
+    for (Entries::iterator it = m_Entries.begin(); it != m_Entries.end();)
+    {
+        it->m_Timer -= delta;
+        if (it->m_Timer <= 0.0f)
+        {
+            it = m_Entries.erase(it);
+        }
+        else
+        {
+            it++;
+        }
+    }
+}
+
+void NotificationLogger::Render()
+{
+    ImGuiWindowFlags flags = 
+        ImGuiWindowFlags_AlwaysAutoResize | 
+        ImGuiWindowFlags_NoSavedSettings |
+        ImGuiWindowFlags_NoResize |
+        ImGuiWindowFlags_NoTitleBar
+        ;
+
+    ImGuiViewport* pViewport = ImGui::GetMainViewport();
+    const float h = pViewport->Size.y;
+    float x = pViewport->Pos.x + 8.0f;
+    float y = pViewport->Pos.y + h - 40.0f;
+
+    int id = 0;
+    for (auto& entry : m_Entries)
+    {
+		std::stringstream windowName;
+		windowName << "LogEntry##" << id++;
+
+        ImGui::SetNextWindowPos(ImVec2(x, y));
+        ImGui::Begin(windowName.str().c_str(), nullptr, flags);
+        ImGui::Text("%s", entry.m_Text.c_str());
+        ImGui::End();
+        y -= 40.0f;
+    }
+}
 
 } // namespace Turbine

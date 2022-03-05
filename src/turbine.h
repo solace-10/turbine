@@ -33,8 +33,9 @@ SOFTWARE.
 
 #include "camera.h"
 #include "geolocationdata.h"
-
 #include "json.h"
+#include "log.h"
+
 using json = nlohmann::json;
 
 struct SDL_Window;
@@ -76,6 +77,7 @@ public:
 	CameraVector GetCameras() const;
 
 private:
+	void InitialiseLoggers(SDL_Window* pWindow);
 	void InitialiseGeolocation();
 	void InitialiseCameras();
 	void InitialiseProviders();
@@ -98,6 +100,7 @@ private:
 	SettingsUniquePtr m_pConfiguration;
     TaskVector m_Tasks;
 	std::vector<ProviderUniquePtr> m_Providers;
+	std::shared_ptr<NotificationLogger> m_pNotificationLogger;
 };
 
 extern Turbine* g_pTurbine;
