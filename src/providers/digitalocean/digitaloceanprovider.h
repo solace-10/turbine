@@ -24,6 +24,10 @@ SOFTWARE.
 
 #pragma once
 
+#include <map>
+#include <memory>
+
+#include "providers/digitalocean/dropletinfo.h"
 #include "providers/provider.h"
 #include "webclient/webclient.h"
 
@@ -40,6 +44,7 @@ public:
 	virtual ~DigitalOceanProvider() override;
 
 	virtual void Update(float delta) override;
+	virtual void RenderSettings() override;
 
 	virtual const std::string& GetName() const override;
 	virtual bool IsAuthenticated() const override;
@@ -49,12 +54,16 @@ private:
 	bool HasAPIKeyChanged();
 	void TryAuthenticate();
 	void RebuildHeaders();
+	void RebuildDropletInfoMap();
 
 	std::string m_Name;
 	std::string m_APIKey;
 	bool m_Authenticated;
 	bool m_AuthenticationInFlight;
 	WebClient::Headers m_Headers;
+
+	using DropletInfoMap = std::map<std::string, std::unique_ptr<DropletInfo>>;
+	DropletInfoMap m_DropletInfoMap;
 };
 
 } // namespace Turbine

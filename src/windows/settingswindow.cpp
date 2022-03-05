@@ -25,6 +25,7 @@ SOFTWARE.
 #include "imgui/imgui.h"
 #include "imgui/imgui_stdlib.h"
 
+#include "providers/provider.h"
 #include "windows/settingswindow.h"
 #include "settings.h"
 #include "turbine.h"
@@ -48,25 +49,13 @@ void SettingsWindow::Render()
 
 	if (ImGui::CollapsingHeader("Providers", ImGuiTreeNodeFlags_DefaultOpen))
 	{
-		if (ImGui::TreeNodeEx("Digital Ocean", ImGuiTreeNodeFlags_DefaultOpen))
+		for (auto& pProvider : g_pTurbine->GetProviders())
 		{
-			static std::string apiKey = g_pTurbine->GetSettings()->GetDigitalOceanAPIKey();
-			if (ImGui::InputText("Personal Access Token", &apiKey))
+			if (ImGui::TreeNodeEx(pProvider->GetName().c_str(), ImGuiTreeNodeFlags_DefaultOpen))
 			{
-				g_pTurbine->GetSettings()->SetDigitalOceanAPIKey(apiKey);
+				pProvider->RenderSettings();
+				ImGui::TreePop();
 			}
-			ImGui::SameLine();
-			ImGui::TextDisabled("(?)");
-			if (ImGui::IsItemHovered())
-			{
-				ImGui::BeginTooltip();
-				ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
-				ImGui::TextUnformatted("In order to use Digital Ocean with Turbine, you need to provide a Personal Access Token. The token must have Read and Write scopes.");
-				ImGui::PopTextWrapPos();
-				ImGui::EndTooltip();
-			}
-
-			ImGui::TreePop();
 		}
 	}
 

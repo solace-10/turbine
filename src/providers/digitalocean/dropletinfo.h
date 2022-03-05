@@ -24,27 +24,34 @@ SOFTWARE.
 
 #pragma once
 
-#include <memory>
 #include <string>
+#include <vector>
 
 namespace Turbine
 {
 
-class Provider;
-using ProviderUniquePtr = std::unique_ptr<Provider>;
+using Regions = std::vector<std::string>;
 
-class Provider
+class DropletInfo
 {
 public:
-	Provider() {}
-	virtual ~Provider() {}
+	DropletInfo(const std::string& name, float memory, int cpus, float disk, float transfer, float priceMonthly, const Regions& regions);
+	const std::string& GetName() const;
+	float GetMemory() const;
+	int GetCPUs() const;
+	float GetDisk() const;
+	float GetTransfer() const;
+	float GetPrice() const;
+	const Regions& GetRegions() const;
 
-	virtual void Update(float delta) = 0;
-	virtual void RenderSettings() = 0;
-
-	virtual const std::string& GetName() const = 0;
-	virtual bool IsAuthenticated() const = 0;
-	virtual void CreateBridge(const std::string& name, bool isPublic) = 0;
+private:
+	std::string m_Name;
+	float m_Memory;
+	int m_CPUs;
+	float m_Disk;
+	float m_Transfer;
+	float m_PriceMonthly;
+	Regions m_Regions;
 };
 
 } // namespace Turbine

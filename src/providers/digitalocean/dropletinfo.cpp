@@ -22,29 +22,56 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-#pragma once
-
-#include <memory>
-#include <string>
+#include "providers/digitalocean/dropletinfo.h"
 
 namespace Turbine
 {
 
-class Provider;
-using ProviderUniquePtr = std::unique_ptr<Provider>;
-
-class Provider
+DropletInfo::DropletInfo(const std::string& name, float memory, int cpus, float disk, float transfer, float priceMonthly, const Regions& regions) :
+m_Name(name),
+m_Memory(memory),
+m_CPUs(cpus),
+m_Disk(disk),
+m_Transfer(transfer),
+m_PriceMonthly(priceMonthly),
+m_Regions(regions)
 {
-public:
-	Provider() {}
-	virtual ~Provider() {}
 
-	virtual void Update(float delta) = 0;
-	virtual void RenderSettings() = 0;
+}
 
-	virtual const std::string& GetName() const = 0;
-	virtual bool IsAuthenticated() const = 0;
-	virtual void CreateBridge(const std::string& name, bool isPublic) = 0;
-};
+const std::string& DropletInfo::GetName() const
+{
+	return m_Name;
+}
+
+float DropletInfo::GetMemory() const
+{
+	return m_Memory;
+}
+
+int DropletInfo::GetCPUs() const
+{
+	return m_CPUs;
+}
+
+float DropletInfo::GetDisk() const
+{
+	return m_Disk;
+}
+
+float DropletInfo::GetTransfer() const
+{
+	return m_Transfer;
+}
+
+float DropletInfo::GetPrice() const
+{
+	return m_PriceMonthly;
+}
+
+const Regions& DropletInfo::GetRegions() const
+{
+	return m_Regions;
+}
 
 } // namespace Turbine

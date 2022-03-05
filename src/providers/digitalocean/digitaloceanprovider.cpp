@@ -26,6 +26,8 @@ SOFTWARE.
 
 #include <sstream>
 
+#include "imgui/imgui.h"
+#include "imgui/imgui_stdlib.h"
 #include "providers/digitalocean/digitaloceanprovider.h"
 #include "webclient/webclient.h"
 #include "log.h"
@@ -60,6 +62,37 @@ void DigitalOceanProvider::Update(float delta)
 	if (!IsAuthenticated())
 	{
 		TryAuthenticate();
+	}
+}
+
+void DigitalOceanProvider::RenderSettings()
+{
+	static std::string apiKey = g_pTurbine->GetSettings()->GetDigitalOceanAPIKey();
+
+	ImGui::Text("Status:");
+	ImGui::SameLine();
+	if (IsAuthenticated())
+	{
+		ImGui::TextColored(ImVec4(0.0f, 1.0f, 0.0f, 1.0f), "Authenticated");
+	}
+	else
+	{
+		ImGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f), "Not authenticated");
+	}
+
+	if (ImGui::InputText("Personal Access Token", &apiKey))
+	{
+		g_pTurbine->GetSettings()->SetDigitalOceanAPIKey(apiKey);
+	}
+	ImGui::SameLine();
+	ImGui::TextDisabled("(?)");
+	if (ImGui::IsItemHovered())
+	{
+		ImGui::BeginTooltip();
+		ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
+		ImGui::TextUnformatted("In order to use Digital Ocean with Turbine, you need to provide a Personal Access Token. The token must have Read and Write scopes.");
+		ImGui::PopTextWrapPos();
+		ImGui::EndTooltip();
 	}
 }
 
@@ -132,6 +165,7 @@ void DigitalOceanProvider::TryAuthenticate()
 				}
 
 				this->m_AuthenticationInFlight = false;
+				RebuildDropletInfoMap();
 			}
 		);
 	}
@@ -142,6 +176,43 @@ void DigitalOceanProvider::RebuildHeaders()
 	m_Headers.clear();
 	m_Headers.emplace_back("Content-Type: application/json");
 	m_Headers.emplace_back("Authorization: Bearer " + m_APIKey);
+}
+
+void DigitalOceanProvider::RebuildDropletInfoMap()
+{
+	g_pTurbine->GetWebClient()->Get("https://api.digitalocean.com/v2/sizes?per_page=200", m_Headers,
+	[this](const WebClientRequestResult& result)
+	{
+		json data = json::parse(result.GetData());
+		if (data.is_object() && data.find("sizes") != data.end())
+		{
+			m_DropletInfoMap.clear();
+			const json& sizes = data["sizes"];
+			if (sizes.is_array())
+			{
+				const size_t numSizes = sizes.size();
+				for (size_t i = 0; i < numSizes; ++i)
+				{
+					const json& entry = sizes[i];
+					const std::string& name = entry["slug"].get<std::string>();
+					const float memory = entry["memory"].get<float>();
+					const int cpus = entry["vcpus"].get<int>();
+					const float disk = entry["disk"].get<float>();
+					const float transfer = entry["transfer"].get<float>();
+					const float priceMonthly = entry["price_monthly"].get<float>();
+					Regions availableRegions;
+					const json& regions = entry["regions"];
+					const size_t numRegions = regions.size();
+					for (size_t j = 0; j < numRegions; ++j)
+					{
+						availableRegions.push_back(regions[j].get<std::string>());
+					}
+					m_DropletInfoMap[name] = std::make_unique<DropletInfo>(name, memory, cpus, disk, transfer, priceMonthly, availableRegions);
+				}
+			}
+		}
+	}
+);
 }
 
 } // namespace Turbine
