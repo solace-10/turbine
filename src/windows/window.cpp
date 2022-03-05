@@ -22,17 +22,45 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-#pragma once
+#include "imgui/imgui.h"
+#include "imgui/imgui_stdlib.h"
 
 #include "windows/window.h"
+#include "settings.h"
+#include "turbine.h"
 
 namespace Turbine
 {
 
-class SettingsWindow : public Window
+Window::Window() :
+m_IsOpen(false)
 {
-public:
-	virtual void Render() override;
-};
+
+}
+
+Window::~Window()
+{
+
+}
+
+void Window::Show(bool state)
+{
+	m_IsOpen = state;
+}
+
+void Window::Update(float delta)
+{
+
+}
+
+void Window::Render()
+{
+
+}
+
+bool Window::IsOpen() const
+{
+	return m_IsOpen;
+}
 
 } // namespace Turbine

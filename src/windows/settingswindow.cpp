@@ -32,15 +32,15 @@ SOFTWARE.
 namespace Turbine
 {
 
-void SettingsWindow::Render(bool* pOpen)
+void SettingsWindow::Render()
 {
-	if (pOpen == nullptr)
+	if (IsOpen() == false)
 	{
 		return;
 	}
 
 	ImGui::SetNextWindowSize(ImVec2(650, 400), ImGuiCond_FirstUseEver);
-	if (!ImGui::Begin("Settings", pOpen))
+	if (!ImGui::Begin("Settings", &m_IsOpen))
 	{
 		ImGui::End();
 		return;

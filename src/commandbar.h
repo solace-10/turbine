@@ -49,7 +49,6 @@ private:
     float m_AnimTimer;
     bool m_ShowAtlasTileStreamer;
     bool m_ShowDemoWindow;
-    bool m_ShowSettingsWindow;
 };
 
 } // namespace Turbine

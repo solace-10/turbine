@@ -48,6 +48,7 @@ class Provider;
 class Task;
 class TurbineRep;
 class WebClient;
+class Window;
 
 using SettingsUniquePtr = std::unique_ptr<Settings>;
 using ProviderUniquePtr = std::unique_ptr<Provider>;
@@ -56,6 +57,7 @@ using GeolocationDataMap = std::unordered_map<std::string, GeolocationDataShared
 using TaskUniquePtr = std::unique_ptr<Task>;
 using TaskVector = std::vector<TaskUniquePtr>;
 using WebClientUniquePtr = std::unique_ptr<WebClient>;
+using WindowUniquePtr = std::unique_ptr<Window>;
 
 class Turbine
 {
@@ -71,6 +73,7 @@ public:
     const TaskVector& GetTasks() const;
 	Task* GetTask(const std::string& name) const;
 	WebClient* GetWebClient();
+	Window* GetSettingsWindow();
 
 	void OnMessageReceived(const json& message);
 
@@ -101,6 +104,7 @@ private:
     TaskVector m_Tasks;
 	std::vector<ProviderUniquePtr> m_Providers;
 	std::shared_ptr<NotificationLogger> m_pNotificationLogger;
+	WindowUniquePtr m_pSettingsWindow;
 };
 
 extern Turbine* g_pTurbine;
@@ -134,6 +138,11 @@ inline CameraVector Turbine::GetCameras() const
 {
 	std::scoped_lock lock(m_CamerasMutex);
 	return m_Cameras;
+}
+
+inline Window* Turbine::GetSettingsWindow()
+{
+	return m_pSettingsWindow.get();
 }
 
 } // namespace Turbine

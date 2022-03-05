@@ -36,6 +36,7 @@ SOFTWARE.
 #include "tasks/googlesearch/googlesearch.h"
 #include "tasks/task.h"
 #include "webclient/webclient.h"
+#include "windows/settingswindow.h"
 #include "geolocationdata.h"
 #include "log.h"
 #include "turbine.h"
@@ -61,6 +62,7 @@ m_Active(true)
 
 	TextureLoader::Initialise();
 
+	m_pSettingsWindow = std::make_unique<SettingsWindow>();
 	m_pWebClient = std::make_unique<WebClient>();
 	m_pRep = std::make_unique<TurbineRep>(pWindow);
 
@@ -122,6 +124,7 @@ void Turbine::Update()
 	const float delta = ImGui::GetIO().DeltaTime;
 
 	m_pWebClient->Update();
+	m_pSettingsWindow->Update(delta);
 
 	for (auto& pProvider : m_Providers)
 	{
@@ -136,6 +139,7 @@ void Turbine::Update()
 	m_pRep->Update(delta);
 	m_pNotificationLogger->Update(delta);
 	m_pRep->Render();
+	m_pSettingsWindow->Render();
 	m_pNotificationLogger->Render();
 }
 

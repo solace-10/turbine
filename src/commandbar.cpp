@@ -39,7 +39,6 @@ CommandBar::CommandBar()
     m_AnimTimer = 0.0f;
     m_ShowAtlasTileStreamer = false;
     m_ShowDemoWindow = false;
-    m_ShowSettingsWindow = false;
 }
 
 void CommandBar::Render()
@@ -54,9 +53,10 @@ void CommandBar::Render()
         {
             ImGui::MenuItem("Bridges", nullptr, nullptr, false);
 
-            if (ImGui::MenuItem("Settings"))
+            bool settingsWindowOpen = g_pTurbine->GetSettingsWindow()->IsOpen();
+            if (ImGui::MenuItem("Settings", nullptr, &settingsWindowOpen))
             {
-                m_ShowSettingsWindow = !m_ShowSettingsWindow;
+                g_pTurbine->GetSettingsWindow()->Show(settingsWindowOpen);
             }
 
 			if (ImGui::BeginMenu("Development"))
@@ -94,11 +94,6 @@ void CommandBar::Render()
     if (m_ShowDemoWindow)
     {
         ImGui::ShowDemoWindow(&m_ShowDemoWindow);
-    }
-
-    if (m_ShowSettingsWindow)
-    {
-        SettingsWindow::Render(&m_ShowSettingsWindow);
     }
 
     RenderSearchWidget();

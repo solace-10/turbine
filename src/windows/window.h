@@ -24,15 +24,26 @@ SOFTWARE.
 
 #pragma once
 
-#include "windows/window.h"
+#include <memory>
 
 namespace Turbine
 {
 
-class SettingsWindow : public Window
+class Window;
+using WindowUniquePtr = std::unique_ptr<Window>;
+
+class Window
 {
 public:
-	virtual void Render() override;
+	Window();
+	virtual ~Window();
+	virtual void Show(bool state);
+	virtual void Update(float delta);
+	virtual void Render();
+	bool IsOpen() const;
+
+protected:
+	bool m_IsOpen;
 };
 
 } // namespace Turbine
