@@ -49,8 +49,8 @@ public:
 
 	void Update();
 
-	void Get(const std::string& url, Headers headers, RequestCallback pCallback);
-	void Post(const std::string& url, Headers headers, const std::string& postData, RequestCallback pCallback);
+	void Get(const std::string& url, Headers headers, RequestCallback pCallback, bool debug = false);
+	void Post(const std::string& url, Headers headers, const std::string& postData, RequestCallback pCallback, bool debug = false);
 
 	void AppendData(uint32_t id, const std::string& data);
 
@@ -62,7 +62,7 @@ private:
 		Get,
 		Post
 	};
-	void Request(RequestType requestType, const std::string& url, Headers headers, const std::string& postData, RequestCallback pCallback);
+	void Request(RequestType requestType, const std::string& url, Headers headers, const std::string& postData, RequestCallback pCallback, bool debug);
 
 	CURLM* m_MultiHandler;
 	std::thread m_CURLThread;
@@ -84,6 +84,7 @@ private:
 		RequestCallback pCallback;
 		CURL* pHandle;
 		std::string data;
+		std::string postData;
 		bool done;
 		curl_slist* pHeaders;
 	};

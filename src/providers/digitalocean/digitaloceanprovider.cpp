@@ -112,9 +112,9 @@ void DigitalOceanProvider::CreateBridge(const std::string& name, bool isPublic)
 	payload["region"] = "nyc3";
 	payload["size"] = "s-1vcpu-1gb";
 	payload["image"] = "ubuntu-20-04-x64";
-	//payload["ssh_keys"] = { "fa:50:a6:d0:48:12:41:a8:0a:c5:31:37:32:1a:ec:b5" };
-	//payload["ipv6"] = true;
-	//payload["tags"] = { "turbine" };
+	payload["ssh_keys"] = { "fa:50:a6:d0:48:12:41:a8:0a:c5:31:37:32:1a:ec:b5" };
+	payload["ipv6"] = true;
+	payload["tags"] = { "turbine" };
 
 	std::string payloadDumped = payload.dump();
 

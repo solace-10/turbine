@@ -23,6 +23,7 @@ SOFTWARE.
 */
 
 #include "webclient/webclient.h"
+#include "webclient/webclientdebug.h"
 #include "turbine.h"
 
 namespace Turbine
@@ -115,17 +116,17 @@ void WebClient::CURLThreadMain(WebClient* pWebClient)
 	}
 }
 
-void WebClient::Get(const std::string& url, Headers headers, RequestCallback pCallback)
+void WebClient::Get(const std::string& url, Headers headers, RequestCallback pCallback, bool debug)
 {
-	Request(RequestType::Get, url, headers, "", pCallback);
+	Request(RequestType::Get, url, headers, "", pCallback, debug);
 }
 
-void WebClient::Post(const std::string& url, Headers headers, const std::string& postData, RequestCallback pCallback)
+void WebClient::Post(const std::string& url, Headers headers, const std::string& postData, RequestCallback pCallback, bool debug)
 {
-	Request(RequestType::Post, url, headers, postData, pCallback);
+	Request(RequestType::Post, url, headers, postData, pCallback, debug);
 }
 
-void WebClient::Request(RequestType requestType, const std::string& url, Headers headers, const std::string& postData, RequestCallback pCallback)
+void WebClient::Request(RequestType requestType, const std::string& url, Headers headers, const std::string& postData, RequestCallback pCallback, bool debug)
 {
 	static uint32_t sId = 0;
 	PendingRequest pr;
@@ -133,6 +134,7 @@ void WebClient::Request(RequestType requestType, const std::string& url, Headers
 	pr.url = url;
 	pr.pCallback = pCallback;
 	pr.pHandle = curl_easy_init();
+	pr.postData = postData;
 
 	curl_easy_setopt(pr.pHandle, CURLOPT_URL, url.c_str());
 	curl_easy_setopt(pr.pHandle, CURLOPT_USERAGENT, "libcurl-agent/1.0");
@@ -142,9 +144,15 @@ void WebClient::Request(RequestType requestType, const std::string& url, Headers
 
 	if (requestType == RequestType::Post)
 	{
-		curl_easy_setopt(pr.pHandle, CURLOPT_POSTFIELDS, postData.c_str());
-		curl_easy_setopt(pr.pHandle, CURLOPT_POSTFIELDSIZE, postData.size());
+		curl_easy_setopt(pr.pHandle, CURLOPT_POSTFIELDS, pr.postData.c_str());
+		curl_easy_setopt(pr.pHandle, CURLOPT_POSTFIELDSIZE, pr.postData.size());
 		curl_easy_setopt(pr.pHandle, CURLOPT_POST, 1L);
+	}
+
+	if (debug)
+	{
+		curl_easy_setopt(pr.pHandle, CURLOPT_DEBUGFUNCTION, &WebClientDebug::Trace);
+    	curl_easy_setopt(pr.pHandle, CURLOPT_VERBOSE, 1L);
 	}
 
 	if (headers.empty() == false)
@@ -157,7 +165,7 @@ void WebClient::Request(RequestType requestType, const std::string& url, Headers
 	}
 
 	curl_multi_add_handle(m_MultiHandler, pr.pHandle);
-	m_PendingRequests.push_back(pr);
+	m_PendingRequests.push_back(std::move(pr));
 }
 
 void WebClient::AppendData(uint32_t id, const std::string& data)
