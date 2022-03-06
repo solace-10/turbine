@@ -137,7 +137,7 @@ void TileStreamer::ShowDebugUI(bool* pOpen)
 	}
 
 	g_pTileStreamer->m_AccessMutex.lock();
-	ImGui::Text("Tiles loaded: %d", g_pTileStreamer->m_LoadedTiles.size());
+	ImGui::Text("Tiles loaded: %zu", g_pTileStreamer->m_LoadedTiles.size());
 
 	static ImGuiTableFlags flags = ImGuiTableFlags_BordersV | ImGuiTableFlags_BordersOuterH | ImGuiTableFlags_Resizable | ImGuiTableFlags_RowBg | ImGuiTableFlags_NoBordersInBody;
 	if (ImGui::BeginTable("table", 5, flags))
@@ -267,7 +267,7 @@ bool TileStreamer::DownloadFromTileServer(Tile& tile)
 #ifdef _WIN32
 	_wfopen_s(&pTileFile, path.c_str(), L"wb");
 #else
-	pTileFile = fopen(filename.str().c_str(), "wb");
+	pTileFile = fopen(path.c_str(), "wb");
 #endif
 	bool result = false;
 	if (pTileFile != nullptr)

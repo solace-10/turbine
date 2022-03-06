@@ -61,6 +61,15 @@ set_target_properties(${NAME} PROPERTIES
     VS_DEBUGGER_WORKING_DIRECTORY           ${OUTPUT_BIN_DIR}
 )
 
+target_compile_options(turbine PRIVATE
+    $<$<OR:$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:GNU>>:
+        -fstandalone-debug
+    >
+    $<$<CXX_COMPILER_ID:MSVC>:
+        /permissive-
+    >
+)
+
 if(WIN32)
     target_compile_definitions(${NAME} PRIVATE UNICODE _UNICODE _HASEXCEPTIONS=0 CURL_STATICLIB)
     target_link_libraries(${NAME} PRIVATE Opengl32 glu32 ws2_32 libssl64MT libcrypto64MT crypt32)

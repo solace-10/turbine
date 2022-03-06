@@ -33,7 +33,7 @@ static size_t CURLWriteCallback(void* pBuffer, size_t size, size_t nmemb, void* 
 	if (nmemb > 0)
 	{
 		std::string data(reinterpret_cast<unsigned char*>(pBuffer), reinterpret_cast<unsigned char*>(pBuffer) + nmemb);
-		uint32_t id = reinterpret_cast<uint32_t>(pUserData);
+		uint32_t id = reinterpret_cast<uintptr_t>(pUserData);
 		g_pTurbine->GetWebClient()->AppendData(id, data);
 	}
 
