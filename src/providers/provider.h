@@ -44,7 +44,7 @@ public:
 
 	virtual const std::string& GetName() const = 0;
 	virtual bool IsAuthenticated() const = 0;
-	virtual void CreateBridge(const std::string& name, bool isPublic) = 0;
+	virtual void CreateBridge(const std::string& name, bool isListed) = 0;
 };
 
 } // namespace Turbine

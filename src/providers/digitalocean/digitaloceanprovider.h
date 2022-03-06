@@ -48,7 +48,7 @@ public:
 
 	virtual const std::string& GetName() const override;
 	virtual bool IsAuthenticated() const override;
-	virtual void CreateBridge(const std::string& name, bool isPublic) override;
+	virtual void CreateBridge(const std::string& name, bool isListed) override;
 
 private:
 	bool HasAPIKeyChanged();

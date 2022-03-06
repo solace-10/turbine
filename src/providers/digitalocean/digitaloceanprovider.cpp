@@ -92,6 +92,40 @@ void DigitalOceanProvider::RenderSettings()
 		ImGui::PopTextWrapPos();
 		ImGui::EndTooltip();
 	}
+
+	const std::string& dropletSize = g_pTurbine->GetSettings()->GetDigitalOceanDropletSize();
+	if (ImGui::BeginCombo("Droplet size", dropletSize.c_str(), 0))
+	{
+		for (auto const& dropletInfoPair : m_DropletInfoMap)
+		{
+			const DropletInfo* pDropletInfo = dropletInfoPair.second.get();
+			const bool is_selected = dropletSize == pDropletInfo->GetName();
+			if (ImGui::Selectable(pDropletInfo->GetName().c_str(), is_selected))
+			{
+				g_pTurbine->GetSettings()->SetDigitalOceanDropletSize(pDropletInfo->GetName());
+			}
+
+			if (ImGui::IsItemHovered())
+			{
+				ImGui::BeginTooltip();
+				ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
+				ImGui::Text("vCPUs: %d", pDropletInfo->GetCPUs());
+				ImGui::Text("Memory: %.2fMB", pDropletInfo->GetMemory());
+				ImGui::Text("Disk: %.2fGB", pDropletInfo->GetDisk());
+				ImGui::Text("Transfer: %.2fTB", pDropletInfo->GetTransfer());
+				ImGui::Text("Price per month: %.2fUSD", pDropletInfo->GetPrice());
+				ImGui::PopTextWrapPos();
+				ImGui::EndTooltip();
+			}
+
+			// Set the initial focus when opening the combo (scrolling + keyboard navigation focus)
+			if (is_selected)
+			{
+				ImGui::SetItemDefaultFocus();
+			}
+		}
+		ImGui::EndCombo();
+	}
 }
 
 const std::string& DigitalOceanProvider::GetName() const
@@ -104,17 +138,18 @@ bool DigitalOceanProvider::IsAuthenticated() const
 	return m_Authenticated;
 }
 
-void DigitalOceanProvider::CreateBridge(const std::string& name, bool isPublic)
+void DigitalOceanProvider::CreateBridge(const std::string& name, bool isListed)
 {
-	Log::Info("Creating %s bridge '%s'...", isPublic ? "public" : "private", name.c_str());
+	Log::Info("Creating %s bridge '%s'...", isListed ? "listed" : "unlisted", name.c_str());
+	std::string turbineTypeTag = isListed ? "turbine_listed" : "turbine_unlisted";
 	json payload;
 	payload["name"] = name;
 	payload["region"] = "nyc3";
-	payload["size"] = "s-1vcpu-1gb";
+	payload["size"] = g_pTurbine->GetSettings()->GetDigitalOceanDropletSize();
 	payload["image"] = "ubuntu-20-04-x64";
 	payload["ssh_keys"] = { "fa:50:a6:d0:48:12:41:a8:0a:c5:31:37:32:1a:ec:b5" };
 	payload["ipv6"] = true;
-	payload["tags"] = { "turbine" };
+	payload["tags"] = { "turbine", "turbine_deployment_pending", turbineTypeTag };
 
 	std::string payloadDumped = payload.dump();
 
@@ -124,7 +159,6 @@ void DigitalOceanProvider::CreateBridge(const std::string& name, bool isPublic)
 			int a = 0;
 		}
 	);
-
 }
 
 bool DigitalOceanProvider::HasAPIKeyChanged()

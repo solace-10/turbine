@@ -44,7 +44,8 @@ SOFTWARE.
 namespace Turbine
 {
 
-Settings::Settings()
+Settings::Settings() :
+m_DigitalOceanDropletSize("s-1vcpu-1gb")
 {
 	CreateStorage();
 	Load();
@@ -81,7 +82,8 @@ void Settings::Save()
 	json settings = {
 		{ "providers", {
 			{ "digital_ocean", {
-				{"api_key", m_DigitalOceanAPIKey }
+				{"api_key", m_DigitalOceanAPIKey },
+				{"droplet_size", m_DigitalOceanDropletSize }
 			}}
 		}}
 	};
