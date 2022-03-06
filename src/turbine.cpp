@@ -36,6 +36,7 @@ SOFTWARE.
 #include "tasks/googlesearch/googlesearch.h"
 #include "tasks/task.h"
 #include "webclient/webclient.h"
+#include "windows/bridgeswindow.h"
 #include "windows/createbridgewindow.h"
 #include "windows/settingswindow.h"
 #include "geolocationdata.h"
@@ -63,6 +64,7 @@ m_Active(true)
 
 	TextureLoader::Initialise();
 
+	m_pBridgesWindow = std::make_unique<BridgesWindow>();
 	m_pCreateBridgeWindow = std::make_unique<CreateBridgeWindow>();
 	m_pSettingsWindow = std::make_unique<SettingsWindow>();
 	m_pWebClient = std::make_unique<WebClient>();
@@ -126,6 +128,7 @@ void Turbine::Update()
 	const float delta = ImGui::GetIO().DeltaTime;
 
 	m_pWebClient->Update();
+	m_pBridgesWindow->Update(delta);
 	m_pCreateBridgeWindow->Update(delta);
 	m_pSettingsWindow->Update(delta);
 
@@ -142,6 +145,7 @@ void Turbine::Update()
 	m_pRep->Update(delta);
 	m_pNotificationLogger->Update(delta);
 	m_pRep->Render();
+	m_pBridgesWindow->Render();
 	m_pCreateBridgeWindow->Render();
 	m_pSettingsWindow->Render();
 	m_pNotificationLogger->Render();

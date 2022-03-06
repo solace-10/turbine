@@ -161,6 +161,12 @@ void DigitalOceanProvider::CreateBridge(const std::string& name, bool isListed)
 	);
 }
 
+BridgeList DigitalOceanProvider::GetBridges() const
+{
+	BridgeList bridgeList;
+	return bridgeList;
+}
+
 bool DigitalOceanProvider::HasAPIKeyChanged()
 {
 	const std::string& settingsKey = g_pTurbine->GetSettings()->GetDigitalOceanAPIKey();

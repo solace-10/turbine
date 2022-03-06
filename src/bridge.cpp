@@ -22,49 +22,14 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-#pragma once
-
-#include <map>
-#include <memory>
-
-#include "providers/digitalocean/dropletinfo.h"
-#include "providers/provider.h"
-#include "webclient/webclient.h"
+#include "bridge.h"
 
 namespace Turbine
 {
 
-class DigitalOceanProvider;
-using DigitalOceanProviderUniquePtr = std::unique_ptr<DigitalOceanProvider>;
-
-class DigitalOceanProvider : public Provider
+Bridge::Bridge(const std::string& name)
 {
-public:
-	DigitalOceanProvider();
-	virtual ~DigitalOceanProvider() override;
-
-	virtual void Update(float delta) override;
-	virtual void RenderSettings() override;
-
-	virtual const std::string& GetName() const override;
-	virtual bool IsAuthenticated() const override;
-	virtual void CreateBridge(const std::string& name, bool isListed) override;
-	virtual BridgeList GetBridges() const override;
-
-private:
-	bool HasAPIKeyChanged();
-	void TryAuthenticate();
-	void RebuildHeaders();
-	void RebuildDropletInfoMap();
-
-	std::string m_Name;
-	std::string m_APIKey;
-	bool m_Authenticated;
-	bool m_AuthenticationInFlight;
-	WebClient::Headers m_Headers;
-
-	using DropletInfoMap = std::map<std::string, std::unique_ptr<DropletInfo>>;
-	DropletInfoMap m_DropletInfoMap;
-};
+    
+}
 
 } // namespace Turbine

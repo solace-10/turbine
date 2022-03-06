@@ -74,6 +74,7 @@ public:
     const TaskVector& GetTasks() const;
 	Task* GetTask(const std::string& name) const;
 	WebClient* GetWebClient();
+	Window* GetBridgesWindow();
 	Window* GetCreateBridgeWindow();
 	Window* GetSettingsWindow();
 
@@ -107,6 +108,7 @@ private:
     TaskVector m_Tasks;
 	std::vector<ProviderUniquePtr> m_Providers;
 	std::shared_ptr<NotificationLogger> m_pNotificationLogger;
+	WindowUniquePtr m_pBridgesWindow;
 	WindowUniquePtr m_pCreateBridgeWindow;
 	WindowUniquePtr m_pSettingsWindow;
 };
@@ -147,6 +149,11 @@ inline CameraVector Turbine::GetCameras() const
 inline ProviderVector& Turbine::GetProviders()
 {
 	return m_Providers;
+}
+
+inline Window* Turbine::GetBridgesWindow()
+{
+	return m_pBridgesWindow.get();
 }
 
 inline Window* Turbine::GetCreateBridgeWindow()

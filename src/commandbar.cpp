@@ -51,7 +51,11 @@ void CommandBar::Render()
     {
         if (ImGui::BeginMenu("File"))
         {
-            ImGui::MenuItem("Bridges", nullptr, nullptr, false);
+            bool bridgesWindowOpen = g_pTurbine->GetBridgesWindow()->IsOpen();
+            if (ImGui::MenuItem("Bridges", nullptr, &bridgesWindowOpen))
+            {
+                g_pTurbine->GetBridgesWindow()->Show(bridgesWindowOpen);
+            }
 
             bool settingsWindowOpen = g_pTurbine->GetSettingsWindow()->IsOpen();
             if (ImGui::MenuItem("Settings", nullptr, &settingsWindowOpen))

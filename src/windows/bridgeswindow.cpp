@@ -22,49 +22,37 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-#pragma once
+#include "imgui/imgui.h"
+#include "imgui/imgui_stdlib.h"
 
-#include <map>
-#include <memory>
-
-#include "providers/digitalocean/dropletinfo.h"
 #include "providers/provider.h"
-#include "webclient/webclient.h"
+#include "windows/bridgeswindow.h"
+#include "settings.h"
+#include "turbine.h"
 
 namespace Turbine
 {
 
-class DigitalOceanProvider;
-using DigitalOceanProviderUniquePtr = std::unique_ptr<DigitalOceanProvider>;
-
-class DigitalOceanProvider : public Provider
+void BridgesWindow::Render()
 {
-public:
-	DigitalOceanProvider();
-	virtual ~DigitalOceanProvider() override;
+	if (IsOpen() == false)
+	{
+		return;
+	}
 
-	virtual void Update(float delta) override;
-	virtual void RenderSettings() override;
+	ImGui::SetNextWindowSize(ImVec2(650, 400), ImGuiCond_FirstUseEver);
+	if (!ImGui::Begin("Bridges", &m_IsOpen))
+	{
+		ImGui::End();
+		return;
+	}
 
-	virtual const std::string& GetName() const override;
-	virtual bool IsAuthenticated() const override;
-	virtual void CreateBridge(const std::string& name, bool isListed) override;
-	virtual BridgeList GetBridges() const override;
+	if (ImGui::Button("Create"))
+	{
 
-private:
-	bool HasAPIKeyChanged();
-	void TryAuthenticate();
-	void RebuildHeaders();
-	void RebuildDropletInfoMap();
+	}
 
-	std::string m_Name;
-	std::string m_APIKey;
-	bool m_Authenticated;
-	bool m_AuthenticationInFlight;
-	WebClient::Headers m_Headers;
-
-	using DropletInfoMap = std::map<std::string, std::unique_ptr<DropletInfo>>;
-	DropletInfoMap m_DropletInfoMap;
-};
+	ImGui::End();
+}
 
 } // namespace Turbine
