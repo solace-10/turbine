@@ -50,7 +50,6 @@ public:
 	virtual const std::string& GetName() const override;
 	virtual bool IsAuthenticated() const override;
 	virtual void CreateBridge(const std::string& name, bool isListed) override;
-	virtual BridgeList GetBridges() const override;
 
 private:
 	bool HasAPIKeyChanged();
@@ -59,6 +58,7 @@ private:
 	void RebuildDropletInfoMap();
 	void RebuildImages();
 	void RenderDropletImageSettings();
+	void UpdateDropletMonitor(float delta);
 
 	std::string m_Name;
 	std::string m_APIKey;
@@ -71,6 +71,8 @@ private:
 
 	using ImagesVector = std::vector<std::unique_ptr<ImageInfo>>;
 	ImagesVector m_Images;
+
+	float m_DropletMonitorTimer;
 };
 
 } // namespace Turbine

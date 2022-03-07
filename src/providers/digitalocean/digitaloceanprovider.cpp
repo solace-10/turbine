@@ -30,6 +30,7 @@ SOFTWARE.
 #include "providers/digitalocean/dropletinfo.h"
 #include "providers/digitalocean/imageinfo.h"
 #include "webclient/webclient.h"
+#include "bridge.h"
 #include "log.h"
 #include "json.h"
 #include "settings.h"
@@ -41,7 +42,8 @@ namespace Turbine
 DigitalOceanProvider::DigitalOceanProvider() :
 	m_Name("Digital Ocean"),
 	m_Authenticated(false),
-	m_AuthenticationInFlight(false)
+	m_AuthenticationInFlight(false),
+	m_DropletMonitorTimer(0.0f)
 {
 	
 }
@@ -62,6 +64,10 @@ void DigitalOceanProvider::Update(float delta)
 	if (!IsAuthenticated())
 	{
 		TryAuthenticate();
+	}
+	else
+	{
+		UpdateDropletMonitor(delta);
 	}
 }
 
@@ -188,20 +194,13 @@ void DigitalOceanProvider::CreateBridge(const std::string& name, bool isListed)
 	payload["ipv6"] = true;
 	payload["tags"] = { "turbine", "turbine_deployment_pending", turbineTypeTag };
 
-	std::string payloadDumped = payload.dump();
-
-	g_pTurbine->GetWebClient()->Post("https://api.digitalocean.com/v2/droplets", m_Headers, payloadDumped,
+	const std::string rawPayload = payload.dump();
+	g_pTurbine->GetWebClient()->Post("https://api.digitalocean.com/v2/droplets", m_Headers, rawPayload,
 		[this](const WebClientRequestResult& result)
 		{
 			int a = 0;
 		}
 	);
-}
-
-BridgeList DigitalOceanProvider::GetBridges() const
-{
-	BridgeList bridgeList;
-	return bridgeList;
 }
 
 bool DigitalOceanProvider::HasAPIKeyChanged()
@@ -319,6 +318,50 @@ void DigitalOceanProvider::RebuildImages()
 			}
 		}
 	);
+}
+
+void DigitalOceanProvider::UpdateDropletMonitor(float delta)
+{
+	m_DropletMonitorTimer -= delta;
+	if (m_DropletMonitorTimer <= 0.0f)
+	{
+		m_DropletMonitorTimer = 15.0f;
+
+		g_pTurbine->GetWebClient()->Get("https://api.digitalocean.com/v2/droplets?per_page=200", m_Headers,
+			[this](const WebClientRequestResult& result)
+			{
+				json data = json::parse(result.GetData());
+				if (data.is_object() && data.find("droplets") != data.end())
+				{
+					json::const_iterator it = data.find("droplets");
+					if (it != data.end() && it->is_array())
+					{
+						size_t numDroplets = it->size();
+						for (auto& droplet : *it)
+						{
+							int rawId = droplet["id"].get<int>();
+							std::stringstream idss;
+							idss << rawId;
+							const std::string& id = idss.str();
+							const std::string& name = droplet["name"].get<std::string>();
+							const std::string& status = droplet["status"].get<std::string>();
+							
+							Bridge* pExistingBridge = g_pTurbine->GetBridge(id);
+							if (pExistingBridge)
+							{
+								pExistingBridge->SetStatus(status);
+							}
+							else
+							{
+								BridgeUniquePtr pBridge = std::make_unique<Bridge>(id, name, status);
+								g_pTurbine->AddBridge(std::move(pBridge));
+							}
+						}
+					}
+				}
+			}
+		);
+	}
 }
 
 } // namespace Turbine

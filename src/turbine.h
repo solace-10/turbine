@@ -43,6 +43,7 @@ struct SDL_Window;
 namespace Turbine
 {
 
+class Bridge;
 class Settings;
 class Provider;
 class Task;
@@ -50,6 +51,8 @@ class TurbineRep;
 class WebClient;
 class Window;
 
+using BridgeList = std::list<Bridge*>;
+using BridgeUniquePtr = std::unique_ptr<Bridge>;
 using SettingsUniquePtr = std::unique_ptr<Settings>;
 using ProviderUniquePtr = std::unique_ptr<Provider>;
 using TurbineRepUniquePtr = std::unique_ptr<TurbineRep>;
@@ -82,6 +85,10 @@ public:
 
 	CameraVector GetCameras() const;
 	ProviderVector& GetProviders();
+	void AddBridge(BridgeUniquePtr&& bridge);
+	Bridge* GetBridge(const std::string& id);
+	const Bridge* GetBridge(const std::string& id) const;
+	BridgeList GetBridges() const;
 
 private:
 	void InitialiseLoggers(SDL_Window* pWindow);
@@ -111,6 +118,9 @@ private:
 	WindowUniquePtr m_pBridgesWindow;
 	WindowUniquePtr m_pCreateBridgeWindow;
 	WindowUniquePtr m_pSettingsWindow;
+	
+	using BridgeMap = std::unordered_map<std::string, BridgeUniquePtr>;
+	BridgeMap m_Bridges;
 };
 
 extern Turbine* g_pTurbine;

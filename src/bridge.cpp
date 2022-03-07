@@ -27,9 +27,32 @@ SOFTWARE.
 namespace Turbine
 {
 
-Bridge::Bridge(const std::string& name)
+Bridge::Bridge(const std::string& id, const std::string& name, const std::string& status) :
+m_Id(id),
+m_Name(name),
+m_Status(status)
 {
     
+}
+
+const std::string& Bridge::GetId() const
+{
+    return m_Id;
+}
+
+const std::string& Bridge::GetName() const
+{
+    return m_Name;
+}
+
+const std::string& Bridge::GetStatus() const
+{
+    return m_Status;
+}
+    
+void Bridge::SetStatus(const std::string& value)
+{
+    m_Status = value;
 }
 
 } // namespace Turbine

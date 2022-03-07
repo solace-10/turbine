@@ -39,6 +39,7 @@ SOFTWARE.
 #include "windows/bridgeswindow.h"
 #include "windows/createbridgewindow.h"
 #include "windows/settingswindow.h"
+#include "bridge.h"
 #include "geolocationdata.h"
 #include "log.h"
 #include "turbine.h"
@@ -248,6 +249,33 @@ void Turbine::SetSearching(bool state)
 			pTask->Stop();
 		}
 	}
+}
+
+void Turbine::AddBridge(BridgeUniquePtr&& bridge)
+{
+	m_Bridges[bridge->GetId()] = std::move(bridge);
+}
+
+Bridge* Turbine::GetBridge(const std::string& id)
+{
+	BridgeMap::iterator it = m_Bridges.find(id);
+	return (it == m_Bridges.end()) ? nullptr : it->second.get();
+}
+
+const Bridge* Turbine::GetBridge(const std::string& id) const
+{
+	BridgeMap::const_iterator it = m_Bridges.find(id);
+	return (it == m_Bridges.end()) ? nullptr : it->second.get();
+}
+	
+BridgeList Turbine::GetBridges() const
+{
+	BridgeList bridges;
+	for (auto& bridge : m_Bridges)
+	{
+		bridges.push_back(bridge.second.get());
+	}
+	return bridges;
 }
 
 } // namespace Turbine
