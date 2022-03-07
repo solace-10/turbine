@@ -27,6 +27,8 @@ SOFTWARE.
 #include "imgui/imgui.h"
 #include "imgui/imgui_stdlib.h"
 #include "providers/digitalocean/digitaloceanprovider.h"
+#include "providers/digitalocean/dropletinfo.h"
+#include "providers/digitalocean/imageinfo.h"
 #include "webclient/webclient.h"
 #include "log.h"
 #include "json.h"
@@ -126,6 +128,41 @@ void DigitalOceanProvider::RenderSettings()
 		}
 		ImGui::EndCombo();
 	}
+
+	RenderDropletImageSettings();
+}
+
+void DigitalOceanProvider::RenderDropletImageSettings()
+{
+	const std::string& savedDropletImage = g_pTurbine->GetSettings()->GetDigitalOceanDropletImage();
+	ImageInfo* pSelectedDropletImage = nullptr;
+	for (auto const& pDropletImage : m_Images)
+	{
+		if (pDropletImage->GetSlug() == savedDropletImage)
+		{
+			pSelectedDropletImage = pDropletImage.get();
+			break;
+		}
+	}
+
+	if (ImGui::BeginCombo("Droplet image", pSelectedDropletImage ? pSelectedDropletImage->GetDisplayText().c_str() : "", 0))
+	{
+		for (auto const& pDropletImage : m_Images)
+		{
+			const bool is_selected = pDropletImage.get() == pSelectedDropletImage;
+			if (ImGui::Selectable(pDropletImage->GetDisplayText().c_str(), is_selected))
+			{
+				g_pTurbine->GetSettings()->SetDigitalOceanDropletImage(pDropletImage->GetSlug());
+			}
+
+			// Set the initial focus when opening the combo (scrolling + keyboard navigation focus)
+			if (is_selected)
+			{
+				ImGui::SetItemDefaultFocus();
+			}
+		}
+		ImGui::EndCombo();
+	}
 }
 
 const std::string& DigitalOceanProvider::GetName() const
@@ -146,7 +183,7 @@ void DigitalOceanProvider::CreateBridge(const std::string& name, bool isListed)
 	payload["name"] = name;
 	payload["region"] = "nyc3";
 	payload["size"] = g_pTurbine->GetSettings()->GetDigitalOceanDropletSize();
-	payload["image"] = "ubuntu-20-04-x64";
+	payload["image"] = g_pTurbine->GetSettings()->GetDigitalOceanDropletImage();
 	payload["ssh_keys"] = { "fa:50:a6:d0:48:12:41:a8:0a:c5:31:37:32:1a:ec:b5" };
 	payload["ipv6"] = true;
 	payload["tags"] = { "turbine", "turbine_deployment_pending", turbineTypeTag };
@@ -204,6 +241,7 @@ void DigitalOceanProvider::TryAuthenticate()
 
 				this->m_AuthenticationInFlight = false;
 				RebuildDropletInfoMap();
+				RebuildImages();
 			}
 		);
 	}
@@ -219,38 +257,68 @@ void DigitalOceanProvider::RebuildHeaders()
 void DigitalOceanProvider::RebuildDropletInfoMap()
 {
 	g_pTurbine->GetWebClient()->Get("https://api.digitalocean.com/v2/sizes?per_page=200", m_Headers,
-	[this](const WebClientRequestResult& result)
-	{
-		json data = json::parse(result.GetData());
-		if (data.is_object() && data.find("sizes") != data.end())
+		[this](const WebClientRequestResult& result)
 		{
-			m_DropletInfoMap.clear();
-			const json& sizes = data["sizes"];
-			if (sizes.is_array())
+			json data = json::parse(result.GetData());
+			if (data.is_object() && data.find("sizes") != data.end())
 			{
-				const size_t numSizes = sizes.size();
-				for (size_t i = 0; i < numSizes; ++i)
+				m_DropletInfoMap.clear();
+				const json& sizes = data["sizes"];
+				if (sizes.is_array())
 				{
-					const json& entry = sizes[i];
-					const std::string& name = entry["slug"].get<std::string>();
-					const float memory = entry["memory"].get<float>();
-					const int cpus = entry["vcpus"].get<int>();
-					const float disk = entry["disk"].get<float>();
-					const float transfer = entry["transfer"].get<float>();
-					const float priceMonthly = entry["price_monthly"].get<float>();
-					Regions availableRegions;
-					const json& regions = entry["regions"];
-					const size_t numRegions = regions.size();
-					for (size_t j = 0; j < numRegions; ++j)
+					const size_t numSizes = sizes.size();
+					for (size_t i = 0; i < numSizes; ++i)
 					{
-						availableRegions.push_back(regions[j].get<std::string>());
+						const json& entry = sizes[i];
+						const std::string& name = entry["slug"].get<std::string>();
+						const float memory = entry["memory"].get<float>();
+						const int cpus = entry["vcpus"].get<int>();
+						const float disk = entry["disk"].get<float>();
+						const float transfer = entry["transfer"].get<float>();
+						const float priceMonthly = entry["price_monthly"].get<float>();
+						Regions availableRegions;
+						const json& regions = entry["regions"];
+						const size_t numRegions = regions.size();
+						for (size_t j = 0; j < numRegions; ++j)
+						{
+							availableRegions.push_back(regions[j].get<std::string>());
+						}
+						m_DropletInfoMap[name] = std::make_unique<DropletInfo>(name, memory, cpus, disk, transfer, priceMonthly, availableRegions);
 					}
-					m_DropletInfoMap[name] = std::make_unique<DropletInfo>(name, memory, cpus, disk, transfer, priceMonthly, availableRegions);
 				}
 			}
 		}
-	}
-);
+	);
+}
+
+void DigitalOceanProvider::RebuildImages()
+{
+	g_pTurbine->GetWebClient()->Get("https://api.digitalocean.com/v2/images?type=distribution&per_page=200", m_Headers,
+		[this](const WebClientRequestResult& result)
+		{
+			json data = json::parse(result.GetData());
+			if (data.is_object() && data.find("images") != data.end())
+			{
+				const json& images = data["images"];
+				if (images.is_array())
+				{
+					m_Images.clear();
+					size_t numImages = images.size();
+					for (size_t i = 0; i < numImages; ++i)
+					{
+						const json& image = images[i];
+						m_Images.emplace_back(
+							std::make_unique<ImageInfo>(
+								image["name"].get<std::string>(),
+								image["distribution"].get<std::string>(),
+								image["slug"].get<std::string>()
+								)
+						);
+					}
+				}
+			}
+		}
+	);
 }
 
 } // namespace Turbine

@@ -213,8 +213,8 @@ void NotificationLogger::Render()
         ImGuiWindowFlags_AlwaysAutoResize | 
         ImGuiWindowFlags_NoSavedSettings |
         ImGuiWindowFlags_NoResize |
-        ImGuiWindowFlags_NoTitleBar
-        ;
+        ImGuiWindowFlags_NoTitleBar | 
+        ImGuiWindowFlags_NoFocusOnAppearing;
 
     ImGuiViewport* pViewport = ImGui::GetMainViewport();
     const float h = pViewport->Size.y;

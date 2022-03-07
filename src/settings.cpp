@@ -45,7 +45,8 @@ namespace Turbine
 {
 
 Settings::Settings() :
-m_DigitalOceanDropletSize("s-1vcpu-1gb")
+m_DigitalOceanDropletSize("s-1vcpu-1gb"),
+m_DigitalOceanDropletImage("debian-11-x64")
 {
 	CreateStorage();
 	Load();
@@ -83,7 +84,8 @@ void Settings::Save()
 		{ "providers", {
 			{ "digital_ocean", {
 				{"api_key", m_DigitalOceanAPIKey },
-				{"droplet_size", m_DigitalOceanDropletSize }
+				{"droplet_size", m_DigitalOceanDropletSize },
+				{"droplet_image", m_DigitalOceanDropletImage }
 			}}
 		}}
 	};
@@ -111,10 +113,22 @@ void Settings::Load()
 			const json& digitalOcean = providers["digital_ocean"];
 			if (digitalOcean.is_object())
 			{
-				const json& digitalOceanAPIKey = digitalOcean["api_key"];
-				if (digitalOceanAPIKey.is_string())
+				json::const_iterator it = digitalOcean.find("api_key");
+				if (it != digitalOcean.end() && it->is_string())
 				{
-					m_DigitalOceanAPIKey = digitalOceanAPIKey.get<std::string>();
+					m_DigitalOceanAPIKey = it->get<std::string>();
+				}
+
+				it = digitalOcean.find("droplet_size");
+				if (it != digitalOcean.end() && it->is_string())
+				{
+					m_DigitalOceanDropletSize = it->get<std::string>();
+				}
+
+				it = digitalOcean.find("droplet_image");
+				if (it != digitalOcean.end() && it->is_string())
+				{
+					m_DigitalOceanDropletImage = it->get<std::string>();
 				}
 			}
 		}
