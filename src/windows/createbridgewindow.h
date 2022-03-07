@@ -24,6 +24,9 @@ SOFTWARE.
 
 #pragma once
 
+#include <string>
+#include <vector>
+
 #include "windows/window.h"
 
 namespace Turbine
@@ -32,7 +35,14 @@ namespace Turbine
 class CreateBridgeWindow : public Window
 {
 public:
+	CreateBridgeWindow();
 	virtual void Render() override;
+	virtual void OnOpen() override;
+
+private:
+	void LoadBridgeNames();
+	std::vector<std::string> m_BridgeNames;
+	std::string m_BridgeName;
 };
 
 } // namespace Turbine

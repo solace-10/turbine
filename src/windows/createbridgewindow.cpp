@@ -22,8 +22,12 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+#include <stdlib.h>
+#include <time.h>
+
 #include "imgui/imgui.h"
 #include "imgui/imgui_stdlib.h"
+#include "json.h"
 
 #include "providers/provider.h"
 #include "windows/createbridgewindow.h"
@@ -33,6 +37,13 @@ SOFTWARE.
 namespace Turbine
 {
 
+CreateBridgeWindow::CreateBridgeWindow() :
+m_BridgeName("turbine-unnamed")
+{
+	srand(time(nullptr));
+	LoadBridgeNames();
+}
+
 void CreateBridgeWindow::Render()
 {
 	if (IsOpen() == false)
@@ -41,19 +52,52 @@ void CreateBridgeWindow::Render()
 	}
 
 	ImGui::SetNextWindowSize(ImVec2(650, 400), ImGuiCond_FirstUseEver);
-	if (!ImGui::Begin("Settings", &m_IsOpen))
+	if (!ImGui::Begin("Create bridge", &m_IsOpen))
 	{
 		ImGui::End();
 		return;
 	}
 
+	ImGui::InputText("Bridge name", &m_BridgeName);
+
 	if (ImGui::Button("Create"))
 	{
 		ProviderVector& providers = g_pTurbine->GetProviders();
-		providers[0]->CreateBridge("test", true);
+		providers[0]->CreateBridge(m_BridgeName, true);
 	}
 
 	ImGui::End();
+}
+
+void CreateBridgeWindow::OnOpen()
+{
+	if (m_BridgeNames.empty() == false)
+	{
+		m_BridgeName = "turbine-" + m_BridgeNames[rand() % m_BridgeNames.size()];
+	}
+}
+
+void CreateBridgeWindow::LoadBridgeNames()
+{
+	using json = nlohmann::json;
+	std::filesystem::path filePath = "names.json";
+	std::ifstream file(filePath);
+	if (file.is_open())
+	{
+		json names;
+		file >> names;
+		file.close();
+
+		if (names.is_array())
+		{
+			const size_t numNames = names.size();
+			m_BridgeName.reserve(numNames);
+			for (size_t i = 0; i < numNames; ++i)
+			{
+				m_BridgeNames.push_back(names[i].get<std::string>());
+			}
+		}
+	}
 }
 
 } // namespace Turbine

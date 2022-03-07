@@ -45,7 +45,16 @@ Window::~Window()
 
 void Window::Show(bool state)
 {
-	m_IsOpen = state;
+	if (state && m_IsOpen == false)
+	{
+		m_IsOpen = true;
+		OnOpen();
+	}
+	else if (!state && m_IsOpen == true)
+	{
+		m_IsOpen = false;
+		OnClose();
+	}
 }
 
 void Window::Update(float delta)
@@ -56,6 +65,16 @@ void Window::Update(float delta)
 void Window::Render()
 {
 
+}
+
+void Window::OnOpen()
+{
+
+}
+
+void Window::OnClose()
+{
+	
 }
 
 bool Window::IsOpen() const

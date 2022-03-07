@@ -40,6 +40,8 @@ public:
 	virtual void Show(bool state);
 	virtual void Update(float delta);
 	virtual void Render();
+	virtual void OnOpen();
+	virtual void OnClose();
 	bool IsOpen() const;
 
 protected:
