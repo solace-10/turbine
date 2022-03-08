@@ -39,6 +39,7 @@ SOFTWARE.
 #include "windows/bridgeswindow.h"
 #include "windows/createbridgewindow.h"
 #include "windows/settingswindow.h"
+#include "windows/summarywindow.h"
 #include "bridge.h"
 #include "geolocationdata.h"
 #include "log.h"
@@ -68,6 +69,7 @@ m_Active(true)
 	m_pBridgesWindow = std::make_unique<BridgesWindow>();
 	m_pCreateBridgeWindow = std::make_unique<CreateBridgeWindow>();
 	m_pSettingsWindow = std::make_unique<SettingsWindow>();
+	m_pSummaryWindow = std::make_unique<SummaryWindow>();
 	m_pWebClient = std::make_unique<WebClient>();
 	m_pRep = std::make_unique<TurbineRep>(pWindow);
 
@@ -132,6 +134,7 @@ void Turbine::Update()
 	m_pBridgesWindow->Update(delta);
 	m_pCreateBridgeWindow->Update(delta);
 	m_pSettingsWindow->Update(delta);
+	m_pSummaryWindow->Update(delta);
 
 	for (auto& pProvider : m_Providers)
 	{
@@ -149,6 +152,7 @@ void Turbine::Update()
 	m_pBridgesWindow->Render();
 	m_pCreateBridgeWindow->Render();
 	m_pSettingsWindow->Render();
+	m_pSummaryWindow->Render();
 	m_pNotificationLogger->Render();
 }
 

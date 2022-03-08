@@ -24,34 +24,22 @@ SOFTWARE.
 
 #pragma once
 
-#include <memory>
 #include <string>
-
-#include "bridgesummarywidget.h"
 
 namespace Turbine
 {
 
-class BridgeSummaryWidget;
-using BridgeSummaryWidgetUniquePtr = std::unique_ptr<BridgeSummaryWidget>;
+class Bridge;
 
-class Bridge
+class BridgeSummaryWidget
 {
 public:
-    Bridge(const std::string& id, const std::string& name, const std::string& status);
-
-    const std::string& GetId() const;
-    const std::string& GetName() const;
-    const std::string& GetStatus() const;
-    void SetStatus(const std::string& value);
-
-    void RenderSummaryWidget();
+    BridgeSummaryWidget();
+    void Update(float delta);
+    void Render(Bridge* pBridge);
 
 private:
-    std::string m_Id;
-    std::string m_Name;
-    std::string m_Status;
-    BridgeSummaryWidgetUniquePtr m_pBridgeSummaryWidget;
+    float m_SpinnerTimer;
 };
 
 } // namespace Turbine

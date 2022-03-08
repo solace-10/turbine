@@ -118,6 +118,7 @@ private:
 	WindowUniquePtr m_pBridgesWindow;
 	WindowUniquePtr m_pCreateBridgeWindow;
 	WindowUniquePtr m_pSettingsWindow;
+	WindowUniquePtr m_pSummaryWindow;
 	
 	using BridgeMap = std::unordered_map<std::string, BridgeUniquePtr>;
 	BridgeMap m_Bridges;

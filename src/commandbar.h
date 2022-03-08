@@ -42,11 +42,6 @@ public:
     void Render();
 
 private:
-    void RenderSearchWidget();
-    void RenderSearchBackground();
-    void RenderSearchButton();
-    void RenderTasks();
-    float m_AnimTimer;
     bool m_ShowAtlasTileStreamer;
     bool m_ShowDemoWindow;
 };

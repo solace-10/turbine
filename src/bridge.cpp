@@ -23,6 +23,7 @@ SOFTWARE.
 */
 
 #include "bridge.h"
+#include "bridgesummarywidget.h"
 
 namespace Turbine
 {
@@ -32,7 +33,7 @@ m_Id(id),
 m_Name(name),
 m_Status(status)
 {
-    
+    m_pBridgeSummaryWidget = std::make_unique<BridgeSummaryWidget>();
 }
 
 const std::string& Bridge::GetId() const
@@ -53,6 +54,11 @@ const std::string& Bridge::GetStatus() const
 void Bridge::SetStatus(const std::string& value)
 {
     m_Status = value;
+}
+
+void Bridge::RenderSummaryWidget()
+{
+    m_pBridgeSummaryWidget->Render(this);
 }
 
 } // namespace Turbine

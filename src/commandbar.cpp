@@ -25,7 +25,6 @@ SOFTWARE.
 #include <imgui/imgui.h>
 
 #include "atlas/tilestreamer.h"
-#include "tasks/googlesearch/googlesearch.h"
 #include "tasks/task.h"
 #include "windows/settingswindow.h"
 #include "commandbar.h"
@@ -36,7 +35,6 @@ namespace Turbine
 
 CommandBar::CommandBar()
 {
-    m_AnimTimer = 0.0f;
     m_ShowAtlasTileStreamer = false;
     m_ShowDemoWindow = false;
 }
@@ -100,90 +98,7 @@ void CommandBar::Render()
         ImGui::ShowDemoWindow(&m_ShowDemoWindow);
     }
 
-    RenderSearchWidget();
-    RenderTasks();
     ImGui::End();
-}
-
-void CommandBar::RenderSearchWidget()
-{
-    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
-    ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(8, 6));
-    ImGui::BeginChild("SearchWidget", ImVec2(0.0f, 30.0f), true);
-    RenderSearchBackground();
-    RenderSearchButton();
-    ImGui::EndChild();
-    ImGui::PopStyleVar(2);
-}
-
-void CommandBar::RenderSearchBackground()
-{
-    const bool isSearching = true;
-    ImVec2 p = ImGui::GetCursorScreenPos();
-    ImDrawList* pDrawList = ImGui::GetWindowDrawList();
-
-    const float width = ImGui::GetWindowWidth();
-    const float height = ImGui::GetWindowHeight();
-
-    ImVec2 tl(p);
-    ImVec2 br(p.x + width, p.y + height);
-    ImU32 bg = IM_COL32(128, 64, 0, 255);
-    ImU32 fg = IM_COL32(255, 128, 0, 255);
-    pDrawList->AddRectFilled(tl, br, bg);
-
-    const float stripeWidth = 15.0f;
-    const float stripeSlant = 15.0f;
-    for (int i = 0; i < 14; ++i)
-    {
-        float xOffset = 30.0f * (i - 1) + m_AnimTimer;
-        pDrawList->AddQuadFilled(
-            ImVec2(tl.x + xOffset, tl.y),
-            ImVec2(tl.x + xOffset + stripeWidth, tl.y),
-            ImVec2(tl.x + xOffset + stripeWidth + stripeSlant, br.y),
-            ImVec2(tl.x + xOffset + stripeSlant, br.y),
-            fg
-        );
-    }
-
-    m_AnimTimer += ImGui::GetIO().DeltaTime * 5.0f;
-    if (m_AnimTimer > stripeWidth * 2.0f)
-    {
-        m_AnimTimer = 0.0f;
-    }
-}
-
-void CommandBar::RenderSearchButton()
-{
-    ImVec2 p = ImGui::GetCursorScreenPos();
-    ImDrawList* pDrawList = ImGui::GetWindowDrawList();
-
-    if (ImGui::InvisibleButton("SearchWidgetButton", ImGui::GetWindowSize()))
-    {
-        g_pTurbine->GetCreateBridgeWindow()->Show(true);
-    }
-
-    const float width = ImGui::GetWindowWidth();
-    const float height = ImGui::GetWindowHeight();
-    const ImVec2 padding(20, 6);
-    const ImVec2 tl(p.x + padding.x, p.y + padding.y);
-    const ImVec2 br(p.x + width - padding.x, p.y + height - padding.y);
-
-    ImU32 borderColor = ImGui::IsItemHovered() ? IM_COL32(200, 200, 200, 255) : IM_COL32(128, 128, 128, 255);
-    pDrawList->AddRectFilled(tl, br, IM_COL32(20, 20, 20, 200));
-    pDrawList->AddRect(tl, br, borderColor);
-
-    const std::string& text("Create bridge");
-    ImVec2 textSize = ImGui::CalcTextSize(text.c_str());
-    pDrawList->AddText(ImVec2(p.x + (width - textSize.x) / 2.0f, p.y + (height - ImGui::GetTextLineHeight()) / 2.0f), IM_COL32(255, 255, 255, 255), text.c_str());
-}
-
-void CommandBar::RenderTasks()
-{
-    const TaskVector& tasks = g_pTurbine->GetTasks();
-    for (auto&& pTask : tasks)
-    {
-        pTask->Render();
-    }
 }
 
 } // namespace Turbine
