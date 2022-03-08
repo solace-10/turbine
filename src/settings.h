@@ -25,6 +25,8 @@ SOFTWARE.
 #pragma once
 
 #include <filesystem>
+#include <string>
+#include <vector>
 
 namespace Turbine
 {
@@ -42,6 +44,8 @@ public:
 	void SetDigitalOceanDropletSize(const std::string& value);
 	const std::string& GetDigitalOceanDropletImage() const;
 	void SetDigitalOceanDropletImage(const std::string& value);
+	const std::vector<std::string>& GetDigitalOceanSSHFingerprints() const;
+	void SetDigitalOceanSSHFingerprints(const std::vector<std::string>& value);
 
 private:
 	void CreateStorage();
@@ -52,6 +56,7 @@ private:
 	std::string m_DigitalOceanAPIKey;
 	std::string m_DigitalOceanDropletSize;
 	std::string m_DigitalOceanDropletImage;
+	std::vector<std::string> m_DigitalOceanSSHFingerprints;
 };
 
 inline std::filesystem::path Settings::GetStoragePath() const
@@ -87,6 +92,16 @@ inline const std::string& Settings::GetDigitalOceanDropletImage() const
 inline void Settings::SetDigitalOceanDropletImage(const std::string& value)
 {
 	m_DigitalOceanDropletImage = value;
+}
+
+inline const std::vector<std::string>& Settings::GetDigitalOceanSSHFingerprints() const
+{
+	return m_DigitalOceanSSHFingerprints;
+}
+
+inline void Settings::SetDigitalOceanSSHFingerprints(const std::vector<std::string>& value)
+{
+	m_DigitalOceanSSHFingerprints = value;
 }
 
 } // namespace Turbine
