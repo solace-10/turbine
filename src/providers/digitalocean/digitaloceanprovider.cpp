@@ -344,16 +344,18 @@ void DigitalOceanProvider::UpdateDropletMonitor(float delta)
 							idss << rawId;
 							const std::string& id = idss.str();
 							const std::string& name = droplet["name"].get<std::string>();
-							const std::string& status = droplet["status"].get<std::string>();
+							const std::string& dropletStatus = droplet["status"].get<std::string>();
+							std::vector<std::string> tags = droplet["tags"];
 							
 							Bridge* pExistingBridge = g_pTurbine->GetBridge(id);
+							Bridge::Status bridgeStatus = ToBridgeStatus(dropletStatus, tags);
 							if (pExistingBridge)
 							{
-								pExistingBridge->SetStatus(status);
+								pExistingBridge->SetStatus(bridgeStatus);
 							}
 							else
 							{
-								BridgeUniquePtr pBridge = std::make_unique<Bridge>(id, name, status);
+								BridgeUniquePtr pBridge = std::make_unique<Bridge>(id, name, bridgeStatus);
 								g_pTurbine->AddBridge(std::move(pBridge));
 							}
 						}
@@ -361,6 +363,28 @@ void DigitalOceanProvider::UpdateDropletMonitor(float delta)
 				}
 			}
 		);
+	}
+}
+
+Bridge::Status DigitalOceanProvider::ToBridgeStatus(const std::string& value, const std::vector<std::string>& tags) const
+{
+	if (value == "new")
+	{
+		return Bridge::Status::New;
+	}
+	else if (value == "active")
+	{
+		const bool deploying = std::find(tags.begin(), tags.end(), "turbine_deployment_pending") != tags.end();
+		if (deploying)
+		{
+			return Bridge::Status::Deploying;
+		}
+
+		return Bridge::Status::Active;
+	}
+	else
+	{
+		return Bridge::Status::Unknown;
 	}
 }
 
