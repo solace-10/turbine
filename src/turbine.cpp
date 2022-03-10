@@ -31,6 +31,7 @@ SOFTWARE.
 #include <SDL.h>
 
 #include "bridge/bridge.h"
+#include "deployment/deployment.h"
 #include "ext/json.h"
 #include "imgui/imgui.h"
 #include "providers/digitalocean/digitaloceanprovider.h"
@@ -67,6 +68,7 @@ m_Active(true)
 	TextureLoader::Initialise();
 
 	m_pBridgesWindow = std::make_unique<BridgesWindow>();
+	m_pDeployment = std::make_unique<Deployment>();
 	m_pCreateBridgeWindow = std::make_unique<CreateBridgeWindow>();
 	m_pSettingsWindow = std::make_unique<SettingsWindow>();
 	m_pSummaryWindow = std::make_unique<SummaryWindow>();
@@ -130,6 +132,7 @@ void Turbine::Update()
 
 	const float delta = ImGui::GetIO().DeltaTime;
 
+	m_pDeployment->Update(delta);
 	m_pWebClient->Update();
 	m_pBridgesWindow->Update(delta);
 	m_pCreateBridgeWindow->Update(delta);
@@ -259,7 +262,7 @@ void Turbine::AddBridge(BridgeSharedPtr&& pBridge)
 {
 	SDL_assert(m_Bridges.find(pBridge->GetId()) == m_Bridges.end());
 	m_Bridges[pBridge->GetId()] = pBridge;
-	
+	m_pDeployment->OnBridgeAdded(pBridge);
 }
 
 Bridge* Turbine::GetBridge(const std::string& id)

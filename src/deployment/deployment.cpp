@@ -22,7 +22,13 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+#include <filesystem>
+#include <fstream>
+
+#include "bridge/bridge.h"
 #include "deployment/deployment.h"
+#include "settings.h"
+#include "turbine.h"
 
 namespace Turbine
 {
@@ -52,9 +58,42 @@ void Deployment::OnBridgeAdded(BridgeSharedPtr& pBridge)
     m_BridgesChanged = true;
 }
 
+void Deployment::OnBridgeIpChanged()
+{
+    m_BridgesChanged = true;
+}
+
 void Deployment::GenerateHostsFile()
 {
+    std::filesystem::path storagePath = g_pTurbine->GetSettings()->GetStoragePath();
 
+	std::filesystem::path filePath = storagePath / "ansiblehosts";
+	std::ofstream file(filePath, std::ofstream::out | std::ofstream::trunc);
+    if (file.good())
+    {
+		for (auto& pDeployments : m_Deployments)
+		{
+			BridgeSharedPtr pBridge = pDeployments.lock();
+			if (pBridge != nullptr)
+			{
+                if (pBridge->GetIPv4().empty() && pBridge->GetIPv6().empty())
+                {
+                    continue;
+                }
+
+				file << "[" << pBridge->GetName() << "]\n";
+                if (pBridge->GetIPv4().empty() == false)
+                {
+                    file << pBridge->GetIPv4() << "\n\n";
+                }
+                else
+                {
+                    file << pBridge->GetIPv6() << "\n\n";
+                }
+			}
+		}
+        file.close();
+    }
 }
 
 } // namespace Turbine

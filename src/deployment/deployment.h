@@ -43,6 +43,7 @@ public:
 
     void Update(float delta);
     void OnBridgeAdded(BridgeSharedPtr& pBridge);
+    void OnBridgeIpChanged();
 
 private:
     void GenerateHostsFile();

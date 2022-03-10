@@ -29,6 +29,7 @@ SOFTWARE.
 #include <string>
 #include <vector>
 
+#include "ext/json.h"
 #include "bridge/bridge.h"
 #include "providers/provider.h"
 #include "webclient/webclient.h"
@@ -66,6 +67,7 @@ private:
 	const std::string& GetBridgeState(const std::string& value, const std::vector<std::string>& tags) const;
 	std::string ArrayToInputField(const std::vector<std::string>& value) const;
 	std::vector<std::string> InputFieldToArray(const std::string& value) const;
+	std::string ExtractIP(const nlohmann::json& droplet, const std::string& ipVersion) const;
 
 	std::string m_Name;
 	std::string m_APIKey;

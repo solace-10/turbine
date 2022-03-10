@@ -45,6 +45,7 @@ namespace Turbine
 {
 
 class Bridge;
+class Deployment;
 class Settings;
 class Provider;
 class Task;
@@ -53,6 +54,7 @@ class WebClient;
 class Window;
 
 using BridgeList = std::list<Bridge*>;
+using DeploymentUniquePtr = std::unique_ptr<Deployment>;
 using SettingsUniquePtr = std::unique_ptr<Settings>;
 using ProviderUniquePtr = std::unique_ptr<Provider>;
 using TurbineRepUniquePtr = std::unique_ptr<TurbineRep>;
@@ -89,6 +91,7 @@ public:
 	Bridge* GetBridge(const std::string& id);
 	const Bridge* GetBridge(const std::string& id) const;
 	BridgeList GetBridges() const;
+	Deployment* GetDeployment() const;
 
 private:
 	void InitialiseLoggers(SDL_Window* pWindow);
@@ -122,6 +125,7 @@ private:
 	
 	using BridgeMap = std::unordered_map<std::string, BridgeSharedPtr>;
 	BridgeMap m_Bridges;
+	DeploymentUniquePtr m_pDeployment;
 };
 
 extern Turbine* g_pTurbine;
@@ -175,6 +179,11 @@ inline Window* Turbine::GetCreateBridgeWindow()
 inline Window* Turbine::GetSettingsWindow()
 {
 	return m_pSettingsWindow.get();
+}
+
+inline Deployment* Turbine::GetDeployment() const
+{
+	return m_pDeployment.get();
 }
 
 } // namespace Turbine

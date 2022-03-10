@@ -51,6 +51,10 @@ public:
     const std::string& GetId() const;
     const std::string& GetName() const;
     const std::string& GetState() const;
+    const std::string& GetIPv4() const;
+    const std::string& GetIPv6() const;
+    void SetIPv4(const std::string& ip);
+    void SetIPv6(const std::string& ip);
     void SetState(const std::string& state, bool force = false);
 
     void RenderSummaryWidget();
@@ -62,6 +66,8 @@ private:
     std::string m_Name;
     BridgeSummaryWidgetUniquePtr m_pBridgeSummaryWidget;
     StateMachineUniquePtr m_pStateMachine;
+    std::string m_Ipv4;
+    std::string m_Ipv6;
 };
 
 } // namespace Turbine

@@ -355,6 +355,9 @@ void DigitalOceanProvider::UpdateDropletMonitor(float delta)
 							const std::string& name = droplet["name"].get<std::string>();
 							const std::string& dropletState = droplet["status"].get<std::string>();
 							std::vector<std::string> tags = droplet["tags"];
+
+							const std::string& ipv4 = ExtractIP(droplet, "v4");
+							const std::string& ipv6 = ExtractIP(droplet, "v6");
 							
 							Bridge* pExistingBridge = g_pTurbine->GetBridge(id);
 							if (pExistingBridge)
@@ -364,11 +367,16 @@ void DigitalOceanProvider::UpdateDropletMonitor(float delta)
 									const std::string& bridgeState = GetBridgeState(dropletState, tags);
 									pExistingBridge->SetState(bridgeState);
 								}
+
+								pExistingBridge->SetIPv4(ipv4);
+								pExistingBridge->SetIPv6(ipv6);
 							}
 							else
 							{
 								const std::string& initialState = GetBridgeState(dropletState, tags);
 								BridgeSharedPtr pBridge = std::make_shared<Bridge>(id, name, initialState);
+								pBridge->SetIPv4(ipv4);
+								pBridge->SetIPv6(ipv6);
 								g_pTurbine->AddBridge(std::move(pBridge));
 							}
 						}
@@ -377,6 +385,29 @@ void DigitalOceanProvider::UpdateDropletMonitor(float delta)
 			}
 		);
 	}
+}
+
+std::string DigitalOceanProvider::ExtractIP(const nlohmann::json& droplet, const std::string& ipVersion) const
+{
+	json::const_iterator it = droplet.find("networks");
+	if (it != droplet.end())
+	{
+		const json& networks = *it;
+		it = networks.find(ipVersion);
+		if (it != networks.end())
+		{
+			const json& version = *it;
+			if (version.is_array() && version.size() > 0)
+			{
+				it = version[0].find("ip_address");
+				if (it != version[0].end())
+				{
+					return it->get<std::string>();
+				}
+			}
+		}
+	}	
+	return "";
 }
 
 bool DigitalOceanProvider::ShouldChangeBridgeState(const std::string& dropletState, const std::string& currentBridgeState) const

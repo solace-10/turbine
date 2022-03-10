@@ -27,6 +27,8 @@ SOFTWARE.
 #include "bridge/bridge.h"
 #include "bridge/bridgesummarywidget.h"
 #include "bridge/statemachine.h"
+#include "deployment/deployment.h"
+#include "turbine.h"
 
 namespace Turbine
 {
@@ -63,6 +65,34 @@ const std::string& Bridge::GetState() const
 void Bridge::SetState(const std::string& state, bool force /* = false */)
 {
     m_pStateMachine->SetState(state, force);
+}
+
+const std::string& Bridge::GetIPv4() const
+{
+    return m_Ipv4;
+}
+
+const std::string& Bridge::GetIPv6() const
+{
+    return m_Ipv6;
+}
+
+void Bridge::SetIPv4(const std::string& ip)
+{
+    if (m_Ipv4 != ip)
+    {
+        m_Ipv4 = ip;
+        g_pTurbine->GetDeployment()->OnBridgeIpChanged();
+    }
+}
+
+void Bridge::SetIPv6(const std::string& ip)
+{
+    if (m_Ipv6 != ip)
+    {
+        m_Ipv6 = ip;
+        g_pTurbine->GetDeployment()->OnBridgeIpChanged();
+    }
 }
 
 void Bridge::RenderSummaryWidget()
