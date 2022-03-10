@@ -31,7 +31,7 @@ SOFTWARE.
 
 #include <SDL.h>
 
-#include "bridge.h"
+#include "bridge/bridge.h"
 #include "camera.h"
 #include "geolocationdata.h"
 #include "json.h"

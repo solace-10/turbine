@@ -22,11 +22,11 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+#include "bridge/bridge.h"
+#include "bridge/bridgesummarywidget.h"
 #include "imgui/imgui.h"
 #include "imguiext/widgets.h"
 #include "tasks/task.h"
-#include "bridge.h"
-#include "bridgesummarywidget.h"
 #include "icons.h"
 
 namespace Turbine

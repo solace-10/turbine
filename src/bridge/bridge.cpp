@@ -24,10 +24,9 @@ SOFTWARE.
 
 #include <array>
 
+#include "bridge/bridge.h"
+#include "bridge/bridgesummarywidget.h"
 #include "bridge/statemachine.h"
-
-#include "bridge.h"
-#include "bridgesummarywidget.h"
 
 namespace Turbine
 {

@@ -30,6 +30,7 @@ SOFTWARE.
 #include <curl/curl.h>
 #include <SDL.h>
 
+#include "bridge/bridge.h"
 #include "ext/json.h"
 #include "imgui/imgui.h"
 #include "providers/digitalocean/digitaloceanprovider.h"
@@ -40,7 +41,6 @@ SOFTWARE.
 #include "windows/createbridgewindow.h"
 #include "windows/settingswindow.h"
 #include "windows/summarywindow.h"
-#include "bridge.h"
 #include "geolocationdata.h"
 #include "log.h"
 #include "turbine.h"

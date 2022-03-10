@@ -26,13 +26,13 @@ SOFTWARE.
 #include <sstream>
 #include <vector>
 
+#include "bridge/bridge.h"
 #include "imgui/imgui.h"
 #include "imgui/imgui_stdlib.h"
 #include "providers/digitalocean/digitaloceanprovider.h"
 #include "providers/digitalocean/dropletinfo.h"
 #include "providers/digitalocean/imageinfo.h"
 #include "webclient/webclient.h"
-#include "bridge.h"
 #include "log.h"
 #include "json.h"
 #include "settings.h"
@@ -394,8 +394,9 @@ bool DigitalOceanProvider::ShouldChangeBridgeState(const std::string& dropletSta
 				return true;
 			}
 		}
+		return false;
 	}
-	return false;
+	return true;
 }
 
 const std::string& DigitalOceanProvider::GetBridgeState(const std::string& dropletState, const std::vector<std::string>& tags) const
@@ -407,10 +408,15 @@ const std::string& DigitalOceanProvider::GetBridgeState(const std::string& dropl
 		const bool deploymentPending = std::find(tags.begin(), tags.end(), "turbine_deployment_pending") != tags.end();
 		return deploymentPending ? sDeploymentPendingState : sDeployedState;
 	}
-	else if(dropletState == "new")
+	else if (dropletState == "new")
 	{
 		static std::string sNewState("New");
 		return sNewState;
+	}
+	else if (dropletState == "off")
+	{
+		static std::string sOfflineState("Offline");
+		return sOfflineState;
 	}
 	else
 	{

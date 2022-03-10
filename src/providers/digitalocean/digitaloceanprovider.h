@@ -29,9 +29,9 @@ SOFTWARE.
 #include <string>
 #include <vector>
 
+#include "bridge/bridge.h"
 #include "providers/provider.h"
 #include "webclient/webclient.h"
-#include "bridge.h"
 
 namespace Turbine
 {

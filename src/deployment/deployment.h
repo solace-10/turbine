@@ -27,7 +27,7 @@ SOFTWARE.
 #include <list>
 #include <string>
 
-#include "bridge.h"
+#include "bridge/bridge.h"
 
 namespace Turbine
 {

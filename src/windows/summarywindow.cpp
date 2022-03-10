@@ -29,9 +29,9 @@ SOFTWARE.
 #include "imgui/imgui_stdlib.h"
 #include "json.h"
 
+#include "bridge/bridge.h"
 #include "providers/provider.h"
 #include "windows/summarywindow.h"
-#include "bridge.h"
 #include "settings.h"
 #include "turbine.h"
 
