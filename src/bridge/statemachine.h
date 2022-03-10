@@ -26,42 +26,34 @@ SOFTWARE.
 
 #include <memory>
 #include <string>
-
-#include "bridgesummarywidget.h"
+#include <vector>
 
 namespace Turbine
 {
 
-class BridgeSummaryWidget;
-using BridgeSummaryWidgetUniquePtr = std::unique_ptr<BridgeSummaryWidget>;
-
-class Bridge;
-using BridgeWeakPtr = std::weak_ptr<Bridge>;
-using BridgeSharedPtr = std::shared_ptr<Bridge>;
-
-class StateMachine;
-using StateMachineUniquePtr = std::unique_ptr<StateMachine>;
-
-class Bridge
+class StateMachine
 {
 public:
-    Bridge(const std::string& id, const std::string& name, const std::string& state);
-    ~Bridge();
+    StateMachine(const std::string& name);
 
-    const std::string& GetId() const;
-    const std::string& GetName() const;
     const std::string& GetState() const;
-    void SetState(const std::string& state, bool force = false);
-
-    void RenderSummaryWidget();
+    void SetState(const std::string& stateName, bool force = false);
+    void AddState(const std::string& stateName);
+    void LinkStates(const std::string& fromStateName, const std::string& toStateName);
 
 private:
-    void InitialiseStateMachine();
+    struct State
+    {
+        std::string m_Name;
+    };
+    using StateUniquePtr = std::unique_ptr<State>;
+    using StateVector = std::vector<StateUniquePtr>;
 
-    std::string m_Id;
+    State* FindState(const std::string& stateName);
+
     std::string m_Name;
-    BridgeSummaryWidgetUniquePtr m_pBridgeSummaryWidget;
-    StateMachineUniquePtr m_pStateMachine;
+    StateVector m_States;
+    State* m_pCurrentState;
 };
 
 } // namespace Turbine

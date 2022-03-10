@@ -24,18 +24,26 @@ SOFTWARE.
 
 #include <array>
 
+#include "bridge/statemachine.h"
+
 #include "bridge.h"
 #include "bridgesummarywidget.h"
 
 namespace Turbine
 {
 
-Bridge::Bridge(const std::string& id, const std::string& name, Status status) :
+Bridge::Bridge(const std::string& id, const std::string& name, const std::string& initialState) :
 m_Id(id),
-m_Name(name),
-m_Status(status)
+m_Name(name)
 {
     m_pBridgeSummaryWidget = std::make_unique<BridgeSummaryWidget>();
+    m_pStateMachine = std::make_unique<StateMachine>(name);
+    InitialiseStateMachine();
+    m_pStateMachine->SetState(initialState, true);
+}
+
+Bridge::~Bridge()
+{
 }
 
 const std::string& Bridge::GetId() const
@@ -48,31 +56,38 @@ const std::string& Bridge::GetName() const
     return m_Name;
 }
 
-Bridge::Status Bridge::GetStatus() const
+const std::string& Bridge::GetState() const
 {
-    return m_Status;
-}
-
-const std::string& Bridge::GetStatusText() const
-{
-    static const std::array<std::string, static_cast<size_t>(Status::Count)> sStatusText =
-    {
-        "New",
-        "Deploying",
-        "Active",
-        "Unknown"
-    };
-    return sStatusText[static_cast<size_t>(m_Status)];
+    return m_pStateMachine->GetState();
 }
     
-void Bridge::SetStatus(Status value)
+void Bridge::SetState(const std::string& state, bool force /* = false */)
 {
-    m_Status = value;
+    m_pStateMachine->SetState(state, force);
 }
 
 void Bridge::RenderSummaryWidget()
 {
     m_pBridgeSummaryWidget->Render(this);
+}
+
+void Bridge::InitialiseStateMachine()
+{
+    m_pStateMachine->AddState("Offline");
+    m_pStateMachine->AddState("Shutting down");
+    m_pStateMachine->AddState("New");
+    m_pStateMachine->AddState("Deployment pending");
+    m_pStateMachine->AddState("Deploying");
+    m_pStateMachine->AddState("Deployed");
+
+    m_pStateMachine->LinkStates("Offline", "New");
+
+    m_pStateMachine->LinkStates("Shutting down", "Offline");
+
+	m_pStateMachine->LinkStates("New", "Shutting down");
+	m_pStateMachine->LinkStates("New", "Offline");
+    m_pStateMachine->LinkStates("New", "Deployment needed");
+    m_pStateMachine->LinkStates("New", "Deploying");
 }
 
 } // namespace Turbine

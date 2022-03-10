@@ -94,7 +94,7 @@ void BridgeSummaryWidget::Render(Bridge* pBridge)
         SetCursorScreenPos(ImVec2(pos.x + 38, pos.y + 4));
         Text("%s", pBridge->GetName().c_str());
         SetCursorScreenPos(ImVec2(pos.x + 38, pos.y + 20));
-        TextUnformatted(pBridge->GetStatusText().c_str());
+        TextUnformatted(pBridge->GetState().c_str());
     }
 
     EndChild();

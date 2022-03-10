@@ -257,7 +257,7 @@ void Turbine::SetSearching(bool state)
 
 void Turbine::AddBridge(BridgeSharedPtr&& pBridge)
 {
-	SDL_assert(m_Bridges.find(pBridge->GetId()) != m_Bridges.end());
+	SDL_assert(m_Bridges.find(pBridge->GetId()) == m_Bridges.end());
 	m_Bridges[pBridge->GetId()] = pBridge;
 	
 }

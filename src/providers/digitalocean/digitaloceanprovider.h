@@ -62,7 +62,8 @@ private:
 	void RebuildImages();
 	void RenderDropletImageSettings();
 	void UpdateDropletMonitor(float delta);
-	Bridge::Status ToBridgeStatus(const std::string& value, const std::vector<std::string>& tags) const;
+	bool ShouldChangeBridgeState(const std::string& dropletState, const std::string& currentBridgeState) const;
+	const std::string& GetBridgeState(const std::string& value, const std::vector<std::string>& tags) const;
 	std::string ArrayToInputField(const std::vector<std::string>& value) const;
 	std::vector<std::string> InputFieldToArray(const std::string& value) const;
 
