@@ -31,6 +31,7 @@ SOFTWARE.
 
 #include <SDL.h>
 
+#include "bridge.h"
 #include "camera.h"
 #include "geolocationdata.h"
 #include "json.h"
@@ -52,7 +53,6 @@ class WebClient;
 class Window;
 
 using BridgeList = std::list<Bridge*>;
-using BridgeUniquePtr = std::unique_ptr<Bridge>;
 using SettingsUniquePtr = std::unique_ptr<Settings>;
 using ProviderUniquePtr = std::unique_ptr<Provider>;
 using TurbineRepUniquePtr = std::unique_ptr<TurbineRep>;
@@ -85,7 +85,7 @@ public:
 
 	CameraVector GetCameras() const;
 	ProviderVector& GetProviders();
-	void AddBridge(BridgeUniquePtr&& bridge);
+	void AddBridge(BridgeSharedPtr&& bridge);
 	Bridge* GetBridge(const std::string& id);
 	const Bridge* GetBridge(const std::string& id) const;
 	BridgeList GetBridges() const;
@@ -120,7 +120,7 @@ private:
 	WindowUniquePtr m_pSettingsWindow;
 	WindowUniquePtr m_pSummaryWindow;
 	
-	using BridgeMap = std::unordered_map<std::string, BridgeUniquePtr>;
+	using BridgeMap = std::unordered_map<std::string, BridgeSharedPtr>;
 	BridgeMap m_Bridges;
 };
 

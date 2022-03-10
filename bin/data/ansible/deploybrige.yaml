@@ -1,0 +1,6 @@
+---
+- name: Deploy Tor Bridges
+  hosts: "{{ servers }}"
+  become: yes
+  roles:
+    - alphacorvus.ansible_tor_bridge

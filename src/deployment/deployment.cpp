@@ -22,32 +22,39 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-#pragma once
-
-#include <list>
-#include <memory>
-#include <string>
+#include "deployment/deployment.h"
 
 namespace Turbine
 {
 
-class Bridge;
-class Provider;
-using ProviderUniquePtr = std::unique_ptr<Provider>;
-using BridgeList = std::list<Bridge*>;
-
-class Provider
+Deployment::Deployment() :
+m_BridgesChanged(false)
 {
-public:
-	Provider() {}
-	virtual ~Provider() {}
+}
+    
+Deployment::~Deployment()
+{
 
-	virtual void Update(float delta) = 0;
-	virtual void RenderSettings() = 0;
+}
 
-	virtual const std::string& GetName() const = 0;
-	virtual bool IsAuthenticated() const = 0;
-	virtual void CreateBridge(const std::string& name, bool isListed) = 0;
-};
+void Deployment::Update(float delta)
+{
+    if (m_BridgesChanged)
+    {
+        GenerateHostsFile();
+        m_BridgesChanged = false;
+    }
+}
+    
+void Deployment::OnBridgeAdded(BridgeSharedPtr& pBridge)
+{
+    m_Deployments.push_back(pBridge);
+    m_BridgesChanged = true;
+}
+
+void Deployment::GenerateHostsFile()
+{
+
+}
 
 } // namespace Turbine

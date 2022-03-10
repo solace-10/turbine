@@ -35,6 +35,10 @@ namespace Turbine
 class BridgeSummaryWidget;
 using BridgeSummaryWidgetUniquePtr = std::unique_ptr<BridgeSummaryWidget>;
 
+class Bridge;
+using BridgeWeakPtr = std::weak_ptr<Bridge>;
+using BridgeSharedPtr = std::shared_ptr<Bridge>;
+
 class Bridge
 {
 public:

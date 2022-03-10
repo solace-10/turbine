@@ -25,29 +25,31 @@ SOFTWARE.
 #pragma once
 
 #include <list>
-#include <memory>
 #include <string>
+
+#include "bridge.h"
 
 namespace Turbine
 {
 
-class Bridge;
-class Provider;
-using ProviderUniquePtr = std::unique_ptr<Provider>;
-using BridgeList = std::list<Bridge*>;
+class HostsGenerator;
+using HostsGeneratorUniquePtr = std::unique_ptr<HostsGenerator>;
 
-class Provider
+class Deployment
 {
 public:
-	Provider() {}
-	virtual ~Provider() {}
+    Deployment();
+    ~Deployment();
 
-	virtual void Update(float delta) = 0;
-	virtual void RenderSettings() = 0;
+    void Update(float delta);
+    void OnBridgeAdded(BridgeSharedPtr& pBridge);
 
-	virtual const std::string& GetName() const = 0;
-	virtual bool IsAuthenticated() const = 0;
-	virtual void CreateBridge(const std::string& name, bool isListed) = 0;
+private:
+    void GenerateHostsFile();
+
+    using BridgeWeakPtrList = std::list<BridgeWeakPtr>;
+    BridgeWeakPtrList m_Deployments;
+    bool m_BridgesChanged;
 };
 
 } // namespace Turbine

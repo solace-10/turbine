@@ -255,9 +255,11 @@ void Turbine::SetSearching(bool state)
 	}
 }
 
-void Turbine::AddBridge(BridgeUniquePtr&& bridge)
+void Turbine::AddBridge(BridgeSharedPtr&& pBridge)
 {
-	m_Bridges[bridge->GetId()] = std::move(bridge);
+	SDL_assert(m_Bridges.find(pBridge->GetId()) != m_Bridges.end());
+	m_Bridges[pBridge->GetId()] = pBridge;
+	
 }
 
 Bridge* Turbine::GetBridge(const std::string& id)

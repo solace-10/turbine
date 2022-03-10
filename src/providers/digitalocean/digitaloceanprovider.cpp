@@ -353,7 +353,7 @@ void DigitalOceanProvider::UpdateDropletMonitor(float delta)
 							}
 							else
 							{
-								BridgeUniquePtr pBridge = std::make_unique<Bridge>(id, name, status);
+								BridgeSharedPtr pBridge = std::make_shared<Bridge>(id, name, status);
 								g_pTurbine->AddBridge(std::move(pBridge));
 							}
 						}
