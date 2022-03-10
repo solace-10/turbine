@@ -22,13 +22,15 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+#include <array>
+
 #include "bridge.h"
 #include "bridgesummarywidget.h"
 
 namespace Turbine
 {
 
-Bridge::Bridge(const std::string& id, const std::string& name, const std::string& status) :
+Bridge::Bridge(const std::string& id, const std::string& name, Status status) :
 m_Id(id),
 m_Name(name),
 m_Status(status)
@@ -46,12 +48,24 @@ const std::string& Bridge::GetName() const
     return m_Name;
 }
 
-const std::string& Bridge::GetStatus() const
+Bridge::Status Bridge::GetStatus() const
 {
     return m_Status;
 }
+
+const std::string& Bridge::GetStatusText() const
+{
+    static const std::array<std::string, static_cast<size_t>(Status::Count)> sStatusText =
+    {
+        "New",
+        "Deploying",
+        "Active",
+        "Unknown"
+    };
+    return sStatusText[static_cast<size_t>(m_Status)];
+}
     
-void Bridge::SetStatus(const std::string& value)
+void Bridge::SetStatus(Status value)
 {
     m_Status = value;
 }

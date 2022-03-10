@@ -22,7 +22,9 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+#include <iostream>
 #include <sstream>
+#include <vector>
 
 #include "imgui/imgui.h"
 #include "imgui/imgui_stdlib.h"
@@ -136,6 +138,12 @@ void DigitalOceanProvider::RenderSettings()
 	}
 
 	RenderDropletImageSettings();
+
+	static std::string fingerprints = ArrayToInputField(g_pTurbine->GetSettings()->GetDigitalOceanSSHFingerprints());
+	if (ImGui::InputTextMultiline("SSH key fingerprints", &fingerprints))
+	{
+		g_pTurbine->GetSettings()->SetDigitalOceanSSHFingerprints(InputFieldToArray(fingerprints));
+	}
 }
 
 void DigitalOceanProvider::RenderDropletImageSettings()
@@ -183,14 +191,15 @@ bool DigitalOceanProvider::IsAuthenticated() const
 
 void DigitalOceanProvider::CreateBridge(const std::string& name, bool isListed)
 {
+	Settings* pSettings = g_pTurbine->GetSettings();
 	Log::Info("Creating %s bridge '%s'...", isListed ? "listed" : "unlisted", name.c_str());
 	std::string turbineTypeTag = isListed ? "turbine_listed" : "turbine_unlisted";
 	json payload;
 	payload["name"] = name;
 	payload["region"] = "nyc3";
-	payload["size"] = g_pTurbine->GetSettings()->GetDigitalOceanDropletSize();
-	payload["image"] = g_pTurbine->GetSettings()->GetDigitalOceanDropletImage();
-	payload["ssh_keys"] = { "fa:50:a6:d0:48:12:41:a8:0a:c5:31:37:32:1a:ec:b5" };
+	payload["size"] = pSettings->GetDigitalOceanDropletSize();
+	payload["image"] = pSettings->GetDigitalOceanDropletImage();
+	payload["ssh_keys"] = pSettings->GetDigitalOceanSSHFingerprints();
 	payload["ipv6"] = true;
 	payload["tags"] = { "turbine", "turbine_deployment_pending", turbineTypeTag };
 
@@ -344,16 +353,18 @@ void DigitalOceanProvider::UpdateDropletMonitor(float delta)
 							idss << rawId;
 							const std::string& id = idss.str();
 							const std::string& name = droplet["name"].get<std::string>();
-							const std::string& status = droplet["status"].get<std::string>();
+							const std::string& dropletStatus = droplet["status"].get<std::string>();
+							std::vector<std::string> tags = droplet["tags"];
 							
 							Bridge* pExistingBridge = g_pTurbine->GetBridge(id);
+							Bridge::Status bridgeStatus = ToBridgeStatus(dropletStatus, tags);
 							if (pExistingBridge)
 							{
-								pExistingBridge->SetStatus(status);
+								pExistingBridge->SetStatus(bridgeStatus);
 							}
 							else
 							{
-								BridgeSharedPtr pBridge = std::make_shared<Bridge>(id, name, status);
+								BridgeSharedPtr pBridge = std::make_shared<Bridge>(id, name, bridgeStatus);
 								g_pTurbine->AddBridge(std::move(pBridge));
 							}
 						}
@@ -362,6 +373,51 @@ void DigitalOceanProvider::UpdateDropletMonitor(float delta)
 			}
 		);
 	}
+}
+
+Bridge::Status DigitalOceanProvider::ToBridgeStatus(const std::string& value, const std::vector<std::string>& tags) const
+{
+	if (value == "new")
+	{
+		return Bridge::Status::New;
+	}
+	else if (value == "active")
+	{
+		const bool deploying = std::find(tags.begin(), tags.end(), "turbine_deployment_pending") != tags.end();
+		if (deploying)
+		{
+			return Bridge::Status::Deploying;
+		}
+
+		return Bridge::Status::Active;
+	}
+	else
+	{
+		return Bridge::Status::Unknown;
+	}
+}
+
+std::string DigitalOceanProvider::ArrayToInputField(const std::vector<std::string>& value) const
+{
+	std::stringstream ss;
+	for (const std::string& v : value)
+	{
+		ss << v << "\n";
+	}
+	return ss.str();
+}
+
+std::vector<std::string> DigitalOceanProvider::InputFieldToArray(const std::string& value) const
+{
+    const char separator = '\n';
+    std::vector<std::string> v;
+    std::stringstream streamData(value);
+    std::string s;
+    while (std::getline(streamData, s, separator)) 
+	{
+        v.push_back(s);
+    }
+	return v;
 }
 
 } // namespace Turbine

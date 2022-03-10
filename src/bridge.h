@@ -42,19 +42,30 @@ using BridgeSharedPtr = std::shared_ptr<Bridge>;
 class Bridge
 {
 public:
-    Bridge(const std::string& id, const std::string& name, const std::string& status);
+    enum class Status
+    {
+        New,
+        Deploying,
+        Active,
+        Unknown,
+
+        Count
+    };
+
+    Bridge(const std::string& id, const std::string& name, Status status);
 
     const std::string& GetId() const;
     const std::string& GetName() const;
-    const std::string& GetStatus() const;
-    void SetStatus(const std::string& value);
+    Status GetStatus() const;
+    const std::string& GetStatusText() const;
+    void SetStatus(Status value);
 
     void RenderSummaryWidget();
 
 private:
     std::string m_Id;
     std::string m_Name;
-    std::string m_Status;
+    Status m_Status;
     BridgeSummaryWidgetUniquePtr m_pBridgeSummaryWidget;
 };
 

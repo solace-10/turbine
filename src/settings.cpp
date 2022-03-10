@@ -85,7 +85,8 @@ void Settings::Save()
 			{ "digital_ocean", {
 				{"api_key", m_DigitalOceanAPIKey },
 				{"droplet_size", m_DigitalOceanDropletSize },
-				{"droplet_image", m_DigitalOceanDropletImage }
+				{"droplet_image", m_DigitalOceanDropletImage },
+				{"ssh_fingerprints", m_DigitalOceanSSHFingerprints }
 			}}
 		}}
 	};
@@ -129,6 +130,12 @@ void Settings::Load()
 				if (it != digitalOcean.end() && it->is_string())
 				{
 					m_DigitalOceanDropletImage = it->get<std::string>();
+				}
+
+				it = digitalOcean.find("ssh_fingerprints");
+				if (it != digitalOcean.end() && it->is_array())
+				{
+					m_DigitalOceanSSHFingerprints = it->get<std::vector<std::string>>();
 				}
 			}
 		}
