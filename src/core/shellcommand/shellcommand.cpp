@@ -26,10 +26,10 @@ SOFTWARE.
 #include "core/shellcommand/shellcommandimpl.hpp"
 #include "core/platform.hpp"
 
-#ifdef TARGET_PLATFORM_LINUX
+#if defined(TARGET_PLATFORM_LINUX)
 #include "core/shellcommand/linux/shellcommandlinux.h"
-#else
-#include "core/shellcommand/null/shellcommandnull.h"
+#elif defined(TARGET_PLATFORM_WINDOWS)
+#include "core/shellcommand/windows/shellcommandwindows.h"
 #endif
 
 namespace Turbine 
@@ -37,10 +37,12 @@ namespace Turbine
 
 ShellCommand::ShellCommand(const std::string& command, ShellCommandOnCompletionCallback completionCallback, ShellCommandOnOutputCallback outputCallback)
 {
-#ifdef TARGET_PLATFORM_LINUX
+#if defined(TARGET_PLATFORM_LINUX)
     m_pImpl = std::make_unique<ShellCommandLinux>(command, completionCallback, outputCallback);
+#elif defined(TARGET_PLATFORM_WINDOWS)
+    m_pImpl = std::make_unique<ShellCommandWindows>(command, completionCallback, outputCallback);
 #else
-    m_pImpl = std::make_unique<ShellCommandNull(command, completionCallback, outputCallback);
+    static_assert(false); // NOT IMPLEMENTED
 #endif
 }
 

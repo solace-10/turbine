@@ -26,14 +26,7 @@ SOFTWARE.
 
 #include "core/platform.hpp"
 
-#if defined(TARGET_PLATFORM_LINUX)
-
-#include <array>
-#include <memory>
-#include <string>
-
-#include <sys/types.h>
-#include <unistd.h>
+#if defined(TARGET_PLATFORM_WINDOWS)
 
 #include "core/shellcommand/shellcommand.hpp"
 #include "core/shellcommand/shellcommandimpl.hpp"
@@ -41,31 +34,18 @@ SOFTWARE.
 namespace Turbine 
 {
 
-class ShellCommandLinux : public ShellCommandImpl
+class ShellCommandWindows : public ShellCommandImpl
 {
 public:
-	ShellCommandLinux(const std::string& command, ShellCommandOnCompletionCallback completionCallback = nullptr, ShellCommandOnOutputCallback outputCallback = nullptr);
-	~ShellCommandLinux();
+	ShellCommandWindows(const std::string& command, ShellCommandOnCompletionCallback completionCallback = nullptr, ShellCommandOnOutputCallback outputCallback = nullptr);
+	~ShellCommandWindows();
 
 	virtual void Run() override;
 	virtual void Update() override;
 	virtual ShellCommand::State GetState() const override;
 	virtual const std::vector<std::string>& GetOutput() const override;
-
-private:
-	void AddLineToOutput();
-	ShellCommand::State m_State;
-	ShellCommandOnCompletionCallback m_CompletionCallback;
-	ShellCommandOnOutputCallback m_OutputCallback;
-	std::string m_Command;
-	std::array<char, 1024> m_LineBuffer;
-	size_t m_LineBufferIndex;
-	std::vector<std::string> m_Output;
-
-	pid_t m_Pid;
-	int m_Pipe[2];
 };
 
 } // namespace Turbine
 
-#endif // TARGET_PLATFORM_LINUX
+#endif // TARGET_PLATFORM_WINDOWS
