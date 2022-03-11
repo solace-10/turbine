@@ -21,3 +21,26 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
+
+#include "providers/provider.h"
+
+namespace Turbine
+{
+
+void Provider::GetRandomTorPorts(int& orPort, int& extPort) const
+{
+	orPort = extPort = GetRandomPort();
+	while (orPort == extPort)
+	{
+		extPort = GetRandomPort();
+	}
+}
+
+int Provider::GetRandomPort() const
+{
+	const int minPort = 1025;
+	const int maxPort = 65535;
+	return rand() % (maxPort - minPort) + minPort;
+}
+
+} // namespace Turbine

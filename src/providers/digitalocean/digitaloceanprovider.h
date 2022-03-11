@@ -68,6 +68,7 @@ private:
 	std::string ArrayToInputField(const std::vector<std::string>& value) const;
 	std::vector<std::string> InputFieldToArray(const std::string& value) const;
 	std::string ExtractIP(const nlohmann::json& droplet, const std::string& ipVersion) const;
+	void CreateTorPortTags(std::string& orPort, std::string& extPort) const;
 
 	std::string m_Name;
 	std::string m_APIKey;

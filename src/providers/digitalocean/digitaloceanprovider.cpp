@@ -194,6 +194,8 @@ void DigitalOceanProvider::CreateBridge(const std::string& name, bool isListed)
 	Settings* pSettings = g_pTurbine->GetSettings();
 	Log::Info("Creating %s bridge '%s'...", isListed ? "listed" : "unlisted", name.c_str());
 	std::string turbineTypeTag = isListed ? "turbine_listed" : "turbine_unlisted";
+	std::string turbineORPortTag, turbineExtPortTag;
+	CreateTorPortTags(turbineORPortTag, turbineExtPortTag);
 	json payload;
 	payload["name"] = name;
 	payload["region"] = "nyc3";
@@ -201,7 +203,7 @@ void DigitalOceanProvider::CreateBridge(const std::string& name, bool isListed)
 	payload["image"] = pSettings->GetDigitalOceanDropletImage();
 	payload["ssh_keys"] = pSettings->GetDigitalOceanSSHFingerprints();
 	payload["ipv6"] = true;
-	payload["tags"] = { "turbine", "turbine_deployment_pending", turbineTypeTag };
+	payload["tags"] = { "turbine", "turbine_deployment_pending", turbineTypeTag, turbineORPortTag, turbineExtPortTag };
 
 	const std::string rawPayload = payload.dump();
 	g_pTurbine->GetWebClient()->Post("https://api.digitalocean.com/v2/droplets", m_Headers, rawPayload,
@@ -478,6 +480,20 @@ std::vector<std::string> DigitalOceanProvider::InputFieldToArray(const std::stri
         v.push_back(s);
     }
 	return v;
+}
+
+void DigitalOceanProvider::CreateTorPortTags(std::string& orPortTag, std::string& extPortTag) const
+{
+	int orPort, extPort;
+	GetRandomTorPorts(orPort, extPort);
+
+	std::stringstream orPortTagStream;
+	orPortTagStream << "turbine_orport_" << orPort;
+	orPortTag = orPortTagStream.str();
+
+	std::stringstream extPortTagStream;
+	extPortTagStream << "turbine_extport_" << extPort;
+	extPortTag = extPortTagStream.str();
 }
 
 } // namespace Turbine
