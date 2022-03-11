@@ -35,7 +35,7 @@ SOFTWARE.
 #include <signal.h>
 #include <string.h>
 
-#include "core/shellcommand/linux/shellcommandlinux.h"
+#include "core/shellcommand/linux/shellcommandlinux.hpp"
 #include "log.h"
 
 namespace Turbine 

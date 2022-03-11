@@ -27,9 +27,9 @@ SOFTWARE.
 #include "core/platform.hpp"
 
 #if defined(TARGET_PLATFORM_LINUX)
-#include "core/shellcommand/linux/shellcommandlinux.h"
+#include "core/shellcommand/linux/shellcommandlinux.hpp"
 #elif defined(TARGET_PLATFORM_WINDOWS)
-#include "core/shellcommand/windows/shellcommandwindows.h"
+#include "core/shellcommand/windows/shellcommandwindows.hpp"
 #endif
 
 namespace Turbine 
