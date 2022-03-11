@@ -401,10 +401,21 @@ std::string DigitalOceanProvider::ExtractIP(const nlohmann::json& droplet, const
 			const json& version = *it;
 			if (version.is_array() && version.size() > 0)
 			{
-				it = version[0].find("ip_address");
-				if (it != version[0].end())
+				const size_t numAddresses = version.size();
+				for (size_t i = 0; i < numAddresses; ++i)
 				{
-					return it->get<std::string>();
+					const json& address = version[i];
+					it = address.find("type");
+					if (it == address.end() || it->is_string() == false || it->get<std::string>() != "public")
+					{
+						continue;
+					}
+
+					it = address.find("ip_address");
+					if (it != address.end())
+					{
+						return it->get<std::string>();
+					}
 				}
 			}
 		}
