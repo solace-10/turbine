@@ -41,6 +41,8 @@ class DigitalOceanProvider;
 using DigitalOceanProviderUniquePtr = std::unique_ptr<DigitalOceanProvider>;
 class DropletInfo;
 class ImageInfo;
+class FirewallManager;
+using FirewallManagerUniquePtr = std::unique_ptr<FirewallManager>;
 
 class DigitalOceanProvider : public Provider
 {
@@ -83,6 +85,7 @@ private:
 	ImagesVector m_Images;
 
 	float m_DropletMonitorTimer;
+	FirewallManagerUniquePtr m_pFirewallManager;
 };
 
 } // namespace Turbine

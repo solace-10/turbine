@@ -31,6 +31,7 @@ SOFTWARE.
 #include "imgui/imgui_stdlib.h"
 #include "providers/digitalocean/digitaloceanprovider.h"
 #include "providers/digitalocean/dropletinfo.h"
+#include "providers/digitalocean/firewallmanager.hpp"
 #include "providers/digitalocean/imageinfo.h"
 #include "webclient/webclient.h"
 #include "log.h"
@@ -47,7 +48,7 @@ DigitalOceanProvider::DigitalOceanProvider() :
 	m_AuthenticationInFlight(false),
 	m_DropletMonitorTimer(0.0f)
 {
-	
+	m_pFirewallManager = std::make_unique<FirewallManager>();
 }
 
 DigitalOceanProvider::~DigitalOceanProvider()
@@ -70,6 +71,7 @@ void DigitalOceanProvider::Update(float delta)
 	else
 	{
 		UpdateDropletMonitor(delta);
+		m_pFirewallManager->Update(delta, m_Headers);
 	}
 }
 
@@ -379,6 +381,7 @@ void DigitalOceanProvider::UpdateDropletMonitor(float delta)
 								BridgeSharedPtr pBridge = std::make_shared<Bridge>(id, name, initialState);
 								pBridge->SetIPv4(ipv4);
 								pBridge->SetIPv6(ipv6);
+								m_pFirewallManager->AddBridge(pBridge);
 								g_pTurbine->AddBridge(std::move(pBridge));
 							}
 						}

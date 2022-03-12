@@ -24,11 +24,18 @@ SOFTWARE.
 
 #pragma once
 
+#include <memory>
 #include <string>
 #include <vector>
 
+#include "webclient/webclient.h"
+
 namespace Turbine
 {
+
+class Bridge;
+using BridgeWeakPtr = std::weak_ptr<Bridge>;
+using BridgeSharedPtr = std::shared_ptr<Bridge>;
 
 class FirewallManager
 {
@@ -36,8 +43,30 @@ public:
 	FirewallManager();
 	~FirewallManager();
 
+	void AddBridge(const BridgeSharedPtr& pBridge);
+	void Update(float delta, const WebClient::Headers& headers);
+
 private:
-	
+	enum class State
+	{
+		Unknown, // We have a droplet, but don't know if there is a firewall associated with it or not.
+		Missing, // We have a droplet with no firewall associated. The bridge won't be able to communicate. 
+		Installing, // A request has been made to setup a firewall.
+		Installed // A firewall is in place.
+	};
+
+	struct Firewall
+	{
+		BridgeWeakPtr m_pBridge;
+		State m_State;
+	};
+
+	void RefreshFirewalls();
+	void InstallFirewall(const Firewall& firewall);
+
+	std::vector<Firewall> m_Firewalls;
+	bool m_RefreshFirewalls;
+	WebClient::Headers m_Headers;
 };
 
 } // namespace Turbine
