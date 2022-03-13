@@ -91,33 +91,40 @@ void FirewallManager::RefreshFirewalls()
                     BridgeSharedPtr pBridge = firewall.m_pBridge.lock();
                     if (pBridge != nullptr)
                     {
-                        // const size_t numFirewallResponses = firewallsResponse.size();
-                        // for (size_t i = 0; i < numFirewallResponses; ++i)
-                        // {
-                        //     if (firewallsResponse[i]["name"] == pBridge->GetName())
-                        //     {
-                        //         it = firewallsResponse[i];
-                        //     }
-                        // }
+                        bool found = false;
+                        size_t idx = 0;
+                        const size_t numFirewallResponses = firewallsResponse.size();
+                        for (; idx < numFirewallResponses; ++idx)
+                        {
+                            if (firewallsResponse[idx]["name"] == pBridge->GetName())
+                            {
+                                found = true;
+                                break;
+                            }
+                        }
 
-                        it = firewallsResponse.find(pBridge->GetName());
-                        if (it == firewallsResponse.end() && firewall.m_State == State::Unknown)
+                        if (!found && firewall.m_State == State::Unknown)
                         {
                             firewall.m_State = State::Missing;
                             this->InstallFirewall(firewall);
                         }
-                        else if (it != firewallsResponse.end())
+                        else if (found)
                         {
-                            const std::string status = (*it)["status"].get<std::string>();
+                            const std::string status = firewallsResponse[idx]["status"].get<std::string>();
                             if (status == "succeeded")
                             {
+                                // No need to show the log if it was previously installed.
+                                if (firewall.m_State == State::Installing)
+                                {
+                                    Log::Info("Installed firewall on bridge %s.", pBridge->GetName().c_str());
+                                }
+
                                 firewall.m_State = State::Installed;
-                                Log::Info("Installed firewall on bridge %s.", pBridge->GetName().c_str());
                             }
                             else if (status == "failed")
                             {
-                                firewall.m_State = State::InstallationFailed;
                                 Log::Error("Installation failed on bridge '%s'.", pBridge->GetName().c_str());
+                                firewall.m_State = State::InstallationFailed;
                             }
                         }
                     }
