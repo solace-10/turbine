@@ -52,7 +52,8 @@ private:
 		Unknown, // We have a droplet, but don't know if there is a firewall associated with it or not.
 		Missing, // We have a droplet with no firewall associated. The bridge won't be able to communicate. 
 		Installing, // A request has been made to setup a firewall.
-		Installed // A firewall is in place.
+		Installed, // A firewall is in place.
+		InstallationFailed
 	};
 
 	struct Firewall
@@ -62,10 +63,10 @@ private:
 	};
 
 	void RefreshFirewalls();
-	void InstallFirewall(const Firewall& firewall);
+	void InstallFirewall(Firewall& firewall);
 
 	std::vector<Firewall> m_Firewalls;
-	bool m_RefreshFirewalls;
+	float m_RefreshTimer;
 	WebClient::Headers m_Headers;
 };
 

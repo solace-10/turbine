@@ -34,7 +34,7 @@ SOFTWARE.
 #include "bridge/bridge.h"
 #include "camera.h"
 #include "geolocationdata.h"
-#include "json.h"
+#include "json.hpp"
 #include "log.h"
 
 using json = nlohmann::json;

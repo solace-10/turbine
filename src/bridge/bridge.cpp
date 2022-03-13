@@ -35,7 +35,9 @@ namespace Turbine
 
 Bridge::Bridge(const std::string& id, const std::string& name, const std::string& initialState) :
 m_Id(id),
-m_Name(name)
+m_Name(name),
+m_ORPort(0),
+m_ExtPort(0)
 {
     m_pBridgeSummaryWidget = std::make_unique<BridgeSummaryWidget>();
     m_pStateMachine = std::make_unique<StateMachine>(name);
@@ -93,6 +95,26 @@ void Bridge::SetIPv6(const std::string& ip)
         m_Ipv6 = ip;
         g_pTurbine->GetDeployment()->OnBridgeIpChanged();
     }
+}
+
+unsigned int Bridge::GetORPort() const
+{
+    return m_ORPort;
+}
+
+unsigned int Bridge::GetExtPort() const
+{
+    return m_ExtPort;
+}
+
+void Bridge::SetORPort(unsigned int port)
+{
+    m_ORPort = port;
+}
+
+void Bridge::SetExtPort(unsigned int port)
+{
+    m_ExtPort = port;
 }
 
 void Bridge::RenderSummaryWidget()

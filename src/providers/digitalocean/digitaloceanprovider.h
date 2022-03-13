@@ -29,7 +29,7 @@ SOFTWARE.
 #include <string>
 #include <vector>
 
-#include "ext/json.h"
+#include "ext/json.hpp"
 #include "bridge/bridge.h"
 #include "providers/provider.h"
 #include "webclient/webclient.h"
@@ -71,6 +71,9 @@ private:
 	std::vector<std::string> InputFieldToArray(const std::string& value) const;
 	std::string ExtractIP(const nlohmann::json& droplet, const std::string& ipVersion) const;
 	void CreateTorPortTags(std::string& orPort, std::string& extPort) const;
+	unsigned int ExtractORPort(const std::vector<std::string>& tags) const;
+	unsigned int ExtractExtPort(const std::vector<std::string>& tags) const;
+	unsigned int ExtractPort(const std::vector<std::string>& tags, const std::string& beginsWith) const;
 
 	std::string m_Name;
 	std::string m_APIKey;

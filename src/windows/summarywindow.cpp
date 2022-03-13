@@ -27,7 +27,7 @@ SOFTWARE.
 
 #include "imgui/imgui.h"
 #include "imgui/imgui_stdlib.h"
-#include "json.h"
+#include "json.hpp"
 
 #include "bridge/bridge.h"
 #include "providers/provider.h"

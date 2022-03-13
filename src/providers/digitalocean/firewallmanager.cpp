@@ -22,6 +22,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+#include <sstream>
+
 #include "bridge/bridge.h"
 #include "providers/digitalocean/firewallmanager.hpp"
 #include "turbine.h"
@@ -30,7 +32,7 @@ namespace Turbine
 {
 
 FirewallManager::FirewallManager() :
-m_RefreshFirewalls(false)
+m_RefreshTimer(0.0f)
 {
 
 }
@@ -50,7 +52,7 @@ void FirewallManager::AddBridge(const BridgeSharedPtr& pBridge)
     firewall.m_pBridge = pBridge;
     firewall.m_State = State::Unknown;
     m_Firewalls.push_back(std::move(firewall));
-    m_RefreshFirewalls = true;
+    m_RefreshTimer = 0.0f;
 }
 
 // This should only be called if we are authenticated with Digital Ocean.
@@ -58,10 +60,10 @@ void FirewallManager::Update(float delta, const WebClient::Headers& headers)
 {
     m_Headers = headers;
 
-    if (m_RefreshFirewalls)
+    if (m_RefreshTimer <= 0.0f)
     {
         RefreshFirewalls();       
-        m_RefreshFirewalls = false;
+        m_RefreshTimer = 60.0f;
     }
 
     for (auto& firewall : m_Firewalls)
@@ -81,14 +83,101 @@ void FirewallManager::RefreshFirewalls()
         {
             json data = json::parse(result.GetData());
             json::const_iterator it = data.find("firewalls");
-            int a = 0;
+            if (it != data.end())
+            {
+                const json& firewallsResponse = *it;
+                for (Firewall& firewall : this->m_Firewalls)
+                {
+                    BridgeSharedPtr pBridge = firewall.m_pBridge.lock();
+                    if (pBridge != nullptr)
+                    {
+                        // const size_t numFirewallResponses = firewallsResponse.size();
+                        // for (size_t i = 0; i < numFirewallResponses; ++i)
+                        // {
+                        //     if (firewallsResponse[i]["name"] == pBridge->GetName())
+                        //     {
+                        //         it = firewallsResponse[i];
+                        //     }
+                        // }
+
+                        it = firewallsResponse.find(pBridge->GetName());
+                        if (it == firewallsResponse.end() && firewall.m_State == State::Unknown)
+                        {
+                            firewall.m_State = State::Missing;
+                            this->InstallFirewall(firewall);
+                        }
+                        else if (it != firewallsResponse.end())
+                        {
+                            const std::string status = (*it)["status"].get<std::string>();
+                            if (status == "succeeded")
+                            {
+                                firewall.m_State = State::Installed;
+                                Log::Info("Installed firewall on bridge %s.", pBridge->GetName().c_str());
+                            }
+                            else if (status == "failed")
+                            {
+                                firewall.m_State = State::InstallationFailed;
+                                Log::Error("Installation failed on bridge '%s'.", pBridge->GetName().c_str());
+                            }
+                        }
+                    }
+                }
+            }
+            else
+            {
+                if (data.find("message") != data.end())
+                {
+                    Log::Error("Error while refreshing Digital Ocean firewalls: %s.", data["message"].get<std::string>().c_str());
+                }
+                else
+                {
+                    Log::Error("Error while refreshing Digital Ocean firewalls: unknown error.");
+                }
+            }
         }
     );
 }
 
-void FirewallManager::InstallFirewall(const Firewall& firewall)
+void FirewallManager::InstallFirewall(Firewall& firewall)
 {
+    firewall.m_State = State::Installing;
+    BridgeSharedPtr pBridge = firewall.m_pBridge.lock();
+    Log::Info("Setting up firewall for %s.", pBridge->GetName().c_str());
 
+    std::stringstream orPort, extPort;
+    orPort << pBridge->GetORPort();
+    extPort << pBridge->GetExtPort();
+
+    nlohmann::ordered_json payload = json::object();
+    payload["name"] = pBridge->GetName();
+    payload["droplet_ids"] = { pBridge->GetId() };
+    json sources;
+    sources["addresses"] = { "0.0.0.0/8" };
+    json inboundRuleORPort = json::object();
+    inboundRuleORPort["protocol"] = "tcp";
+    inboundRuleORPort["ports"] = orPort.str();
+    inboundRuleORPort["sources"] = sources;
+    json inboundRuleExtPort = json::object();
+    inboundRuleExtPort["protocol"] = "tcp";
+    inboundRuleExtPort["ports"] = extPort.str();
+    inboundRuleExtPort["sources"] = sources;
+    payload["inbound_rules"] = { inboundRuleORPort, inboundRuleExtPort };
+
+    const std::string rawPayload = payload.dump();
+	g_pTurbine->GetWebClient()->Post("https://api.digitalocean.com/v2/firewalls", m_Headers, rawPayload,
+		[this](const WebClientRequestResult& result)
+		{
+            json data = json::parse(result.GetData());
+            json::const_iterator it = data.find("id");
+            if (it != data.end())
+            {
+                Log::Error("Error installing firewall: (%s) %s", 
+                    data["id"].get<std::string>().c_str(), 
+                    data["message"].get<std::string>().c_str()
+                );
+            }
+		}
+	);
 }
 
 } // namespace Turbine

@@ -32,7 +32,7 @@ SOFTWARE.
 
 #include "bridge/bridge.h"
 #include "deployment/deployment.h"
-#include "ext/json.h"
+#include "ext/json.hpp"
 #include "imgui/imgui.h"
 #include "providers/digitalocean/digitaloceanprovider.h"
 #include "tasks/googlesearch/googlesearch.h"

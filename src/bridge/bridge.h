@@ -55,6 +55,10 @@ public:
     const std::string& GetIPv6() const;
     void SetIPv4(const std::string& ip);
     void SetIPv6(const std::string& ip);
+    unsigned int GetORPort() const;
+    unsigned int GetExtPort() const;
+    void SetORPort(unsigned int port);
+    void SetExtPort(unsigned int port);
     void SetState(const std::string& state, bool force = false);
 
     void RenderSummaryWidget();
@@ -68,6 +72,8 @@ private:
     StateMachineUniquePtr m_pStateMachine;
     std::string m_Ipv4;
     std::string m_Ipv6;
+    unsigned int m_ORPort;
+    unsigned int m_ExtPort;
 };
 
 } // namespace Turbine

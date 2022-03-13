@@ -35,7 +35,7 @@ SOFTWARE.
 #include "providers/digitalocean/imageinfo.h"
 #include "webclient/webclient.h"
 #include "log.h"
-#include "json.h"
+#include "json.hpp"
 #include "settings.h"
 #include "turbine.h"
 
@@ -381,6 +381,8 @@ void DigitalOceanProvider::UpdateDropletMonitor(float delta)
 								BridgeSharedPtr pBridge = std::make_shared<Bridge>(id, name, initialState);
 								pBridge->SetIPv4(ipv4);
 								pBridge->SetIPv6(ipv6);
+								pBridge->SetORPort(this->ExtractORPort(tags));
+								pBridge->SetExtPort(this->ExtractExtPort(tags));
 								m_pFirewallManager->AddBridge(pBridge);
 								g_pTurbine->AddBridge(std::move(pBridge));
 							}
@@ -508,6 +510,31 @@ void DigitalOceanProvider::CreateTorPortTags(std::string& orPortTag, std::string
 	std::stringstream extPortTagStream;
 	extPortTagStream << "turbine_extport_" << extPort;
 	extPortTag = extPortTagStream.str();
+}
+
+unsigned int DigitalOceanProvider::ExtractORPort(const std::vector<std::string>& tags) const
+{
+	return ExtractPort(tags, "turbine_orport_");
+}
+
+unsigned int DigitalOceanProvider::ExtractExtPort(const std::vector<std::string>& tags) const
+{
+	return ExtractPort(tags, "turbine_extport_");
+}
+
+unsigned int DigitalOceanProvider::ExtractPort(const std::vector<std::string>& tags, const std::string& beginsWith) const
+{
+	unsigned int port = 0;
+	for (const std::string& tag : tags)
+	{
+		if (tag.rfind(beginsWith, 0) == 0)
+		{
+			std::stringstream ss(tag.substr(beginsWith.size()));
+			ss >> port;
+			break;
+		}
+	}
+	return port;
 }
 
 } // namespace Turbine

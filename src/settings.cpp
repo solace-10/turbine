@@ -38,7 +38,7 @@ SOFTWARE.
 #include <fstream>
 #include <string>
 #include <SDL.h>
-#include "ext/json.h"
+#include "ext/json.hpp"
 #include "settings.h"
 
 namespace Turbine

@@ -26,7 +26,7 @@ SOFTWARE.
 
 #include <memory>
 #include "ipaddress.h"
-#include "json.h"
+#include "json.hpp"
 using json = nlohmann::json;
 
 namespace Turbine
