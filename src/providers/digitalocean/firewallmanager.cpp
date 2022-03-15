@@ -159,16 +159,24 @@ void FirewallManager::InstallFirewall(Firewall& firewall)
     payload["name"] = pBridge->GetName();
     payload["droplet_ids"] = { pBridge->GetId() };
     json sources;
-    sources["addresses"] = { "0.0.0.0/8" };
+    sources["addresses"] = { "0.0.0.0/0", "::/0" };
+
+    json inboundRuleSSHPort = json::object();
+    inboundRuleSSHPort["protocol"] = "tcp";
+    inboundRuleSSHPort["ports"] = "22";
+    inboundRuleSSHPort["sources"] = sources;
+    
     json inboundRuleORPort = json::object();
     inboundRuleORPort["protocol"] = "tcp";
     inboundRuleORPort["ports"] = orPort.str();
     inboundRuleORPort["sources"] = sources;
+
     json inboundRuleExtPort = json::object();
     inboundRuleExtPort["protocol"] = "tcp";
     inboundRuleExtPort["ports"] = extPort.str();
     inboundRuleExtPort["sources"] = sources;
-    payload["inbound_rules"] = { inboundRuleORPort, inboundRuleExtPort };
+
+    payload["inbound_rules"] = { inboundRuleSSHPort, inboundRuleORPort, inboundRuleExtPort };
 
     const std::string rawPayload = payload.dump();
 	g_pTurbine->GetWebClient()->Post("https://api.digitalocean.com/v2/firewalls", m_Headers, rawPayload,

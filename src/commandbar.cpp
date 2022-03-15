@@ -67,6 +67,13 @@ void CommandBar::Render()
 				{
 					m_ShowAtlasTileStreamer = !m_ShowAtlasTileStreamer;
 				}
+
+                bool deploymentWindowOpen = g_pTurbine->GetDeploymentWindow()->IsOpen();
+                if (ImGui::MenuItem("Deployments", nullptr, &deploymentWindowOpen))
+                {
+                    g_pTurbine->GetDeploymentWindow()->Show(deploymentWindowOpen);
+                }
+
 				if (ImGui::MenuItem("ImGui demo window", nullptr, m_ShowDemoWindow))
 				{
 					m_ShowDemoWindow = !m_ShowDemoWindow;

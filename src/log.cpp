@@ -104,12 +104,6 @@ void Log::Error( const char* format, ... )
     vsnprintf( m_VABuffer.data(), m_VABuffer.size(), format, args );
     LogInternal( m_VABuffer.data(), LogLevel::Error );
     va_end( args );
-
-#ifdef _WIN32
-	__debugbreak();
-#else
-    asm("int $3");
-#endif
 }
 
 

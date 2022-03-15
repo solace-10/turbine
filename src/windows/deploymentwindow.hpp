@@ -24,42 +24,24 @@ SOFTWARE.
 
 #pragma once
 
-#include <list>
 #include <string>
 
-#include "bridge/bridge.h"
+#include "windows/window.h"
 
 namespace Turbine
 {
 
-class HostsGenerator;
-using HostsGeneratorUniquePtr = std::unique_ptr<HostsGenerator>;
-class ShellCommand;
-using ShellCommandUniquePtr = std::unique_ptr<ShellCommand>;
-
-class Deployment
+class DeploymentWindow : public Window
 {
 public:
-    Deployment();
-    ~Deployment();
+	DeploymentWindow();
+	virtual void Render() override;
+	virtual void OnOpen() override;
 
-    void Update(float delta);
-    void OnBridgeAdded(BridgeSharedPtr& pBridge);
-    void OnBridgeIpChanged();
+    void AddOutput(const std::string& output);
 
 private:
-    using BridgeWeakPtrList = std::list<BridgeWeakPtr>;
-
-    void GenerateHostsFile();
-    BridgeWeakPtrList GetPendingDeployments() const;
-    void ExecuteDeployments(const BridgeWeakPtrList& pendingDeployments);
-    std::string GetAnsibleCommand() const;
-    void OnDeploymentComplete(int result);
-    void OnDeploymentOutput(const std::string& output);
-
-    BridgeWeakPtrList m_Deployments;
-    bool m_BridgesChanged;
-    ShellCommandUniquePtr m_pAnsibleCommand;
+    std::string m_Output;
 };
 
 } // namespace Turbine

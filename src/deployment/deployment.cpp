@@ -26,7 +26,9 @@ SOFTWARE.
 #include <fstream>
 
 #include "bridge/bridge.h"
+#include "core/shellcommand/shellcommand.hpp"
 #include "deployment/deployment.h"
+#include "windows/deploymentwindow.hpp"
 #include "settings.h"
 #include "turbine.h"
 
@@ -50,8 +52,53 @@ void Deployment::Update(float delta)
         GenerateHostsFile();
         m_BridgesChanged = false;
     }
+
+    BridgeWeakPtrList pendingDeployments = GetPendingDeployments();
+    if (m_pAnsibleCommand == nullptr && pendingDeployments.size() > 0)
+    {
+        ExecuteDeployments(pendingDeployments);
+    }
+    else if (m_pAnsibleCommand)
+    {
+        m_pAnsibleCommand->Update();
+        if (m_pAnsibleCommand->GetState() == ShellCommand::State::Completed)
+        {
+            m_pAnsibleCommand = nullptr;
+        }
+        else if (m_pAnsibleCommand->GetState() == ShellCommand::State::FailedToRun)
+        {
+            Log::Error("Deployment command failed.");
+            m_pAnsibleCommand = nullptr;
+        }
+    }
 }
-    
+
+void Deployment::ExecuteDeployments(const BridgeWeakPtrList& pendingDeployments)
+{
+    for (auto& pPendingDeployment : pendingDeployments)
+    {
+        BridgeSharedPtr pBridge = pPendingDeployment.lock();
+        if (pBridge)
+        {
+            pBridge->SetState("Deploying");
+        }
+    }
+
+    m_pAnsibleCommand = std::make_unique<ShellCommand>(
+        GetAnsibleCommand(),
+        std::bind(&Deployment::OnDeploymentComplete, this, std::placeholders::_1),
+        std::bind(&Deployment::OnDeploymentOutput, this, std::placeholders::_1)
+    );
+    m_pAnsibleCommand->Run();
+}
+
+std::string Deployment::GetAnsibleCommand() const
+{
+    std::stringstream cmd;
+    cmd << "/home/hostilenode/.local/bin/ansible-playbook -i /home/hostilenode/.local/share/turbine/ansiblehosts /home/hostilenode/Dev/turbine/bin/data/ansible/deploybrige.yaml -e '{\"servers\": [\"all\"]}'";
+    return cmd.str();
+}
+
 void Deployment::OnBridgeAdded(BridgeSharedPtr& pBridge)
 {
     m_Deployments.push_back(pBridge);
@@ -84,16 +131,47 @@ void Deployment::GenerateHostsFile()
 				file << "[" << pBridge->GetName() << "]\n";
                 if (pBridge->GetIPv4().empty() == false)
                 {
-                    file << pBridge->GetIPv4() << "\n\n";
+                    file << pBridge->GetIPv4();
                 }
                 else
                 {
-                    file << pBridge->GetIPv6() << "\n\n";
+                    file << pBridge->GetIPv6();
                 }
+
+                file << " tor_port=" << pBridge->GetORPort();
+                file << " obfs4_port=" << pBridge->GetExtPort();
+                file << "\n\n";
 			}
 		}
         file.close();
     }
+}
+
+Deployment::BridgeWeakPtrList Deployment::GetPendingDeployments() const
+{
+    BridgeWeakPtrList pendingDeployments;
+
+    for (auto& pDeployment : m_Deployments)
+    {
+        BridgeSharedPtr pBridge = pDeployment.lock();
+        if (pBridge && pBridge->GetState() == "Deployment pending")
+        {
+            pendingDeployments.push_back(pDeployment);
+        }
+    }
+
+    return pendingDeployments;
+}
+
+void Deployment::OnDeploymentComplete(int result)
+{
+    int a = 0;
+}
+
+void Deployment::OnDeploymentOutput(const std::string& output)
+{
+    DeploymentWindow* pWindow = reinterpret_cast<DeploymentWindow*>(g_pTurbine->GetDeploymentWindow());
+    pWindow->AddOutput(output + "\n");
 }
 
 } // namespace Turbine

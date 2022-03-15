@@ -81,6 +81,7 @@ public:
 	WebClient* GetWebClient();
 	Window* GetBridgesWindow();
 	Window* GetCreateBridgeWindow();
+	Window* GetDeploymentWindow();
 	Window* GetSettingsWindow();
 
 	void OnMessageReceived(const json& message);
@@ -120,6 +121,7 @@ private:
 	std::shared_ptr<NotificationLogger> m_pNotificationLogger;
 	WindowUniquePtr m_pBridgesWindow;
 	WindowUniquePtr m_pCreateBridgeWindow;
+	WindowUniquePtr m_pDeploymentWindow;
 	WindowUniquePtr m_pSettingsWindow;
 	WindowUniquePtr m_pSummaryWindow;
 	
@@ -174,6 +176,11 @@ inline Window* Turbine::GetBridgesWindow()
 inline Window* Turbine::GetCreateBridgeWindow()
 {
 	return m_pCreateBridgeWindow.get();
+}
+
+inline Window* Turbine::GetDeploymentWindow()
+{
+	return m_pDeploymentWindow.get();
 }
 
 inline Window* Turbine::GetSettingsWindow()

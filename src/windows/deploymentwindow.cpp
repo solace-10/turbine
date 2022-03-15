@@ -22,44 +22,45 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-#pragma once
+#include "imgui/imgui.h"
+#include "imgui/imgui_stdlib.h"
 
-#include <list>
-#include <string>
-
-#include "bridge/bridge.h"
+#include "windows/deploymentwindow.hpp"
 
 namespace Turbine
 {
 
-class HostsGenerator;
-using HostsGeneratorUniquePtr = std::unique_ptr<HostsGenerator>;
-class ShellCommand;
-using ShellCommandUniquePtr = std::unique_ptr<ShellCommand>;
-
-class Deployment
+DeploymentWindow::DeploymentWindow()
 {
-public:
-    Deployment();
-    ~Deployment();
+}
 
-    void Update(float delta);
-    void OnBridgeAdded(BridgeSharedPtr& pBridge);
-    void OnBridgeIpChanged();
+void DeploymentWindow::Render()
+{
+	if (IsOpen() == false)
+	{
+		return;
+	}
 
-private:
-    using BridgeWeakPtrList = std::list<BridgeWeakPtr>;
+	ImGui::SetNextWindowSize(ImVec2(650, 400), ImGuiCond_FirstUseEver);
+	if (!ImGui::Begin("Deployments", &m_IsOpen))
+	{
+		ImGui::End();
+		return;
+	}
 
-    void GenerateHostsFile();
-    BridgeWeakPtrList GetPendingDeployments() const;
-    void ExecuteDeployments(const BridgeWeakPtrList& pendingDeployments);
-    std::string GetAnsibleCommand() const;
-    void OnDeploymentComplete(int result);
-    void OnDeploymentOutput(const std::string& output);
+    ImGui::TextWrapped("%s", m_Output.c_str());
 
-    BridgeWeakPtrList m_Deployments;
-    bool m_BridgesChanged;
-    ShellCommandUniquePtr m_pAnsibleCommand;
-};
+	ImGui::End();
+}
+
+void DeploymentWindow::OnOpen()
+{
+
+}
+
+void DeploymentWindow::AddOutput(const std::string& output)
+{
+    m_Output += output;
+}
 
 } // namespace Turbine
