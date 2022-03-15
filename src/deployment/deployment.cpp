@@ -138,6 +138,8 @@ void Deployment::GenerateHostsFile()
                     file << pBridge->GetIPv6();
                 }
 
+                file << " ansible_user=root";
+                file << " host_key_checking=False";
                 file << " tor_port=" << pBridge->GetORPort();
                 file << " obfs4_port=" << pBridge->GetExtPort();
                 file << "\n\n";
