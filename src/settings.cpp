@@ -81,6 +81,9 @@ void Settings::Save()
 {
 	using json = nlohmann::json;
 	json settings = {
+		{ "general", {
+			{ "email", m_ContactEmail }
+		}},
 		{ "providers", {
 			{ "digital_ocean", {
 				{"api_key", m_DigitalOceanAPIKey },
@@ -108,13 +111,24 @@ void Settings::Load()
 		file >> settings;
 		file.close();
 
+		json::const_iterator it = settings.find("general");
+		if (it != settings.end())
+		{
+			const json& general = *it;
+			it = general.find("email");
+			if (it != general.end() && it->is_string())
+			{
+				m_ContactEmail = it->get<std::string>();
+			}
+		}
+
 		const json& providers = settings["providers"];
 		if (providers.is_object())
 		{
 			const json& digitalOcean = providers["digital_ocean"];
 			if (digitalOcean.is_object())
 			{
-				json::const_iterator it = digitalOcean.find("api_key");
+				it = digitalOcean.find("api_key");
 				if (it != digitalOcean.end() && it->is_string())
 				{
 					m_DigitalOceanAPIKey = it->get<std::string>();

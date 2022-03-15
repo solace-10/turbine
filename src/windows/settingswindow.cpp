@@ -47,6 +47,16 @@ void SettingsWindow::Render()
 		return;
 	}
 
+	Settings* pSettings = g_pTurbine->GetSettings();
+	if (ImGui::CollapsingHeader("General", ImGuiTreeNodeFlags_DefaultOpen))
+	{
+		static std::string sEmail = pSettings->GetContactEmail();
+		if (ImGui::InputText("Contact email", &sEmail))
+		{
+			pSettings->SetContactEmail(sEmail);
+		}
+	}
+
 	if (ImGui::CollapsingHeader("Providers", ImGuiTreeNodeFlags_DefaultOpen))
 	{
 		for (auto& pProvider : g_pTurbine->GetProviders())

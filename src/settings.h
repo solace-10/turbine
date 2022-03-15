@@ -38,6 +38,8 @@ public:
 	~Settings();
 
 	std::filesystem::path GetStoragePath() const;
+	const std::string& GetContactEmail() const;
+	void SetContactEmail(const std::string& value);
 	const std::string& GetDigitalOceanAPIKey() const;
 	void SetDigitalOceanAPIKey(const std::string& value);
 	const std::string& GetDigitalOceanDropletSize() const;
@@ -53,6 +55,7 @@ private:
 	void Load();
 
 	std::filesystem::path m_StoragePath;
+	std::string m_ContactEmail;
 	std::string m_DigitalOceanAPIKey;
 	std::string m_DigitalOceanDropletSize;
 	std::string m_DigitalOceanDropletImage;
@@ -62,6 +65,16 @@ private:
 inline std::filesystem::path Settings::GetStoragePath() const
 {
 	return m_StoragePath;
+}
+
+inline const std::string& Settings::GetContactEmail() const
+{
+	return m_ContactEmail;
+}
+
+inline void Settings::SetContactEmail(const std::string& value)
+{
+	m_ContactEmail = value;
 }
 
 inline const std::string& Settings::GetDigitalOceanAPIKey() const

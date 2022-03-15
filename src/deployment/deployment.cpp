@@ -112,7 +112,8 @@ void Deployment::OnBridgeIpChanged()
 
 void Deployment::GenerateHostsFile()
 {
-    std::filesystem::path storagePath = g_pTurbine->GetSettings()->GetStoragePath();
+    Settings* pSettings = g_pTurbine->GetSettings();
+    std::filesystem::path storagePath = pSettings->GetStoragePath();
 
 	std::filesystem::path filePath = storagePath / "ansiblehosts";
 	std::ofstream file(filePath, std::ofstream::out | std::ofstream::trunc);
@@ -129,17 +130,12 @@ void Deployment::GenerateHostsFile()
                 }
 
 				file << "[" << pBridge->GetName() << "]\n";
-                if (pBridge->GetIPv4().empty() == false)
-                {
-                    file << pBridge->GetIPv4();
-                }
-                else
-                {
-                    file << pBridge->GetIPv6();
-                }
-
+                const std::string& ip = pBridge->GetIPv4().size() > 0 ? pBridge->GetIPv4() : pBridge->GetIPv6();
+                file << ip;
                 file << " ansible_user=root";
                 file << " host_key_checking=False";
+                file << " public_ip=" << ip;
+                file << " email_address=" << pSettings->GetContactEmail();
                 file << " tor_port=" << pBridge->GetORPort();
                 file << " obfs4_port=" << pBridge->GetExtPort();
                 file << "\n\n";

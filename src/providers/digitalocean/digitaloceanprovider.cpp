@@ -194,6 +194,17 @@ bool DigitalOceanProvider::IsAuthenticated() const
 void DigitalOceanProvider::CreateBridge(const std::string& name, bool isListed)
 {
 	Settings* pSettings = g_pTurbine->GetSettings();
+	if (pSettings->GetContactEmail().empty())
+	{
+		Log::Error("Can't create bridge: contact email must be set.");
+		return;
+	}
+	else if (pSettings->GetDigitalOceanSSHFingerprints().empty())
+	{
+		Log::Error("Can't create bridge: no SSH keys registered.");
+		return;
+	}
+
 	Log::Info("Creating %s bridge '%s'...", isListed ? "listed" : "unlisted", name.c_str());
 	std::string turbineTypeTag = isListed ? "turbine_listed" : "turbine_unlisted";
 	std::string turbineORPortTag, turbineExtPortTag;
@@ -206,6 +217,7 @@ void DigitalOceanProvider::CreateBridge(const std::string& name, bool isListed)
 	payload["ssh_keys"] = pSettings->GetDigitalOceanSSHFingerprints();
 	payload["ipv6"] = true;
 	payload["tags"] = { "turbine", "turbine_deployment_pending", turbineTypeTag, turbineORPortTag, turbineExtPortTag };
+	payload["password"] = nullptr;
 
 	const std::string rawPayload = payload.dump();
 	g_pTurbine->GetWebClient()->Post("https://api.digitalocean.com/v2/droplets", m_Headers, rawPayload,
@@ -357,6 +369,13 @@ void DigitalOceanProvider::UpdateDropletMonitor(float delta)
 							idss << rawId;
 							const std::string& id = idss.str();
 							const std::string& name = droplet["name"].get<std::string>();
+
+							// Skip any non-Turbine droplets.
+							if (name.rfind("turbine-", 0) != 0)
+							{
+								continue;
+							}
+
 							const std::string& dropletState = droplet["status"].get<std::string>();
 							std::vector<std::string> tags = droplet["tags"];
 
