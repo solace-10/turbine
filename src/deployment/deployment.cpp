@@ -132,6 +132,7 @@ void Deployment::GenerateHostsFile()
 				file << "[" << pBridge->GetName() << "]\n";
                 const std::string& ip = pBridge->GetIPv4().size() > 0 ? pBridge->GetIPv4() : pBridge->GetIPv6();
                 file << ip;
+                file << " nickname=" << pBridge->GetName();
                 file << " ansible_user=root";
                 file << " host_key_checking=False";
                 file << " public_ip=" << ip;
