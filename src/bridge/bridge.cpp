@@ -81,20 +81,12 @@ const std::string& Bridge::GetIPv6() const
 
 void Bridge::SetIPv4(const std::string& ip)
 {
-    if (m_Ipv4 != ip)
-    {
-        m_Ipv4 = ip;
-        g_pTurbine->GetDeployment()->OnBridgeIpChanged();
-    }
+    m_Ipv4 = ip;
 }
 
 void Bridge::SetIPv6(const std::string& ip)
 {
-    if (m_Ipv6 != ip)
-    {
-        m_Ipv6 = ip;
-        g_pTurbine->GetDeployment()->OnBridgeIpChanged();
-    }
+    m_Ipv6 = ip;
 }
 
 unsigned int Bridge::GetORPort() const

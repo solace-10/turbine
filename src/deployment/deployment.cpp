@@ -35,9 +35,9 @@ SOFTWARE.
 namespace Turbine
 {
 
-Deployment::Deployment() :
-m_BridgesChanged(false)
+Deployment::Deployment()
 {
+
 }
     
 Deployment::~Deployment()
@@ -47,12 +47,6 @@ Deployment::~Deployment()
 
 void Deployment::Update(float delta)
 {
-    if (m_BridgesChanged)
-    {
-        GenerateHostsFile();
-        m_BridgesChanged = false;
-    }
-
     BridgeWeakPtrList pendingDeployments = GetPendingDeployments();
     if (m_pAnsibleCommand == nullptr && pendingDeployments.size() > 0)
     {
@@ -84,6 +78,8 @@ void Deployment::ExecuteDeployments(const BridgeWeakPtrList& pendingDeployments)
         }
     }
 
+    GenerateHostsFile(pendingDeployments);
+
     m_pAnsibleCommand = std::make_unique<ShellCommand>(
         GetAnsibleCommand(),
         std::bind(&Deployment::OnDeploymentComplete, this, std::placeholders::_1),
@@ -102,15 +98,9 @@ std::string Deployment::GetAnsibleCommand() const
 void Deployment::OnBridgeAdded(BridgeSharedPtr& pBridge)
 {
     m_Deployments.push_back(pBridge);
-    m_BridgesChanged = true;
 }
 
-void Deployment::OnBridgeIpChanged()
-{
-    m_BridgesChanged = true;
-}
-
-void Deployment::GenerateHostsFile()
+void Deployment::GenerateHostsFile(const BridgeWeakPtrList& pendingDeployments)
 {
     Settings* pSettings = g_pTurbine->GetSettings();
     std::filesystem::path storagePath = pSettings->GetStoragePath();
@@ -119,7 +109,7 @@ void Deployment::GenerateHostsFile()
 	std::ofstream file(filePath, std::ofstream::out | std::ofstream::trunc);
     if (file.good())
     {
-		for (auto& pDeployments : m_Deployments)
+		for (auto& pDeployments : pendingDeployments)
 		{
 			BridgeSharedPtr pBridge = pDeployments.lock();
 			if (pBridge != nullptr)

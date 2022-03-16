@@ -45,12 +45,11 @@ public:
 
     void Update(float delta);
     void OnBridgeAdded(BridgeSharedPtr& pBridge);
-    void OnBridgeIpChanged();
 
 private:
     using BridgeWeakPtrList = std::list<BridgeWeakPtr>;
 
-    void GenerateHostsFile();
+    void GenerateHostsFile(const BridgeWeakPtrList& pendingDeployments);
     BridgeWeakPtrList GetPendingDeployments() const;
     void ExecuteDeployments(const BridgeWeakPtrList& pendingDeployments);
     std::string GetAnsibleCommand() const;
@@ -58,7 +57,6 @@ private:
     void OnDeploymentOutput(const std::string& output);
 
     BridgeWeakPtrList m_Deployments;
-    bool m_BridgesChanged;
     ShellCommandUniquePtr m_pAnsibleCommand;
 };
 
