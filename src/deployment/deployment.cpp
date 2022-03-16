@@ -119,16 +119,22 @@ void Deployment::GenerateHostsFile(const BridgeWeakPtrList& pendingDeployments)
                     continue;
                 }
 
+                json additionalConfig = 
+                {
+                    {{"name", "PublishServerDescriptor"}, {"value", "bridge"}},
+                    {{"name", "Log"}, {"value", "notice file /var/log/tor/notices.log"}}
+                };
+
 				file << "[" << pBridge->GetName() << "]\n";
                 const std::string& ip = pBridge->GetIPv4().size() > 0 ? pBridge->GetIPv4() : pBridge->GetIPv6();
                 file << ip;
                 file << " nickname=" << pBridge->GetName();
                 file << " ansible_user=root";
-                file << " host_key_checking=False";
                 file << " public_ip=" << ip;
                 file << " email_address=" << pSettings->GetContactEmail();
                 file << " tor_port=" << pBridge->GetORPort();
                 file << " obfs4_port=" << pBridge->GetExtPort();
+                file << " additionnal_torrc_config='" << additionalConfig.dump() << "'"; // typo in ansible-tor-bridge, see ansible-tor-bridge/defaults/main.yml. 
                 file << "\n\n";
 			}
 		}
