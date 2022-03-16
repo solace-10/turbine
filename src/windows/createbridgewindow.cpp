@@ -39,7 +39,7 @@ namespace Turbine
 {
 
 CreateBridgeWindow::CreateBridgeWindow() :
-m_BridgeName("turbine-unnamed")
+m_BridgeName("TurbineUnnamed")
 {
 	srand(time(nullptr));
 	LoadBridgeNames();
