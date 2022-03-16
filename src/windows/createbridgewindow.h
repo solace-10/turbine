@@ -41,6 +41,7 @@ public:
 
 private:
 	void LoadBridgeNames();
+	bool IsValidBridgeName(const std::string& name) const;
 	std::vector<std::string> m_BridgeNames;
 	std::string m_BridgeName;
 };

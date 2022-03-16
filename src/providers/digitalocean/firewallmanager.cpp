@@ -178,6 +178,18 @@ void FirewallManager::InstallFirewall(Firewall& firewall)
 
     payload["inbound_rules"] = { inboundRuleSSHPort, inboundRuleORPort, inboundRuleExtPort };
 
+    json outboundRuleTCP = json::object();
+    outboundRuleTCP["protocol"] = "tcp";
+    outboundRuleTCP["ports"] = "0"; // All ports.
+    outboundRuleTCP["sources"] = sources;
+
+    json outboundRuleUDP = json::object();
+    outboundRuleUDP["protocol"] = "udp";
+    outboundRuleUDP["ports"] = "0"; // All ports.
+    outboundRuleUDP["sources"] = sources;
+
+    payload["outbound_rules"] = { outboundRuleTCP, outboundRuleUDP };
+
     const std::string rawPayload = payload.dump();
 	g_pTurbine->GetWebClient()->Post("https://api.digitalocean.com/v2/firewalls", m_Headers, rawPayload,
 		[this](const WebClientRequestResult& result)

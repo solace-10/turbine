@@ -22,6 +22,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+#include <cctype>
 #include <stdlib.h>
 #include <time.h>
 
@@ -60,7 +61,14 @@ void CreateBridgeWindow::Render()
 
 	ImGui::InputText("Bridge name", &m_BridgeName);
 
-	if (ImGui::Button("Create"))
+	bool canCreateBridge = true;
+	if (IsValidBridgeName(m_BridgeName) == false)
+	{
+		ImGui::TextColored(ImVec4(1, 0, 0, 1), "Invalid bridge name. Must be 1-19 characters and alphanumeric.");
+		canCreateBridge = false;
+	}
+
+	if (ImGui::Button("Create") && canCreateBridge)
 	{
 		ProviderVector& providers = g_pTurbine->GetProviders();
 		providers[0]->CreateBridge(m_BridgeName, true);
@@ -73,14 +81,14 @@ void CreateBridgeWindow::OnOpen()
 {
 	if (m_BridgeNames.empty() == false)
 	{
-		m_BridgeName = "turbine-" + m_BridgeNames[rand() % m_BridgeNames.size()];
+		m_BridgeName = "Turbine" + m_BridgeNames[rand() % m_BridgeNames.size()];
 	}
 }
 
 void CreateBridgeWindow::LoadBridgeNames()
 {
 	using json = nlohmann::json;
-	std::filesystem::path filePath = "names.json";
+	std::filesystem::path filePath = "data/names.json";
 	std::ifstream file(filePath);
 	if (file.is_open())
 	{
@@ -98,6 +106,26 @@ void CreateBridgeWindow::LoadBridgeNames()
 			}
 		}
 	}
+}
+
+bool CreateBridgeWindow::IsValidBridgeName(const std::string& name) const
+{
+	// Valid names must be between 1 and 19 characters and must only
+	// contain [a-zA-Z0-9].
+    if (name.size() < 1 || name.size() > 19)
+	{
+		return false;
+	}
+
+	for (char c : name)
+	{
+		if (isalnum(c) == 0)
+		{
+			return false;
+		}
+	}
+
+	return true;
 }
 
 } // namespace Turbine
