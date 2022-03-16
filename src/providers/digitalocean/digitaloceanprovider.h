@@ -74,6 +74,7 @@ private:
 	unsigned int ExtractORPort(const std::vector<std::string>& tags) const;
 	unsigned int ExtractExtPort(const std::vector<std::string>& tags) const;
 	unsigned int ExtractPort(const std::vector<std::string>& tags, const std::string& beginsWith) const;
+	bool IsTurbineDroplet(const std::vector<std::string>& tags) const;
 
 	std::string m_Name;
 	std::string m_APIKey;

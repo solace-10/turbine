@@ -369,15 +369,13 @@ void DigitalOceanProvider::UpdateDropletMonitor(float delta)
 							idss << rawId;
 							const std::string& id = idss.str();
 							const std::string& name = droplet["name"].get<std::string>();
+							const std::string& dropletState = droplet["status"].get<std::string>();
+							std::vector<std::string> tags = droplet["tags"];
 
-							// Skip any non-Turbine droplets.
-							if (name.rfind("turbine-", 0) != 0)
+							if (IsTurbineDroplet(tags) == false)
 							{
 								continue;
 							}
-
-							const std::string& dropletState = droplet["status"].get<std::string>();
-							std::vector<std::string> tags = droplet["tags"];
 
 							const std::string& ipv4 = ExtractIP(droplet, "v4");
 							const std::string& ipv6 = ExtractIP(droplet, "v6");
@@ -554,6 +552,18 @@ unsigned int DigitalOceanProvider::ExtractPort(const std::vector<std::string>& t
 		}
 	}
 	return port;
+}
+
+bool DigitalOceanProvider::IsTurbineDroplet(const std::vector<std::string>& tags) const
+{
+	for (const std::string& tag : tags)
+	{
+		if (tag == "turbine")
+		{
+			return true;
+		}
+	}
+	return false;
 }
 
 } // namespace Turbine
