@@ -178,15 +178,18 @@ void FirewallManager::InstallFirewall(Firewall& firewall)
 
     payload["inbound_rules"] = { inboundRuleSSHPort, inboundRuleORPort, inboundRuleExtPort };
 
+    json destinations;
+    destinations["addresses"] = { "0.0.0.0/0", "::/0" };
+
     json outboundRuleTCP = json::object();
     outboundRuleTCP["protocol"] = "tcp";
     outboundRuleTCP["ports"] = "0"; // All ports.
-    outboundRuleTCP["sources"] = sources;
+    outboundRuleTCP["destinations"] = destinations;
 
     json outboundRuleUDP = json::object();
     outboundRuleUDP["protocol"] = "udp";
     outboundRuleUDP["ports"] = "0"; // All ports.
-    outboundRuleUDP["sources"] = sources;
+    outboundRuleUDP["destinations"] = destinations;
 
     payload["outbound_rules"] = { outboundRuleTCP, outboundRuleUDP };
 
