@@ -39,15 +39,18 @@ class Bridge;
 using BridgeWeakPtr = std::weak_ptr<Bridge>;
 using BridgeSharedPtr = std::shared_ptr<Bridge>;
 
+class Provider;
+
 class StateMachine;
 using StateMachineUniquePtr = std::unique_ptr<StateMachine>;
 
 class Bridge
 {
 public:
-    Bridge(const std::string& id, const std::string& name, const std::string& state);
+    Bridge(Provider* pProvider, const std::string& id, const std::string& name, const std::string& state);
     ~Bridge();
 
+    Provider* GetProvider() const;
     const std::string& GetId() const;
     const std::string& GetName() const;
     const std::string& GetState() const;
@@ -66,6 +69,7 @@ public:
 private:
     void InitialiseStateMachine();
 
+    Provider* m_pProvider;
     std::string m_Id;
     std::string m_Name;
     BridgeSummaryWidgetUniquePtr m_pBridgeSummaryWidget;

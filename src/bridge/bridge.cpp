@@ -33,7 +33,8 @@ SOFTWARE.
 namespace Turbine
 {
 
-Bridge::Bridge(const std::string& id, const std::string& name, const std::string& initialState) :
+Bridge::Bridge(Provider* pProvider, const std::string& id, const std::string& name, const std::string& initialState) :
+m_pProvider(pProvider),
 m_Id(id),
 m_Name(name),
 m_ORPort(0),
@@ -47,6 +48,11 @@ m_ExtPort(0)
 
 Bridge::~Bridge()
 {
+}
+
+Provider* Bridge::GetProvider() const
+{
+    return m_pProvider;
 }
 
 const std::string& Bridge::GetId() const

@@ -56,6 +56,7 @@ public:
 	virtual const std::string& GetName() const override;
 	virtual bool IsAuthenticated() const override;
 	virtual void CreateBridge(const std::string& name, bool isListed) override;
+	virtual void OnBridgeDeployed(Bridge* pBridge) override;
 
 private:
 	bool HasAPIKeyChanged();

@@ -116,6 +116,11 @@ void WebClient::CURLThreadMain(WebClient* pWebClient)
 	}
 }
 
+void WebClient::Delete(const std::string& url, Headers headers, const std::string& postData, RequestCallback pCallback, bool debug)
+{
+	Request(RequestType::Delete, url, headers, postData, pCallback, debug);
+}
+
 void WebClient::Get(const std::string& url, Headers headers, RequestCallback pCallback, bool debug)
 {
 	Request(RequestType::Get, url, headers, "", pCallback, debug);
@@ -142,11 +147,19 @@ void WebClient::Request(RequestType requestType, const std::string& url, Headers
 	curl_easy_setopt(pr.pHandle, CURLOPT_WRITEFUNCTION, &CURLWriteCallback);
 	curl_easy_setopt(pr.pHandle, CURLOPT_WRITEDATA, pr.id);
 
-	if (requestType == RequestType::Post)
+	if (postData.size() > 0)
 	{
 		curl_easy_setopt(pr.pHandle, CURLOPT_POSTFIELDS, pr.postData.c_str());
 		curl_easy_setopt(pr.pHandle, CURLOPT_POSTFIELDSIZE, pr.postData.size());
+	}
+
+	if (requestType == RequestType::Post)
+	{
 		curl_easy_setopt(pr.pHandle, CURLOPT_POST, 1L);
+	}
+	else if (requestType == RequestType::Delete)
+	{
+		curl_easy_setopt(pr.pHandle, CURLOPT_CUSTOMREQUEST, "DELETE");
 	}
 
 	if (debug)

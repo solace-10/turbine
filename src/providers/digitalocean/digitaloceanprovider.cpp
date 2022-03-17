@@ -228,6 +228,22 @@ void DigitalOceanProvider::CreateBridge(const std::string& name, bool isListed)
 	);
 }
 
+void DigitalOceanProvider::OnBridgeDeployed(Bridge* pBridge)
+{
+	json payload;
+	payload["resources"] = 	{{
+		{ "resource_id", pBridge->GetId() },
+		{ "resource_type", "droplet" }
+	}};
+
+	const std::string rawPayload = payload.dump();
+	g_pTurbine->GetWebClient()->Delete("https://api.digitalocean.com/v2/tags/turbine_deployment_pending/resources", m_Headers, rawPayload,
+		[this](const WebClientRequestResult& result)
+		{
+		}
+	);
+}
+
 bool DigitalOceanProvider::HasAPIKeyChanged()
 {
 	const std::string& settingsKey = g_pTurbine->GetSettings()->GetDigitalOceanAPIKey();
@@ -395,7 +411,7 @@ void DigitalOceanProvider::UpdateDropletMonitor(float delta)
 							else
 							{
 								const std::string& initialState = GetBridgeState(dropletState, tags);
-								BridgeSharedPtr pBridge = std::make_shared<Bridge>(id, name, initialState);
+								BridgeSharedPtr pBridge = std::make_shared<Bridge>(this, id, name, initialState);
 								pBridge->SetIPv4(ipv4);
 								pBridge->SetIPv6(ipv6);
 								pBridge->SetORPort(this->ExtractORPort(tags));

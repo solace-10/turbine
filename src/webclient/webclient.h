@@ -49,6 +49,7 @@ public:
 
 	void Update();
 
+	void Delete(const std::string& url, Headers headers, const std::string& postData, RequestCallback pCallback, bool debug = false);
 	void Get(const std::string& url, Headers headers, RequestCallback pCallback, bool debug = false);
 	void Post(const std::string& url, Headers headers, const std::string& postData, RequestCallback pCallback, bool debug = false);
 
@@ -59,6 +60,7 @@ private:
 	
 	enum class RequestType
 	{
+		Delete,
 		Get,
 		Post
 	};

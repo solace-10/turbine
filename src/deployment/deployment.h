@@ -53,8 +53,9 @@ private:
     BridgeWeakPtrList GetPendingDeployments() const;
     void ExecuteDeployments(const BridgeWeakPtrList& pendingDeployments);
     std::string GetAnsibleCommand() const;
-    void OnDeploymentComplete(int result);
-    void OnDeploymentOutput(const std::string& output);
+    void OnDeploymentComplete(Bridge* pBridge, bool success);
+    void OnDeploymentCommandFinished(int result);
+    void OnDeploymentCommandOutput(const std::string& output);
     Bridge* GetBridgeFromOutput(const std::string& output) const;
     bool GetSuccessFromOutput(const std::string& output) const;
 

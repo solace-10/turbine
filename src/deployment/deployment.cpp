@@ -28,6 +28,7 @@ SOFTWARE.
 #include "bridge/bridge.h"
 #include "core/shellcommand/shellcommand.hpp"
 #include "deployment/deployment.h"
+#include "providers/provider.h"
 #include "windows/deploymentwindow.hpp"
 #include "settings.h"
 #include "turbine.h"
@@ -84,8 +85,8 @@ void Deployment::ExecuteDeployments(const BridgeWeakPtrList& pendingDeployments)
     m_ParsingResults = false;
     m_pAnsibleCommand = std::make_unique<ShellCommand>(
         GetAnsibleCommand(),
-        std::bind(&Deployment::OnDeploymentComplete, this, std::placeholders::_1),
-        std::bind(&Deployment::OnDeploymentOutput, this, std::placeholders::_1)
+        std::bind(&Deployment::OnDeploymentCommandFinished, this, std::placeholders::_1),
+        std::bind(&Deployment::OnDeploymentCommandOutput, this, std::placeholders::_1)
     );
     m_pAnsibleCommand->Run();
 }
@@ -160,12 +161,28 @@ Deployment::BridgeWeakPtrList Deployment::GetPendingDeployments() const
     return pendingDeployments;
 }
 
-void Deployment::OnDeploymentComplete(int result)
+void Deployment::OnDeploymentComplete(Bridge* pBridge, bool success)
 {
-    int a = 0;
+    if (pBridge->GetState() == "Deploying")
+    {
+        if (success)
+        {
+            pBridge->SetState("Deployed");
+            pBridge->GetProvider()->OnBridgeDeployed(pBridge);
+        }
+        else
+        {
+            pBridge->SetState("Deployment failed");
+        }
+    }
 }
 
-void Deployment::OnDeploymentOutput(const std::string& output)
+void Deployment::OnDeploymentCommandFinished(int result)
+{
+
+}
+
+void Deployment::OnDeploymentCommandOutput(const std::string& output)
 {
     DeploymentWindow* pWindow = reinterpret_cast<DeploymentWindow*>(g_pTurbine->GetDeploymentWindow());
     pWindow->AddOutput(output + "\n");
@@ -179,11 +196,9 @@ void Deployment::OnDeploymentOutput(const std::string& output)
         Bridge* pBridge = GetBridgeFromOutput(output);
         if (pBridge != nullptr)
         {
-
-            pBridge->SetState(GetSuccessFromOutput(output) ? "Deployed" : "Deployment failed");
+            OnDeploymentComplete(pBridge, GetSuccessFromOutput(output));
         }
     }
-    
 }
 
 Bridge* Deployment::GetBridgeFromOutput(const std::string& output) const
