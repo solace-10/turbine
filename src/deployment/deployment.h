@@ -55,9 +55,12 @@ private:
     std::string GetAnsibleCommand() const;
     void OnDeploymentComplete(int result);
     void OnDeploymentOutput(const std::string& output);
+    Bridge* GetBridgeFromOutput(const std::string& output) const;
+    bool GetSuccessFromOutput(const std::string& output) const;
 
     BridgeWeakPtrList m_Deployments;
     ShellCommandUniquePtr m_pAnsibleCommand;
+    bool m_ParsingResults;
 };
 
 } // namespace Turbine

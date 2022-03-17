@@ -35,7 +35,8 @@ SOFTWARE.
 namespace Turbine
 {
 
-Deployment::Deployment()
+Deployment::Deployment() :
+m_ParsingResults(false)
 {
 
 }
@@ -80,6 +81,7 @@ void Deployment::ExecuteDeployments(const BridgeWeakPtrList& pendingDeployments)
 
     GenerateHostsFile(pendingDeployments);
 
+    m_ParsingResults = false;
     m_pAnsibleCommand = std::make_unique<ShellCommand>(
         GetAnsibleCommand(),
         std::bind(&Deployment::OnDeploymentComplete, this, std::placeholders::_1),
@@ -167,6 +169,44 @@ void Deployment::OnDeploymentOutput(const std::string& output)
 {
     DeploymentWindow* pWindow = reinterpret_cast<DeploymentWindow*>(g_pTurbine->GetDeploymentWindow());
     pWindow->AddOutput(output + "\n");
+
+    if (m_ParsingResults == false && output.rfind("PLAY RECAP *", 0) == 0)
+    {
+        m_ParsingResults = true;
+    }
+    else if (m_ParsingResults)
+    {
+        Bridge* pBridge = GetBridgeFromOutput(output);
+        if (pBridge != nullptr)
+        {
+
+            pBridge->SetState(GetSuccessFromOutput(output) ? "Deployed" : "Deployment failed");
+        }
+    }
+    
+}
+
+Bridge* Deployment::GetBridgeFromOutput(const std::string& output) const
+{
+    size_t ipEndIdx = output.find(' ');
+    if (ipEndIdx != std::string::npos)
+    {
+        const std::string ip = output.substr(0, ipEndIdx);
+        for (BridgeWeakPtr pBridgeWeak : m_Deployments)
+        {
+            BridgeSharedPtr pBridge = pBridgeWeak.lock();
+            if (pBridge && (ip == pBridge->GetIPv4() || ip == pBridge->GetIPv6()))
+            {
+                return pBridge.get();
+            }
+        }
+    }
+    return nullptr;
+}
+
+bool Deployment::GetSuccessFromOutput(const std::string& output) const
+{
+    return output.find("failed=0") != std::string::npos;
 }
 
 } // namespace Turbine

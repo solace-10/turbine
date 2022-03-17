@@ -122,6 +122,7 @@ void Bridge::InitialiseStateMachine()
     m_pStateMachine->AddState("Deployment pending");
     m_pStateMachine->AddState("Deploying");
     m_pStateMachine->AddState("Deployed");
+    m_pStateMachine->AddState("Deployment failed");
 
     m_pStateMachine->LinkStates("Offline", "New");
 
