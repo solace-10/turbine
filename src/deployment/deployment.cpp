@@ -122,10 +122,17 @@ void Deployment::GenerateHostsFile(const BridgeWeakPtrList& pendingDeployments)
                     continue;
                 }
 
-                json additionalConfig = 
+                const json additionalConfig = 
                 {
                     {{"name", "PublishServerDescriptor"}, {"value", "bridge"}},
-                    {{"name", "Log"}, {"value", "notice file /var/log/tor/notices.log"}}
+                    {{"name", "Log"}, {"value", "notice file /var/log/tor/notices.log"}},
+                    {{"name", "CellStatistics"}, {"value", "1"}},
+                    {{"name", "DirReqStatistics"}, {"value", "1"}},
+                    {{"name", "EntryStatistics"}, {"value", "1"}},
+                    {{"name", "ExitPortStatistics"}, {"value", "1"}},
+                    {{"name", "ConnDirectionStatistics"}, {"value", "1"}},
+                    {{"name", "ExtraInfoStatistics"}, {"value", "1"}},
+                    {{"name", "BridgeRecordUsageByCountry"}, {"value", "1"}},
                 };
 
 				file << "[" << pBridge->GetName() << "]\n";
