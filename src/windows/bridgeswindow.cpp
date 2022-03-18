@@ -47,9 +47,24 @@ void BridgesWindow::Render()
 		return;
 	}
 
-	if (ImGui::Button("Create"))
+	static ImGuiTableFlags flags = ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg;
+	if (ImGui::BeginTable("Bridges", 3, flags))
 	{
+		ImGui::TableSetupColumn("Name");
+		ImGui::TableSetupColumn("Type");
+		ImGui::TableSetupColumn("IP");
+		ImGui::TableHeadersRow();
 
+		BridgeList pBridges = g_pTurbine->GetBridges();
+		for (auto& pBridge : pBridges)
+		{
+			ImGui::TableNextRow();
+			ImGui::TableNextColumn(); ImGui::TextUnformatted(pBridge->GetName().c_str());
+			ImGui::TableNextColumn(); ImGui::TextUnformatted("Listed");
+			ImGui::TableNextColumn(); ImGui::TextUnformatted(pBridge->GetIPv4().c_str());
+		}
+
+		ImGui::EndTable();
 	}
 
 	ImGui::End();
