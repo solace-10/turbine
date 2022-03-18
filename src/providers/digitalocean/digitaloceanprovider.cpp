@@ -205,13 +205,20 @@ void DigitalOceanProvider::CreateBridge(const std::string& name, bool isListed)
 		return;
 	}
 
+	std::string region = GetRandomRegion(pSettings->GetDigitalOceanDropletSize());
+	if (region.empty())
+	{
+		Log::Error("Can't create bridge: couldn't get region.");
+		return;
+	}
+
 	Log::Info("Creating %s bridge '%s'...", isListed ? "listed" : "unlisted", name.c_str());
 	std::string turbineTypeTag = isListed ? "turbine_listed" : "turbine_unlisted";
 	std::string turbineORPortTag, turbineExtPortTag;
 	CreateTorPortTags(turbineORPortTag, turbineExtPortTag);
 	json payload;
 	payload["name"] = name;
-	payload["region"] = "nyc3";
+	payload["region"] = region;
 	payload["size"] = pSettings->GetDigitalOceanDropletSize();
 	payload["image"] = pSettings->GetDigitalOceanDropletImage();
 	payload["ssh_keys"] = pSettings->GetDigitalOceanSSHFingerprints();
@@ -226,6 +233,27 @@ void DigitalOceanProvider::CreateBridge(const std::string& name, bool isListed)
 			int a = 0;
 		}
 	);
+}
+
+std::string DigitalOceanProvider::GetRandomRegion(const std::string& dropletSize) const
+{
+	DropletInfoMap::const_iterator it = m_DropletInfoMap.find(dropletSize);
+	if (it == m_DropletInfoMap.end())
+	{
+		return "";
+	}
+	else
+	{
+		const Regions& regions = it->second->GetRegions();
+		if (regions.empty())
+		{
+			return "";
+		}
+		else
+		{
+			return regions[rand()%regions.size()];
+		}
+	}
 }
 
 void DigitalOceanProvider::OnBridgeDeployed(Bridge* pBridge)
