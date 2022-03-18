@@ -147,4 +147,25 @@ bool Spinner(float radius, int thickness, const ImU32& color, float* pTimer /* =
     return true;
 }
 
+bool SpinnerFilled(float radius, int thickness, const ImU32& color, float* pTimer /* = nullptr */) 
+{
+	ImGuiWindow* window = GetCurrentWindow();
+	ImVec2 pos = window->DC.CursorPos;
+
+    float outerRadius = radius;
+    float innerRadius = radius - thickness;
+
+    if (!Spinner(outerRadius, thickness, color, pTimer))
+    {
+        return false;
+    }
+
+	// Render
+	ImGuiContext& g = *GImGui;
+	const ImGuiStyle& style = g.Style;
+    const ImVec2 center = ImVec2(pos.x + outerRadius, pos.y + outerRadius + thickness + style.FramePadding.y);
+	window->DrawList->AddCircleFilled(center, innerRadius, color, 24);
+	return true;
+}
+
 } // namespace ImGui

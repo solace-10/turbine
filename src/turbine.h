@@ -48,7 +48,6 @@ class Bridge;
 class Deployment;
 class Settings;
 class Provider;
-class Task;
 class TurbineRep;
 class WebClient;
 class Window;
@@ -60,8 +59,6 @@ using ProviderUniquePtr = std::unique_ptr<Provider>;
 using TurbineRepUniquePtr = std::unique_ptr<TurbineRep>;
 using GeolocationDataMap = std::unordered_map<std::string, GeolocationDataSharedPtr>;
 using ProviderVector = std::vector<ProviderUniquePtr>;
-using TaskUniquePtr = std::unique_ptr<Task>;
-using TaskVector = std::vector<TaskUniquePtr>;
 using WebClientUniquePtr = std::unique_ptr<WebClient>;
 using WindowUniquePtr = std::unique_ptr<Window>;
 
@@ -72,12 +69,8 @@ public:
 	~Turbine();
 	void ProcessEvent(const SDL_Event& event);
 	void Update();
-    bool IsSearching() const;
-    void SetSearching(bool state);
 	bool IsActive() const;
 	Settings* GetSettings() const;
-    const TaskVector& GetTasks() const;
-	Task* GetTask(const std::string& name) const;
 	WebClient* GetWebClient();
 	Window* GetBridgesWindow();
 	Window* GetCreateBridgeWindow();
@@ -99,12 +92,10 @@ private:
 	void InitialiseGeolocation();
 	void InitialiseCameras();
 	void InitialiseProviders();
-    void InitialiseTasks();
 	void AddGeolocationData(const json& message);
 	CameraSharedPtr FindCamera(const std::string& url);
 	void ChangeCameraState(CameraSharedPtr pCamera, Camera::State state);
 
-    bool m_Searching;
 	bool m_Active;
 
 	std::mutex m_GeolocationDataMutex;
@@ -116,7 +107,6 @@ private:
 	WebClientUniquePtr m_pWebClient;
 	TurbineRepUniquePtr m_pRep;
 	SettingsUniquePtr m_pConfiguration;
-    TaskVector m_Tasks;
 	std::vector<ProviderUniquePtr> m_Providers;
 	std::shared_ptr<NotificationLogger> m_pNotificationLogger;
 	WindowUniquePtr m_pBridgesWindow;
@@ -132,11 +122,6 @@ private:
 
 extern Turbine* g_pTurbine;
 
-inline bool Turbine::IsSearching() const
-{
-    return m_Searching;
-}
-
 inline bool Turbine::IsActive() const
 {
 	return m_Active;
@@ -150,11 +135,6 @@ inline WebClient* Turbine::GetWebClient()
 inline Settings* Turbine::GetSettings() const
 {
 	return m_pConfiguration.get();
-}
-
-inline const TaskVector& Turbine::GetTasks() const
-{
-    return m_Tasks;
 }
 
 inline CameraVector Turbine::GetCameras() const

@@ -25,4 +25,5 @@ namespace ImGui
 {
 	void HelpMarker(const std::string& desc);
     bool Spinner(float radius, int thickness, const ImU32& color, float* pTimer = nullptr);
+	bool SpinnerFilled(float radius, int thickness, const ImU32& color, float* pTimer = nullptr);
 }

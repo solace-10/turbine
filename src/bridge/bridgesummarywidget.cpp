@@ -26,16 +26,14 @@ SOFTWARE.
 #include "bridge/bridgesummarywidget.h"
 #include "imgui/imgui.h"
 #include "imguiext/widgets.h"
-#include "tasks/task.h"
 #include "icons.h"
 
 namespace Turbine
 {
 
-BridgeSummaryWidget::BridgeSummaryWidget() :
-m_SpinnerTimer(0.0f)
+BridgeSummaryWidget::BridgeSummaryWidget()
 {
-
+    m_SpinnerTimer = static_cast<float>(rand() % 1000) / 1000.f;
 }
 
 void BridgeSummaryWidget::Update(float delta)
@@ -53,41 +51,17 @@ void BridgeSummaryWidget::Render(Bridge* pBridge)
 
     ImVec2 pos = GetCursorScreenPos();
     
-    // if (GetState() == State::Idle)
-    // {
-    //     SetCursorScreenPos(ImVec2(pos.x + 8, pos.y + 4));
-    //     Spinner(10.0f, 4, IM_COL32(120, 120, 120, 255), &m_SpinnerTimer);
-    //     SetCursorScreenPos(ImVec2(pos.x + 38, pos.y + 4));
-    //     TextDisabled("%s", m_Name.c_str());
-    //     SetCursorScreenPos(ImVec2(pos.x + 38, pos.y + 20));
-    //     TextDisabled("Idle");
-    // }
-	// else if (GetState() == State::Disabled)
-	// {
-	// 	SetCursorScreenPos(ImVec2(pos.x + 6, pos.y + 6));
-    //     Image(reinterpret_cast<ImTextureID>(uintptr_t(Icons::GetIcon(IconId::TaskDisabled))), ImVec2(26, 26));
-	// 	SetCursorScreenPos(ImVec2(pos.x + 38, pos.y + 4));
-	// 	TextDisabled("%s", m_Name.c_str());
-	// 	SetCursorScreenPos(ImVec2(pos.x + 38, pos.y + 20));
-	// 	TextDisabled("Disabled");
-	// }
-	// else if (GetState() == State::Error)
-	// {
-	// 	SetCursorScreenPos(ImVec2(pos.x + 6, pos.y + 6));
-    //     Image(reinterpret_cast<ImTextureID>(uintptr_t(Icons::GetIcon(IconId::TaskError))), ImVec2(26, 26), ImVec2(0, 0), ImVec2(1, 1), ImVec4(1, 1, 1, 1));
-	// 	SetCursorScreenPos(ImVec2(pos.x + 38, pos.y + 4));
-	// 	TextColored(ImVec4(1, 0, 0, 1), "%s", m_Name.c_str());
-	// 	SetCursorScreenPos(ImVec2(pos.x + 38, pos.y + 20));
-    //     if (m_Error.empty())
-    //     {
-    //         TextDisabled("Error");
-    //     }
-    //     else
-    //     {
-    //         TextColored(ImVec4(1, 0, 0, 1), "%s", m_Error.c_str());
-    //     }
-	// }
-    // else
+    if (pBridge->GetState() == "Deployed")
+	{
+        float timer = m_SpinnerTimer / 2.0f;
+		SetCursorScreenPos(ImVec2(pos.x + 8, pos.y + 4));
+		SpinnerFilled(10.0f, 4, IM_COL32(0, 255, 255, 255), &timer);
+		SetCursorScreenPos(ImVec2(pos.x + 38, pos.y + 4));
+		Text("%s", pBridge->GetName().c_str());
+		SetCursorScreenPos(ImVec2(pos.x + 38, pos.y + 20));
+		TextUnformatted(pBridge->GetState().c_str());
+	}
+    else
     {
         SetCursorScreenPos(ImVec2(pos.x + 8, pos.y + 4));
         Spinner(10.0f, 4, IM_COL32(0, 255, 255, 255), &m_SpinnerTimer);

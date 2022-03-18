@@ -25,7 +25,6 @@ SOFTWARE.
 #include <imgui/imgui.h>
 
 #include "atlas/tilestreamer.h"
-#include "tasks/task.h"
 #include "windows/settingswindow.h"
 #include "commandbar.h"
 #include "turbine.h"

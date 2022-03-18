@@ -35,8 +35,6 @@ SOFTWARE.
 #include "ext/json.hpp"
 #include "imgui/imgui.h"
 #include "providers/digitalocean/digitaloceanprovider.h"
-#include "tasks/googlesearch/googlesearch.h"
-#include "tasks/task.h"
 #include "webclient/webclient.h"
 #include "windows/bridgeswindow.h"
 #include "windows/createbridgewindow.h"
@@ -58,7 +56,6 @@ namespace Turbine
 Turbine* g_pTurbine = nullptr;
 
 Turbine::Turbine(SDL_Window* pWindow, unsigned int scannerCount) :
-m_Searching(false),
 m_Active(true)
 {
 	g_pTurbine = this;
@@ -82,12 +79,10 @@ m_Active(true)
 	InitialiseGeolocation();
 	InitialiseCameras();
 	InitialiseProviders();
-    InitialiseTasks();
 }
 
 Turbine::~Turbine()
 {
-	m_Tasks.clear();
 	m_Active = false;
 }
 
@@ -117,12 +112,6 @@ void Turbine::InitialiseCameras()
 
 }
 
-void Turbine::InitialiseTasks()
-{
-    m_Tasks.emplace_back(std::make_unique<Task>("Geolocation"));
-    m_Tasks.emplace_back(std::make_unique<Task>("HTTP camera detector"));
-}
-
 void Turbine::ProcessEvent(const SDL_Event& event)
 {
 	m_pRep->ProcessEvent(event);
@@ -147,11 +136,6 @@ void Turbine::Update()
 		pProvider->Update(delta);
 	}
 
-	for (auto& pTask : m_Tasks)
-	{
-		pTask->Update(delta);
-	}
-
 	m_pRep->Update(delta);
 	m_pNotificationLogger->Update(delta);
 	m_pRep->Render();
@@ -161,19 +145,6 @@ void Turbine::Update()
 	m_pSettingsWindow->Render();
 	m_pSummaryWindow->Render();
 	m_pNotificationLogger->Render();
-}
-
-Task* Turbine::GetTask(const std::string& name) const
-{
-	for (auto&& pTask : m_Tasks)
-	{
-		if (pTask->GetName() == name)
-		{
-			return pTask.get();
-		}
-	}
-
-	return nullptr;
 }
 
 void Turbine::OnMessageReceived(const json& message)
@@ -241,23 +212,6 @@ void Turbine::AddGeolocationData(const json& message)
 			{
 				camera->SetGeolocationData(pGeolocationData);
 			}
-		}
-	}
-}
-
-void Turbine::SetSearching(bool state)
-{
-	m_Searching = state;
-
-	for (auto& pTask : m_Tasks)
-	{
-		if (m_Searching)
-		{
-			pTask->Start();
-		}
-		else
-		{
-			pTask->Stop();
 		}
 	}
 }
