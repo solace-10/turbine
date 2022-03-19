@@ -38,19 +38,17 @@ using HostsGeneratorUniquePtr = std::unique_ptr<HostsGenerator>;
 class ShellCommand;
 using ShellCommandUniquePtr = std::unique_ptr<ShellCommand>;
 
-class Deployment : public AnsibleCommand
+class Monitor : public AnsibleCommand
 {
 public:
-    Deployment();
-    ~Deployment();
+    Monitor();
+    ~Monitor();
 
     void Update(float delta);
-    void OnBridgeAdded(BridgeSharedPtr& pBridge);
 
 private:
     using BridgeWeakPtrList = std::list<BridgeWeakPtr>;
 
-    BridgeWeakPtrList GetPendingDeployments() const;
     void ExecuteDeployments(const BridgeWeakPtrList& pendingDeployments);
     std::string GetAnsibleCommand() const;
     void OnDeploymentComplete(Bridge* pBridge, bool success);

@@ -1,0 +1,28 @@
+---
+- name: Monitor bridges
+  hosts: "{{ servers }}"
+  become: yes
+  vars:
+    ansible_ssh_host_key_checking: False
+  tasks:
+    - name: Fetch fingerprint
+      ansible.builtin.fetch:
+        src: /var/lib/tor/fingerprint
+        dest: ~/.local/share/turbine/bridges/{{ ansible_hostname }}/fingerprint
+        flat: yes
+    - name: Fetch hashed fingerprint
+      ansible.builtin.fetch:
+        src: /var/lib/tor/hashed-fingerprint
+        dest: ~/.local/share/turbine/bridges/{{ ansible_hostname }}/hashed-fingerprint
+        flat: yes
+    - name: Fetch bridge stats
+      ignore_errors: yes
+      ansible.builtin.fetch:
+        src: /var/lib/tor/stats/bridge-stats
+        dest: ~/.local/share/turbine/bridges/{{ ansible_hostname }}/bridge-stats
+        flat: yes
+    - name: Fetch notices
+      ansible.builtin.fetch:
+        src: /var/log/tor/notices.log
+        dest: ~/.local/share/turbine/bridges/{{ ansible_hostname }}/notices.log
+        flat: yes

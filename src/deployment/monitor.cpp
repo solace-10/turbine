@@ -27,7 +27,7 @@ SOFTWARE.
 
 #include "bridge/bridge.h"
 #include "core/shellcommand/shellcommand.hpp"
-#include "deployment/deployment.h"
+#include "deployment/monitor.hpp"
 #include "providers/provider.h"
 #include "windows/deploymentwindow.hpp"
 #include "settings.h"
@@ -36,25 +36,20 @@ SOFTWARE.
 namespace Turbine
 {
 
-Deployment::Deployment() :
+Monitor::Monitor() :
 m_ParsingResults(false)
 {
 
 }
     
-Deployment::~Deployment()
+Monitor::~Monitor()
 {
 
 }
 
-void Deployment::Update(float delta)
+void Monitor::Update(float delta)
 {
-    BridgeWeakPtrList pendingDeployments = GetPendingDeployments();
-    if (m_pAnsibleCommand == nullptr && pendingDeployments.size() > 0)
-    {
-        ExecuteDeployments(pendingDeployments);
-    }
-    else if (m_pAnsibleCommand)
+    if (m_pAnsibleCommand)
     {
         m_pAnsibleCommand->Update();
         if (m_pAnsibleCommand->GetState() == ShellCommand::State::Completed)
@@ -69,57 +64,27 @@ void Deployment::Update(float delta)
     }
 }
 
-void Deployment::ExecuteDeployments(const BridgeWeakPtrList& pendingDeployments)
+void Monitor::ExecuteDeployments(const BridgeWeakPtrList& pendingDeployments)
 {
-    for (auto& pPendingDeployment : pendingDeployments)
-    {
-        BridgeSharedPtr pBridge = pPendingDeployment.lock();
-        if (pBridge)
-        {
-            pBridge->SetState("Deploying");
-        }
-    }
-
     GenerateInventory();
 
     m_ParsingResults = false;
     m_pAnsibleCommand = std::make_unique<ShellCommand>(
         GetAnsibleCommand(),
-        std::bind(&Deployment::OnDeploymentCommandFinished, this, std::placeholders::_1),
-        std::bind(&Deployment::OnDeploymentCommandOutput, this, std::placeholders::_1)
+        std::bind(&Monitor::OnDeploymentCommandFinished, this, std::placeholders::_1),
+        std::bind(&Monitor::OnDeploymentCommandOutput, this, std::placeholders::_1)
     );
     m_pAnsibleCommand->Run();
 }
 
-std::string Deployment::GetAnsibleCommand() const
+std::string Monitor::GetAnsibleCommand() const
 {
     std::stringstream cmd;
     cmd << "/home/hostilenode/.local/bin/ansible-playbook -i /home/hostilenode/.local/share/turbine/inventory /home/hostilenode/Dev/turbine/bin/data/ansible/deploybrige.yaml -e '{\"servers\": [\"DeploymentPending\"]}'";
     return cmd.str();
 }
 
-void Deployment::OnBridgeAdded(BridgeSharedPtr& pBridge)
-{
-    m_Deployments.push_back(pBridge);
-}
-
-Deployment::BridgeWeakPtrList Deployment::GetPendingDeployments() const
-{
-    BridgeWeakPtrList pendingDeployments;
-
-    for (auto& pDeployment : m_Deployments)
-    {
-        BridgeSharedPtr pBridge = pDeployment.lock();
-        if (pBridge && pBridge->GetState() == "Deployment pending")
-        {
-            pendingDeployments.push_back(pDeployment);
-        }
-    }
-
-    return pendingDeployments;
-}
-
-void Deployment::OnDeploymentComplete(Bridge* pBridge, bool success)
+void Monitor::OnDeploymentComplete(Bridge* pBridge, bool success)
 {
     if (pBridge->GetState() == "Deploying")
     {
@@ -135,12 +100,12 @@ void Deployment::OnDeploymentComplete(Bridge* pBridge, bool success)
     }
 }
 
-void Deployment::OnDeploymentCommandFinished(int result)
+void Monitor::OnDeploymentCommandFinished(int result)
 {
 
 }
 
-void Deployment::OnDeploymentCommandOutput(const std::string& output)
+void Monitor::OnDeploymentCommandOutput(const std::string& output)
 {
     DeploymentWindow* pWindow = reinterpret_cast<DeploymentWindow*>(g_pTurbine->GetDeploymentWindow());
     pWindow->AddOutput(output + "\n");
@@ -159,7 +124,7 @@ void Deployment::OnDeploymentCommandOutput(const std::string& output)
     }
 }
 
-Bridge* Deployment::GetBridgeFromOutput(const std::string& output) const
+Bridge* Monitor::GetBridgeFromOutput(const std::string& output) const
 {
     size_t ipEndIdx = output.find(' ');
     if (ipEndIdx != std::string::npos)
@@ -177,7 +142,7 @@ Bridge* Deployment::GetBridgeFromOutput(const std::string& output) const
     return nullptr;
 }
 
-bool Deployment::GetSuccessFromOutput(const std::string& output) const
+bool Monitor::GetSuccessFromOutput(const std::string& output) const
 {
     return output.find("failed=0") != std::string::npos;
 }

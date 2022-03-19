@@ -24,44 +24,17 @@ SOFTWARE.
 
 #pragma once
 
-#include <list>
-#include <string>
-
-#include "bridge/bridge.h"
-#include "deployment/ansiblecommand.h"
-
 namespace Turbine
 {
 
-class HostsGenerator;
-using HostsGeneratorUniquePtr = std::unique_ptr<HostsGenerator>;
-class ShellCommand;
-using ShellCommandUniquePtr = std::unique_ptr<ShellCommand>;
-
-class Deployment : public AnsibleCommand
+class AnsibleCommand
 {
 public:
-    Deployment();
-    ~Deployment();
+    AnsibleCommand();
+    ~AnsibleCommand();
 
-    void Update(float delta);
-    void OnBridgeAdded(BridgeSharedPtr& pBridge);
-
-private:
-    using BridgeWeakPtrList = std::list<BridgeWeakPtr>;
-
-    BridgeWeakPtrList GetPendingDeployments() const;
-    void ExecuteDeployments(const BridgeWeakPtrList& pendingDeployments);
-    std::string GetAnsibleCommand() const;
-    void OnDeploymentComplete(Bridge* pBridge, bool success);
-    void OnDeploymentCommandFinished(int result);
-    void OnDeploymentCommandOutput(const std::string& output);
-    Bridge* GetBridgeFromOutput(const std::string& output) const;
-    bool GetSuccessFromOutput(const std::string& output) const;
-
-    BridgeWeakPtrList m_Deployments;
-    ShellCommandUniquePtr m_pAnsibleCommand;
-    bool m_ParsingResults;
+protected:
+    void GenerateInventory();
 };
 
 } // namespace Turbine
