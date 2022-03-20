@@ -76,6 +76,7 @@ public:
 	Window* GetCreateBridgeWindow();
 	Window* GetDeploymentWindow();
 	Window* GetSettingsWindow();
+	Window* GetBridgeWindow(Bridge* pBridge);
 
 	ProviderVector& GetProviders();
 	void AddBridge(BridgeSharedPtr&& bridge);
@@ -104,6 +105,8 @@ private:
 	
 	using BridgeMap = std::unordered_map<std::string, BridgeSharedPtr>;
 	BridgeMap m_Bridges;
+	using BridgeWindowMap = std::unordered_map<std::string, WindowUniquePtr>;
+	BridgeWindowMap m_BridgeWindows;
 	DeploymentUniquePtr m_pDeployment;
 	MonitorUniquePtr m_pMonitor;
 };

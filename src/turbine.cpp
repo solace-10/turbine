@@ -37,6 +37,7 @@ SOFTWARE.
 #include "imgui/imgui.h"
 #include "providers/digitalocean/digitaloceanprovider.h"
 #include "webclient/webclient.h"
+#include "windows/bridgewindow.hpp"
 #include "windows/bridgeswindow.h"
 #include "windows/createbridgewindow.h"
 #include "windows/deploymentwindow.hpp"
@@ -120,6 +121,11 @@ void Turbine::Update()
 	m_pSettingsWindow->Update(delta);
 	m_pSummaryWindow->Update(delta);
 
+	for (auto& pBridgeWindowPair : m_BridgeWindows)
+	{
+		pBridgeWindowPair.second->Update(delta);
+	}
+
 	for (auto& pProvider : m_Providers)
 	{
 		pProvider->Update(delta);
@@ -134,13 +140,21 @@ void Turbine::Update()
 	m_pSettingsWindow->Render();
 	m_pSummaryWindow->Render();
 	m_pNotificationLogger->Render();
+
+	for (auto& pBridgeWindowPair : m_BridgeWindows)
+	{
+		pBridgeWindowPair.second->Render();
+	}
 }
 
 void Turbine::AddBridge(BridgeSharedPtr&& pBridge)
 {
 	SDL_assert(m_Bridges.find(pBridge->GetId()) == m_Bridges.end());
 	m_Bridges[pBridge->GetId()] = pBridge;
+	m_BridgeWindows[pBridge->GetId()] = std::make_unique<BridgeWindow>(pBridge);
 	m_pDeployment->OnBridgeAdded(pBridge);
+
+	// Notify the monitor to retrieve monitored data from the new bridge.
 	m_pMonitor->Retrieve();
 }
 
@@ -164,6 +178,26 @@ BridgeList Turbine::GetBridges() const
 		bridges.push_back(bridge.second.get());
 	}
 	return bridges;
+}
+
+Window* Turbine::GetBridgeWindow(Bridge* pBridge)
+{
+	if (pBridge == nullptr)
+	{
+		return nullptr;
+	}
+	else
+	{
+		BridgeWindowMap::iterator it = m_BridgeWindows.find(pBridge->GetId());
+		if (it == m_BridgeWindows.end())
+		{
+			return nullptr;
+		}
+		else
+		{
+			return it->second.get();
+		}
+	}
 }
 
 } // namespace Turbine

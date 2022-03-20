@@ -26,7 +26,9 @@ SOFTWARE.
 #include "bridge/bridgesummarywidget.h"
 #include "imgui/imgui.h"
 #include "imguiext/widgets.h"
+#include "windows/window.h"
 #include "icons.h"
+#include "turbine.h"
 
 namespace Turbine
 {
@@ -69,6 +71,16 @@ void BridgeSummaryWidget::Render(Bridge* pBridge)
         Text("%s", pBridge->GetName().c_str());
         SetCursorScreenPos(ImVec2(pos.x + 38, pos.y + 20));
         TextUnformatted(pBridge->GetState().c_str());
+    }
+
+    SetCursorScreenPos(pos);
+    if (ImGui::InvisibleButton("BridgeSummaryButton", ImGui::GetWindowSize()))
+    {
+        Window* pWindow = g_pTurbine->GetBridgeWindow(pBridge);
+        if (pWindow != nullptr)
+        {
+            pWindow->Show(true);
+        }
     }
 
     EndChild();

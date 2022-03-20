@@ -27,17 +27,14 @@ SOFTWARE.
 #include <memory>
 #include <string>
 
-#include "bridgesummarywidget.h"
+#include "bridge/bridge.fwd.hpp"
+#include "bridge/bridgesummarywidget.h"
 
 namespace Turbine
 {
 
 class BridgeSummaryWidget;
 using BridgeSummaryWidgetUniquePtr = std::unique_ptr<BridgeSummaryWidget>;
-
-class Bridge;
-using BridgeWeakPtr = std::weak_ptr<Bridge>;
-using BridgeSharedPtr = std::shared_ptr<Bridge>;
 
 class Provider;
 
