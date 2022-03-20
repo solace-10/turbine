@@ -24,6 +24,7 @@ SOFTWARE.
 
 #pragma once
 
+#include <chrono>
 #include <list>
 #include <string>
 
@@ -33,8 +34,6 @@ SOFTWARE.
 namespace Turbine
 {
 
-class HostsGenerator;
-using HostsGeneratorUniquePtr = std::unique_ptr<HostsGenerator>;
 class ShellCommand;
 using ShellCommandUniquePtr = std::unique_ptr<ShellCommand>;
 
@@ -45,6 +44,7 @@ public:
     ~Monitor();
 
     void Update(float delta);
+    void Retrieve();
 
 private:
     using BridgeWeakPtrList = std::list<BridgeWeakPtr>;
@@ -60,6 +60,9 @@ private:
     BridgeWeakPtrList m_Deployments;
     ShellCommandUniquePtr m_pAnsibleCommand;
     bool m_ParsingResults;
+
+    std::chrono::time_point<std::chrono::system_clock> m_NextRetrieval;
+    std::chrono::hours m_RetrivalInterval;
 };
 
 } // namespace Turbine

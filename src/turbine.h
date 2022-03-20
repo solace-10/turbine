@@ -32,7 +32,6 @@ SOFTWARE.
 #include <SDL.h>
 
 #include "bridge/bridge.h"
-#include "camera.h"
 #include "geolocationdata.h"
 #include "json.hpp"
 #include "log.h"
@@ -46,6 +45,7 @@ namespace Turbine
 
 class Bridge;
 class Deployment;
+class Monitor;
 class Settings;
 class Provider;
 class TurbineRep;
@@ -54,10 +54,10 @@ class Window;
 
 using BridgeList = std::list<Bridge*>;
 using DeploymentUniquePtr = std::unique_ptr<Deployment>;
+using MonitorUniquePtr = std::unique_ptr<Monitor>;
 using SettingsUniquePtr = std::unique_ptr<Settings>;
 using ProviderUniquePtr = std::unique_ptr<Provider>;
 using TurbineRepUniquePtr = std::unique_ptr<TurbineRep>;
-using GeolocationDataMap = std::unordered_map<std::string, GeolocationDataSharedPtr>;
 using ProviderVector = std::vector<ProviderUniquePtr>;
 using WebClientUniquePtr = std::unique_ptr<WebClient>;
 using WindowUniquePtr = std::unique_ptr<Window>;
@@ -77,32 +77,19 @@ public:
 	Window* GetDeploymentWindow();
 	Window* GetSettingsWindow();
 
-	void OnMessageReceived(const json& message);
-
-	CameraVector GetCameras() const;
 	ProviderVector& GetProviders();
 	void AddBridge(BridgeSharedPtr&& bridge);
 	Bridge* GetBridge(const std::string& id);
 	const Bridge* GetBridge(const std::string& id) const;
 	BridgeList GetBridges() const;
 	Deployment* GetDeployment() const;
+	Monitor* GetMonitor() const;
 
 private:
 	void InitialiseLoggers(SDL_Window* pWindow);
-	void InitialiseGeolocation();
-	void InitialiseCameras();
 	void InitialiseProviders();
-	void AddGeolocationData(const json& message);
-	CameraSharedPtr FindCamera(const std::string& url);
-	void ChangeCameraState(CameraSharedPtr pCamera, Camera::State state);
 
 	bool m_Active;
-
-	std::mutex m_GeolocationDataMutex;
-	GeolocationDataMap m_GeolocationData;
-
-	mutable std::mutex m_CamerasMutex;
-	CameraVector m_Cameras;
 
 	WebClientUniquePtr m_pWebClient;
 	TurbineRepUniquePtr m_pRep;
@@ -118,6 +105,7 @@ private:
 	using BridgeMap = std::unordered_map<std::string, BridgeSharedPtr>;
 	BridgeMap m_Bridges;
 	DeploymentUniquePtr m_pDeployment;
+	MonitorUniquePtr m_pMonitor;
 };
 
 extern Turbine* g_pTurbine;
@@ -135,12 +123,6 @@ inline WebClient* Turbine::GetWebClient()
 inline Settings* Turbine::GetSettings() const
 {
 	return m_pConfiguration.get();
-}
-
-inline CameraVector Turbine::GetCameras() const
-{
-	std::scoped_lock lock(m_CamerasMutex);
-	return m_Cameras;
 }
 
 inline ProviderVector& Turbine::GetProviders()
@@ -171,6 +153,11 @@ inline Window* Turbine::GetSettingsWindow()
 inline Deployment* Turbine::GetDeployment() const
 {
 	return m_pDeployment.get();
+}
+
+inline Monitor* Turbine::GetMonitor() const
+{
+	return m_pMonitor.get();
 }
 
 } // namespace Turbine

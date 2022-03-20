@@ -39,7 +39,9 @@ namespace Turbine
 Monitor::Monitor() :
 m_ParsingResults(false)
 {
-
+    using namespace std::literals;
+    m_RetrivalInterval = 4h;
+    m_NextRetrieval = std::chrono::system_clock::now() + m_RetrivalInterval;
 }
     
 Monitor::~Monitor()
@@ -49,6 +51,19 @@ Monitor::~Monitor()
 
 void Monitor::Update(float delta)
 {
+    if (m_NextRetrieval < std::chrono::system_clock::now())
+    {
+        GenerateInventory();
+        m_ParsingResults = false;
+        m_pAnsibleCommand = std::make_unique<ShellCommand>(
+            GetAnsibleCommand(),
+            std::bind(&Monitor::OnDeploymentCommandFinished, this, std::placeholders::_1),
+            std::bind(&Monitor::OnDeploymentCommandOutput, this, std::placeholders::_1)
+        );
+        m_pAnsibleCommand->Run();
+        m_NextRetrieval = std::chrono::system_clock::now() + m_RetrivalInterval;
+    }
+
     if (m_pAnsibleCommand)
     {
         m_pAnsibleCommand->Update();
@@ -62,6 +77,11 @@ void Monitor::Update(float delta)
             m_pAnsibleCommand = nullptr;
         }
     }
+}
+
+void Monitor::Retrieve()
+{
+    m_NextRetrieval = std::chrono::system_clock::now();
 }
 
 void Monitor::ExecuteDeployments(const BridgeWeakPtrList& pendingDeployments)
@@ -80,24 +100,13 @@ void Monitor::ExecuteDeployments(const BridgeWeakPtrList& pendingDeployments)
 std::string Monitor::GetAnsibleCommand() const
 {
     std::stringstream cmd;
-    cmd << "/home/hostilenode/.local/bin/ansible-playbook -i /home/hostilenode/.local/share/turbine/inventory /home/hostilenode/Dev/turbine/bin/data/ansible/deploybrige.yaml -e '{\"servers\": [\"DeploymentPending\"]}'";
+    cmd << "/home/hostilenode/.local/bin/ansible-playbook -i /home/hostilenode/.local/share/turbine/inventory /home/hostilenode/Dev/turbine/bin/data/ansible/monitor.yaml -e '{\"servers\": [\"Deployed\"]}'";
     return cmd.str();
 }
 
 void Monitor::OnDeploymentComplete(Bridge* pBridge, bool success)
 {
-    if (pBridge->GetState() == "Deploying")
-    {
-        if (success)
-        {
-            pBridge->SetState("Deployed");
-            pBridge->GetProvider()->OnBridgeDeployed(pBridge);
-        }
-        else
-        {
-            pBridge->SetState("Deployment failed");
-        }
-    }
+
 }
 
 void Monitor::OnDeploymentCommandFinished(int result)

@@ -115,13 +115,6 @@ void CameraRep::Render()
 			{
 				m_WindowWidth = static_cast<float>(m_TextureWidth);
 				m_WindowHeight = static_cast<float>(m_TextureHeight);
-
-				json message =
-				{
-					{ "type", "stream_started" },
-					{ "url", pCamera->GetURL() }
-				};
-				g_pTurbine->OnMessageReceived(message);
 			}
 		}
 

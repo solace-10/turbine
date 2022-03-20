@@ -216,24 +216,24 @@ void TurbineRep::Render()
     m_pCommandBar->Render();
 	ImGui::End();
 
-	CameraVector cameras = g_pTurbine->GetCameras();
-	for (CameraSharedPtr& camera : cameras)
-	{
-		GeolocationData* pGeolocationData = camera->GetGeolocationData();
-		if (pGeolocationData != nullptr)
-		{
-			float locationX, locationY;
-			m_pAtlas->GetScreenCoordinates(pGeolocationData->GetLongitude(), pGeolocationData->GetLatitude(), locationX, locationY);
-			pDrawList->AddImage(
-				reinterpret_cast<ImTextureID>(uintptr_t(Icons::GetIcon(IconId::Pin))),
-				ImVec2(locationX - sPinHalfWidth, locationY - sPinHeight),
-				ImVec2(locationX + sPinHalfWidth, locationY),
-				ImVec2(0, 0),
-				ImVec2(1, 1),
-				GetPinColor(camera->GetState())
-			);
-		}
-	}
+	// CameraVector cameras = g_pTurbine->GetCameras();
+	// for (CameraSharedPtr& camera : cameras)
+	// {
+	// 	GeolocationData* pGeolocationData = camera->GetGeolocationData();
+	// 	if (pGeolocationData != nullptr)
+	// 	{
+	// 		float locationX, locationY;
+	// 		m_pAtlas->GetScreenCoordinates(pGeolocationData->GetLongitude(), pGeolocationData->GetLatitude(), locationX, locationY);
+	// 		pDrawList->AddImage(
+	// 			reinterpret_cast<ImTextureID>(uintptr_t(Icons::GetIcon(IconId::Pin))),
+	// 			ImVec2(locationX - sPinHalfWidth, locationY - sPinHeight),
+	// 			ImVec2(locationX + sPinHalfWidth, locationY),
+	// 			ImVec2(0, 0),
+	// 			ImVec2(1, 1),
+	// 			GetPinColor(camera->GetState())
+	// 		);
+	// 	}
+	// }
 
 	OpenPickedCamera();
 	RenderCameras();
@@ -282,7 +282,7 @@ void TurbineRep::OpenPickedCamera()
 					{ "url", hoveredCameras.front()->GetURL() },
 					{ "texture_id", m_CameraReps.back().GetTexture() }
 				};
-				g_pTurbine->OnMessageReceived(message);
+				//g_pTurbine->OnMessageReceived(message);
 			}
 		}
 
@@ -311,26 +311,26 @@ void TurbineRep::FlushClosedCameras()
 CameraVector TurbineRep::GetHoveredCameras()
 {
 	CameraVector hoveredCameras;
-	CameraVector cameras = g_pTurbine->GetCameras();
+	// CameraVector cameras = g_pTurbine->GetCameras();
 
-	int mx, my;
-	SDL_GetMouseState(&mx, &my);
+	// int mx, my;
+	// SDL_GetMouseState(&mx, &my);
 
-	for (CameraSharedPtr pCamera : cameras)
-	{
-		GeolocationData* pGeolocationData = pCamera->GetGeolocationData();
-		if (pGeolocationData != nullptr)
-		{
-			float locationX, locationY;
-			m_pAtlas->GetScreenCoordinates(pGeolocationData->GetLongitude(), pGeolocationData->GetLatitude(), locationX, locationY);
+	// for (CameraSharedPtr pCamera : cameras)
+	// {
+	// 	GeolocationData* pGeolocationData = pCamera->GetGeolocationData();
+	// 	if (pGeolocationData != nullptr)
+	// 	{
+	// 		float locationX, locationY;
+	// 		m_pAtlas->GetScreenCoordinates(pGeolocationData->GetLongitude(), pGeolocationData->GetLatitude(), locationX, locationY);
 
-			if (mx > locationX - sPinHalfWidth && mx < locationX + sPinHalfWidth && 
-				my > locationY - sPinHeight && my < locationY)
-			{
-				hoveredCameras.push_back(pCamera);
-			}
-		}
-	}
+	// 		if (mx > locationX - sPinHalfWidth && mx < locationX + sPinHalfWidth && 
+	// 			my > locationY - sPinHeight && my < locationY)
+	// 		{
+	// 			hoveredCameras.push_back(pCamera);
+	// 		}
+	// 	}
+	// }
 
 	return hoveredCameras;
 }

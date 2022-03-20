@@ -32,6 +32,7 @@ SOFTWARE.
 
 #include "bridge/bridge.h"
 #include "deployment/deployment.h"
+#include "deployment/monitor.hpp"
 #include "ext/json.hpp"
 #include "imgui/imgui.h"
 #include "providers/digitalocean/digitaloceanprovider.h"
@@ -67,6 +68,7 @@ m_Active(true)
 
 	m_pBridgesWindow = std::make_unique<BridgesWindow>();
 	m_pDeployment = std::make_unique<Deployment>();
+	m_pMonitor = std::make_unique<Monitor>();
 	m_pCreateBridgeWindow = std::make_unique<CreateBridgeWindow>();
 	m_pDeploymentWindow = std::make_unique<DeploymentWindow>();
 	m_pSettingsWindow = std::make_unique<SettingsWindow>();
@@ -74,10 +76,6 @@ m_Active(true)
 	m_pWebClient = std::make_unique<WebClient>();
 	m_pRep = std::make_unique<TurbineRep>(pWindow);
 
-	// All the geolocation data needs to be loaded before the cameras are, as every 
-	// camera will try to associate its IP address with a geolocation entry.
-	InitialiseGeolocation();
-	InitialiseCameras();
 	InitialiseProviders();
 }
 
@@ -102,16 +100,6 @@ void Turbine::InitialiseProviders()
 	m_Providers.emplace_back(std::make_unique<DigitalOceanProvider>());
 }
 
-void Turbine::InitialiseGeolocation()
-{
-
-}
-
-void Turbine::InitialiseCameras()
-{
-
-}
-
 void Turbine::ProcessEvent(const SDL_Event& event)
 {
 	m_pRep->ProcessEvent(event);
@@ -124,6 +112,7 @@ void Turbine::Update()
 	const float delta = ImGui::GetIO().DeltaTime;
 
 	m_pDeployment->Update(delta);
+	m_pMonitor->Update(delta);
 	m_pWebClient->Update();
 	m_pBridgesWindow->Update(delta);
 	m_pCreateBridgeWindow->Update(delta);
@@ -147,80 +136,12 @@ void Turbine::Update()
 	m_pNotificationLogger->Render();
 }
 
-void Turbine::OnMessageReceived(const json& message)
-{
-	const std::string& messageType = message["type"];
-	if (messageType == "log")
-	{
-		const std::string& messageLevel = message["level"];
-		const std::string& messagePlugin = message["plugin"];
-		const std::string& messageText = message["message"];
-		if (messageLevel == "warning") Log::Warning("%s %s", messagePlugin.c_str(), messageText.c_str());
-		else if (messageLevel == "error") Log::Error("%s %s", messagePlugin.c_str(), messageText.c_str());
-		else Log::Info("%s %s", messagePlugin.c_str(), messageText.c_str());
-	}
-	else if (messageType == "geolocation_result")
-	{
-		AddGeolocationData(message);
-	}
-	else if (messageType == "http_server_scan_result")
-	{
-	}
-	else if (messageType == "stream_started")
-	{
-		CameraSharedPtr pCamera = FindCamera(message["url"]);
-		if (pCamera != nullptr)
-		{
-			ChangeCameraState(pCamera, Camera::State::StreamAvailable);
-		}
-	}
-}
-
-CameraSharedPtr Turbine::FindCamera(const std::string& url)
-{
-	std::scoped_lock lock(m_CamerasMutex);
-	for (CameraSharedPtr& pCamera : m_Cameras)
-	{
-		if (pCamera->GetURL() == url)
-		{
-			return pCamera;
-		}
-	}
-	return CameraSharedPtr();
-}
-
-void Turbine::ChangeCameraState(CameraSharedPtr pCamera, Camera::State state)
-{
-	pCamera->SetState(state);
-}
-
-void Turbine::AddGeolocationData(const json& message)
-{
-	std::string addressStr = message["address"];
-	const IPAddress address(addressStr);
-	GeolocationDataSharedPtr pGeolocationData = std::make_shared<GeolocationData>(address);
-	pGeolocationData->LoadFromJSON(message);
-	Log::Info("Added geolocation data for %s: %s, %s", addressStr.c_str(), pGeolocationData->GetCity().c_str(), pGeolocationData->GetCountry().c_str());
-
-	{
-		std::scoped_lock lock(m_GeolocationDataMutex, m_CamerasMutex);
-		m_GeolocationData[addressStr] = pGeolocationData;
-
-		for (CameraSharedPtr& camera : m_Cameras)
-		{
-			if (camera->GetAddress().ToString() == pGeolocationData->GetIPAddress().ToString())
-			{
-				camera->SetGeolocationData(pGeolocationData);
-			}
-		}
-	}
-}
-
 void Turbine::AddBridge(BridgeSharedPtr&& pBridge)
 {
 	SDL_assert(m_Bridges.find(pBridge->GetId()) == m_Bridges.end());
 	m_Bridges[pBridge->GetId()] = pBridge;
 	m_pDeployment->OnBridgeAdded(pBridge);
+	m_pMonitor->Retrieve();
 }
 
 Bridge* Turbine::GetBridge(const std::string& id)
