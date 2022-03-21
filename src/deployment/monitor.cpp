@@ -104,11 +104,6 @@ std::string Monitor::GetAnsibleCommand() const
     return cmd.str();
 }
 
-void Monitor::OnDeploymentComplete(Bridge* pBridge, bool success)
-{
-
-}
-
 void Monitor::OnDeploymentCommandFinished(int result)
 {
 
@@ -128,7 +123,7 @@ void Monitor::OnDeploymentCommandOutput(const std::string& output)
         Bridge* pBridge = GetBridgeFromOutput(output);
         if (pBridge != nullptr)
         {
-            OnDeploymentComplete(pBridge, GetSuccessFromOutput(output));
+            pBridge->OnMonitoredDataUpdated();
         }
     }
 }
@@ -139,21 +134,15 @@ Bridge* Monitor::GetBridgeFromOutput(const std::string& output) const
     if (ipEndIdx != std::string::npos)
     {
         const std::string ip = output.substr(0, ipEndIdx);
-        for (BridgeWeakPtr pBridgeWeak : m_Deployments)
+        for (Bridge* pBridge : g_pTurbine->GetBridges())
         {
-            BridgeSharedPtr pBridge = pBridgeWeak.lock();
             if (pBridge && (ip == pBridge->GetIPv4() || ip == pBridge->GetIPv6()))
             {
-                return pBridge.get();
+                return pBridge;
             }
         }
     }
     return nullptr;
-}
-
-bool Monitor::GetSuccessFromOutput(const std::string& output) const
-{
-    return output.find("failed=0") != std::string::npos;
 }
 
 } // namespace Turbine

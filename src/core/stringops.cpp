@@ -24,54 +24,28 @@ SOFTWARE.
 
 #include <sstream>
 
-#include "imgui/imgui.h"
-#include "imgui/imgui_stdlib.h"
+#include "core/stringops.hpp"
 
-#include "bridge/bridge.h"
-#include "providers/provider.h"
-#include "windows/bridgewindow.hpp"
-#include "settings.h"
-#include "turbine.h"
-
-namespace Turbine
+namespace StringOps
 {
 
-BridgeWindow::BridgeWindow(BridgeSharedPtr& pBridge)
+bool BeginsWith(const std::string& text, const std::string& beginsWith)
 {
-    m_pBridge = pBridge;
+    return text.rfind(beginsWith, 0) == 0;
 }
 
-void BridgeWindow::Render()
+Tokens Split(const std::string& text, char delimiter)
 {
-	if (IsOpen() == false)
-	{
-		return;
-	}
+    Tokens tokens;
+    std::stringstream ss(text);
 
-    BridgeSharedPtr pBridge = m_pBridge.lock();
-    if (pBridge == nullptr)
+    std::string token;
+    while (getline(ss, token, delimiter))
     {
-        return;
+        tokens.push_back(token);
     }
 
-    std::stringstream windowName;
-    windowName << pBridge->GetName() << " - details";
-
-	ImGui::SetNextWindowSize(ImVec2(650, 400), ImGuiCond_FirstUseEver);
-	if (!ImGui::Begin(windowName.str().c_str(), &m_IsOpen))
-	{
-		ImGui::End();
-		return;
-	}
-
-    ImGui::Text("Name %s", pBridge->GetName().c_str());
-
-    std::string fingerprint = pBridge->GetFingerprint();
-    ImGui::InputText("Fingerprint", &fingerprint, ImGuiInputTextFlags_ReadOnly);
-    std::string hashedFingerprint = pBridge->GetHashedFingerprint();
-    ImGui::InputText("Hashed fingerprint", &hashedFingerprint, ImGuiInputTextFlags_ReadOnly);
-
-	ImGui::End();
+    return tokens;
 }
 
-} // namespace Turbine
+}

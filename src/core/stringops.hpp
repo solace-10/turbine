@@ -24,43 +24,15 @@ SOFTWARE.
 
 #pragma once
 
-#include <chrono>
-#include <list>
 #include <string>
+#include <vector>
 
-#include "bridge/bridge.h"
-#include "deployment/ansiblecommand.h"
-
-namespace Turbine
+namespace StringOps
 {
 
-class ShellCommand;
-using ShellCommandUniquePtr = std::unique_ptr<ShellCommand>;
+using Tokens = std::vector<std::string>;
 
-class Monitor : public AnsibleCommand
-{
-public:
-    Monitor();
-    ~Monitor();
+bool BeginsWith(const std::string& text, const std::string& beginsWith);
+Tokens Split(const std::string& text, char delimiter);
 
-    void Update(float delta);
-    void Retrieve();
-
-private:
-    using BridgeWeakPtrList = std::list<BridgeWeakPtr>;
-
-    void ExecuteDeployments(const BridgeWeakPtrList& pendingDeployments);
-    std::string GetAnsibleCommand() const;
-    void OnDeploymentCommandFinished(int result);
-    void OnDeploymentCommandOutput(const std::string& output);
-    Bridge* GetBridgeFromOutput(const std::string& output) const;
-
-    BridgeWeakPtrList m_Deployments;
-    ShellCommandUniquePtr m_pAnsibleCommand;
-    bool m_ParsingResults;
-
-    std::chrono::time_point<std::chrono::system_clock> m_NextRetrieval;
-    std::chrono::hours m_RetrivalInterval;
-};
-
-} // namespace Turbine
+}

@@ -23,11 +23,14 @@ SOFTWARE.
 */
 
 #include <array>
+#include <fstream>
 
 #include "bridge/bridge.h"
+#include "bridge/bridgestats.hpp"
 #include "bridge/bridgesummarywidget.h"
 #include "bridge/statemachine.h"
 #include "deployment/deployment.h"
+#include "settings.h"
 #include "turbine.h"
 
 namespace Turbine
@@ -44,6 +47,11 @@ m_ExtPort(0)
     m_pStateMachine = std::make_unique<StateMachine>(name);
     InitialiseStateMachine();
     m_pStateMachine->SetState(initialState, true);
+
+    m_BridgePath = g_pTurbine->GetSettings()->GetStoragePath() / "bridges" / GetName();
+    m_pBridgeStats = std::make_unique<BridgeStats>(this);
+
+    OnMonitoredDataUpdated();
 }
 
 Bridge::~Bridge()
@@ -115,6 +123,28 @@ void Bridge::SetExtPort(unsigned int port)
     m_ExtPort = port;
 }
 
+// Returns the location in the filesystem where we store
+// any files which are specific to this bridge.
+std::filesystem::path Bridge::GetStoragePath() const
+{
+    return m_BridgePath;
+}
+
+const std::string& Bridge::GetFingerprint() const
+{
+    return m_Fingerprint;
+}
+
+const std::string& Bridge::GetHashedFingerprint() const
+{
+    return m_HashedFingerprint;
+}
+
+BridgeStats* Bridge::GetStats() const
+{
+    return m_pBridgeStats.get();
+}
+
 void Bridge::RenderSummaryWidget()
 {
     m_pBridgeSummaryWidget->Render(this);
@@ -138,6 +168,52 @@ void Bridge::InitialiseStateMachine()
 	m_pStateMachine->LinkStates("New", "Offline");
     m_pStateMachine->LinkStates("New", "Deployment needed");
     m_pStateMachine->LinkStates("New", "Deploying");
+}
+
+void Bridge::OnMonitoredDataUpdated()
+{
+    ReadBridgeStats();
+    ReadFingerprint();
+    ReadHashedFingerprint();
+}
+
+void Bridge::ReadBridgeStats()
+{
+    m_pBridgeStats->OnMonitoredDataUpdated();
+}
+
+void Bridge::ReadFingerprint()
+{
+    m_Fingerprint = ReadFingerprint(m_BridgePath / "fingerprint");
+}
+
+void Bridge::ReadHashedFingerprint()
+{
+    m_HashedFingerprint = ReadFingerprint(m_BridgePath / "hashed-fingerprint");
+}
+
+std::string Bridge::ReadFingerprint(const std::filesystem::path filePath) const
+{
+    std::ifstream file(filePath, std::ifstream::in);
+    if (file.good())
+    {
+        std::string token;
+        std::vector<std::string> tokens;
+        while (getline(file, token, ' '))
+        {
+            tokens.push_back(token);
+        }
+        file.close();
+
+        if (tokens.size() == 2)
+        {
+            std::string fingerprint = tokens[1];
+            fingerprint.erase(std::remove(fingerprint.begin(), fingerprint.end(), '\n'), fingerprint.end());
+            return fingerprint;
+        }
+    }
+
+    return "";
 }
 
 } // namespace Turbine

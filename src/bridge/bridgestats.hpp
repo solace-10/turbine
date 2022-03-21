@@ -24,43 +24,51 @@ SOFTWARE.
 
 #pragma once
 
-#include <chrono>
+#include <filesystem>
 #include <list>
+#include <memory>
 #include <string>
+#include <unordered_map>
+#include <vector>
 
-#include "bridge/bridge.h"
-#include "deployment/ansiblecommand.h"
+#include "bridge/bridge.fwd.hpp"
 
 namespace Turbine
 {
 
-class ShellCommand;
-using ShellCommandUniquePtr = std::unique_ptr<ShellCommand>;
-
-class Monitor : public AnsibleCommand
+class BridgeStats
 {
 public:
-    Monitor();
-    ~Monitor();
+    BridgeStats(Bridge* pBridge);
+    ~BridgeStats();
 
-    void Update(float delta);
-    void Retrieve();
+    void OnMonitoredDataUpdated();
 
 private:
-    using BridgeWeakPtrList = std::list<BridgeWeakPtr>;
 
-    void ExecuteDeployments(const BridgeWeakPtrList& pendingDeployments);
-    std::string GetAnsibleCommand() const;
-    void OnDeploymentCommandFinished(int result);
-    void OnDeploymentCommandOutput(const std::string& output);
-    Bridge* GetBridgeFromOutput(const std::string& output) const;
+    struct Entry
+    {
+        Entry()
+        {
+            v4 = 0;
+            v6 = 0;
+        }
 
-    BridgeWeakPtrList m_Deployments;
-    ShellCommandUniquePtr m_pAnsibleCommand;
-    bool m_ParsingResults;
+        std::string date;
+        std::unordered_map<std::string, int> usage;
+        int v4;
+        int v6;
+    };
+    using EntryVector = std::vector<Entry>;
 
-    std::chrono::time_point<std::chrono::system_clock> m_NextRetrieval;
-    std::chrono::hours m_RetrivalInterval;
+    void ParseBridgeStatsEndLine(const std::string& line, Entry* pEntry);
+    void ParseBridgeIpsLine(const std::string& line, Entry* pEntry);
+    void ParseBridgeIpVersionsLine(const std::string& line, Entry* pEntry);
+
+    Bridge* m_pBridge;
+    std::filesystem::path m_BridgeStatsArchivePath;
+    std::filesystem::path m_BridgeStatsRawPath;
+    EntryVector m_Entries;
 };
 
 } // namespace Turbine

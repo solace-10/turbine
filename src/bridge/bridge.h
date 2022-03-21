@@ -24,6 +24,7 @@ SOFTWARE.
 
 #pragma once
 
+#include <filesystem>
 #include <memory>
 #include <string>
 
@@ -32,6 +33,9 @@ SOFTWARE.
 
 namespace Turbine
 {
+
+class BridgeStats;
+using BridgeStatsUniquePtr = std::unique_ptr<BridgeStats>;
 
 class BridgeSummaryWidget;
 using BridgeSummaryWidgetUniquePtr = std::unique_ptr<BridgeSummaryWidget>;
@@ -60,11 +64,21 @@ public:
     void SetORPort(unsigned int port);
     void SetExtPort(unsigned int port);
     void SetState(const std::string& state, bool force = false);
+    std::filesystem::path GetStoragePath() const;
+    const std::string& GetFingerprint() const;
+    const std::string& GetHashedFingerprint() const;
+    BridgeStats* GetStats() const;
+
+    void OnMonitoredDataUpdated();
 
     void RenderSummaryWidget();
 
 private:
     void InitialiseStateMachine();
+    std::string ReadFingerprint(const std::filesystem::path filePath) const;
+    void ReadFingerprint();
+    void ReadHashedFingerprint();
+    void ReadBridgeStats();
 
     Provider* m_pProvider;
     std::string m_Id;
@@ -75,6 +89,10 @@ private:
     std::string m_Ipv6;
     unsigned int m_ORPort;
     unsigned int m_ExtPort;
+    std::string m_Fingerprint;
+    std::string m_HashedFingerprint;
+    BridgeStatsUniquePtr m_pBridgeStats;
+    std::filesystem::path m_BridgePath;
 };
 
 } // namespace Turbine
