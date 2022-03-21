@@ -36,6 +36,8 @@ SOFTWARE.
 namespace Turbine
 {
 
+using PerCountryStats = std::unordered_map<std::string, int>;
+
 class BridgeStats
 {
 public:
@@ -44,7 +46,15 @@ public:
 
     void OnMonitoredDataUpdated();
 
+    size_t GetEntryCount() const;
+    const std::string& GetDate(size_t entryId) const;
+    int GetIpv4Stats(size_t entryId) const;
+    int GetIpv6Stats(size_t entryId) const;
+    const PerCountryStats& GetPerCountryStats(size_t entryId) const;
+
 private:
+    void ReadArchive();
+    void WriteArchive();
 
     struct Entry
     {
@@ -64,11 +74,37 @@ private:
     void ParseBridgeStatsEndLine(const std::string& line, Entry* pEntry);
     void ParseBridgeIpsLine(const std::string& line, Entry* pEntry);
     void ParseBridgeIpVersionsLine(const std::string& line, Entry* pEntry);
+    bool AddEntry(Entry&& entry);
 
     Bridge* m_pBridge;
     std::filesystem::path m_BridgeStatsArchivePath;
     std::filesystem::path m_BridgeStatsRawPath;
     EntryVector m_Entries;
 };
+
+inline size_t BridgeStats::GetEntryCount() const
+{
+    return m_Entries.size();
+}
+
+inline const std::string& BridgeStats::GetDate(size_t entryId) const
+{
+    return m_Entries.at(entryId).date;
+}
+
+inline int BridgeStats::GetIpv4Stats(size_t entryId) const
+{
+    return m_Entries.at(entryId).v4;
+}
+
+inline int BridgeStats::GetIpv6Stats(size_t entryId) const
+{
+    return m_Entries.at(entryId).v6;
+}
+
+inline const PerCountryStats& BridgeStats::GetPerCountryStats(size_t entryId) const
+{
+    return m_Entries.at(entryId).usage;
+}
 
 } // namespace Turbine

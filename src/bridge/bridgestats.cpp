@@ -29,6 +29,7 @@ SOFTWARE.
 #include "bridge/bridge.h"
 #include "bridge/bridgestats.hpp"
 #include "core/stringops.hpp"
+#include "json.hpp"
 
 namespace Turbine
 {
@@ -43,11 +44,57 @@ m_pBridge(pBridge)
     // The archive file contains the aggregated statistics over a period of time.
     // New data is appended to it when the raw file contains updated stats.
     m_BridgeStatsArchivePath = pBridge->GetStoragePath() / "bridgestats.json";
+
+    ReadArchive();
 }
 
 BridgeStats::~BridgeStats()
 {
 
+}
+
+void BridgeStats::ReadArchive()
+{
+    using json = nlohmann::json;
+    std::ifstream file(m_BridgeStatsArchivePath, std::ifstream::in);
+    if (file.good())
+    {
+        json data;
+        file >> data;
+        file.close();
+
+        for (const json& e : data)
+        {
+            Entry entry;
+            entry.date = e["date"].get<std::string>();
+            entry.v4 = e["ipv4"].get<int>();
+            entry.v6 = e["ipv6"].get<int>();
+            entry.usage = e["usage"].get<PerCountryStats>();
+            m_Entries.push_back(std::move(entry));
+        }
+    }
+}
+
+void BridgeStats::WriteArchive()
+{
+    using json = nlohmann::json;
+    json data = json::array();
+    for (Entry& entry : m_Entries)
+    {
+        json e;
+        e["date"] = entry.date;
+        e["ipv4"] = entry.v4;
+        e["ipv6"] = entry.v6;
+        e["usage"] = entry.usage;
+        data += e;
+    }
+
+    std::ofstream file(m_BridgeStatsArchivePath, std::ofstream::out | std::ofstream::trunc);
+    if (file.good())
+    {
+        file << data.dump();
+        file.close();
+    }
 }
 
 void BridgeStats::OnMonitoredDataUpdated()
@@ -74,9 +121,27 @@ void BridgeStats::OnMonitoredDataUpdated()
                 ParseBridgeIpVersionsLine(line, &entry);
             }
         }
-
         file.close();
+
+        if (AddEntry(std::move(entry)))
+        {
+            WriteArchive();
+        }
     }
+}
+
+bool BridgeStats::AddEntry(Entry&& entry)
+{
+    for (auto& existingEntry : m_Entries)
+    {
+        if (existingEntry.date == entry.date)
+        {
+            return false;
+        }
+    }
+
+    m_Entries.push_back(std::move(entry));
+    return true;
 }
 
 void BridgeStats::ParseBridgeStatsEndLine(const std::string& line, Entry* pEntry)

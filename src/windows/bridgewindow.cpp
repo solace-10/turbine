@@ -28,6 +28,7 @@ SOFTWARE.
 #include "imgui/imgui_stdlib.h"
 
 #include "bridge/bridge.h"
+#include "bridge/bridgestats.hpp"
 #include "providers/provider.h"
 #include "windows/bridgewindow.hpp"
 #include "settings.h"
@@ -66,10 +67,30 @@ void BridgeWindow::Render()
 
     ImGui::Text("Name %s", pBridge->GetName().c_str());
 
+    ImGui::Text("IPv4: %s", pBridge->GetIPv4().c_str());
+    ImGui::Text("IPv6: %s", pBridge->GetIPv6().c_str());
+
     std::string fingerprint = pBridge->GetFingerprint();
     ImGui::InputText("Fingerprint", &fingerprint, ImGuiInputTextFlags_ReadOnly);
     std::string hashedFingerprint = pBridge->GetHashedFingerprint();
     ImGui::InputText("Hashed fingerprint", &hashedFingerprint, ImGuiInputTextFlags_ReadOnly);
+
+    ImGui::TextUnformatted("Stats:");
+
+    BridgeStats* pStats = pBridge->GetStats();
+    size_t numEntries = pStats->GetEntryCount();
+    for (size_t i = 0; i < numEntries; ++i)
+    {
+        ImGui::TextUnformatted(pStats->GetDate(i).c_str());
+        ImGui::Text("- IPv4 users: %d", pStats->GetIpv4Stats(i));
+        ImGui::Text("- IPv6 users: %d", pStats->GetIpv6Stats(i));
+        ImGui::TextUnformatted("- Per country:");
+        const PerCountryStats& perCountryStats = pStats->GetPerCountryStats(i);
+        for (auto& pair : perCountryStats)
+        {
+            ImGui::Text("  - %s: %d", pair.first.c_str(), pair.second);
+        }
+    }
 
 	ImGui::End();
 }
