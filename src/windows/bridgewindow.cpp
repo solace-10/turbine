@@ -70,6 +70,8 @@ void BridgeWindow::Render()
     ImGui::Text("IPv4: %s", pBridge->GetIPv4().c_str());
     ImGui::Text("IPv6: %s", pBridge->GetIPv6().c_str());
 
+    ImGui::Text("Distribution mechanism: %s", pBridge->GetDistributionMechanism().c_str());
+
     std::string fingerprint = pBridge->GetFingerprint();
     ImGui::InputText("Fingerprint", &fingerprint, ImGuiInputTextFlags_ReadOnly);
     std::string hashedFingerprint = pBridge->GetHashedFingerprint();

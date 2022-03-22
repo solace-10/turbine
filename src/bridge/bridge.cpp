@@ -30,6 +30,7 @@ SOFTWARE.
 #include "bridge/bridgesummarywidget.h"
 #include "bridge/statemachine.h"
 #include "deployment/deployment.h"
+#include "webclient/webclient.h"
 #include "settings.h"
 #include "turbine.h"
 
@@ -41,7 +42,8 @@ m_pProvider(pProvider),
 m_Id(id),
 m_Name(name),
 m_ORPort(0),
-m_ExtPort(0)
+m_ExtPort(0),
+m_DistributionMechanism("unknown")
 {
     m_pBridgeSummaryWidget = std::make_unique<BridgeSummaryWidget>();
     m_pStateMachine = std::make_unique<StateMachine>(name);
@@ -145,6 +147,11 @@ BridgeStats* Bridge::GetStats() const
     return m_pBridgeStats.get();
 }
 
+const std::string& Bridge::GetDistributionMechanism() const
+{
+    return m_DistributionMechanism;
+}
+
 void Bridge::RenderSummaryWidget()
 {
     m_pBridgeSummaryWidget->Render(this);
@@ -175,6 +182,7 @@ void Bridge::OnMonitoredDataUpdated()
     ReadBridgeStats();
     ReadFingerprint();
     ReadHashedFingerprint();
+    RetrieveDistributionMechanism();
 }
 
 void Bridge::ReadBridgeStats()
@@ -214,6 +222,44 @@ std::string Bridge::ReadFingerprint(const std::filesystem::path filePath) const
     }
 
     return "";
+}
+
+void Bridge::RetrieveDistributionMechanism()
+{
+    using json = nlohmann::json;
+
+    std::stringstream url;
+    url << "https://onionoo.torproject.org/details?lookup=" << m_HashedFingerprint;
+
+    g_pTurbine->GetWebClient()->Get(url.str(), {},
+		[this, &distributionMechanism = m_DistributionMechanism](const WebClientRequestResult& result)
+		{
+			json data = json::parse(result.GetData());
+            json::const_iterator it = data.find("bridges");
+            if (it == data.end() || !it->is_array())
+            {
+                return;
+            }
+
+            const json& bridges = *it;
+            for (auto& bridge : bridges)
+            {
+                it = bridge.find("nickname");
+                if (it == bridge.end() || !it->is_string() || it->get<std::string>() != this->GetName())
+                {
+                    continue;
+                }
+
+                it = bridge.find("bridgedb_distributor");
+                if (it == bridge.end() || !it->is_string())
+                {
+                    continue;
+                }
+
+                distributionMechanism = it->get<std::string>();
+            }
+		}
+	);
 }
 
 } // namespace Turbine

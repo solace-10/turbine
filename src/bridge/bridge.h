@@ -68,6 +68,7 @@ public:
     const std::string& GetFingerprint() const;
     const std::string& GetHashedFingerprint() const;
     BridgeStats* GetStats() const;
+    const std::string& GetDistributionMechanism() const;
 
     void OnMonitoredDataUpdated();
 
@@ -79,6 +80,7 @@ private:
     void ReadFingerprint();
     void ReadHashedFingerprint();
     void ReadBridgeStats();
+    void RetrieveDistributionMechanism();
 
     Provider* m_pProvider;
     std::string m_Id;
@@ -93,6 +95,7 @@ private:
     std::string m_HashedFingerprint;
     BridgeStatsUniquePtr m_pBridgeStats;
     std::filesystem::path m_BridgePath;
+    std::string m_DistributionMechanism;
 };
 
 } // namespace Turbine
