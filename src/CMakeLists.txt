@@ -27,6 +27,7 @@ find_package(SDL2_image REQUIRED)
 include_directories(
   "."
   "ext"
+  "ext/imgui"
   ${CURL_INCLUDE_DIRS}
   ${SDL2_INCLUDE_DIRS}
   ${SDL2_IMAGE_INCLUDE_DIRS}

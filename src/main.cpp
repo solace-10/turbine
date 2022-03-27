@@ -12,6 +12,8 @@
 #include <SDL_image.h>
 #include <SDL_opengl.h>
 #include <curl/curl.h>
+#include <implot/implot.h>
+
 #include "turbine.h"
 
 int main(int, char**)
@@ -62,6 +64,7 @@ int main(int, char**)
     // Setup Dear ImGui binding
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
+	ImPlot::CreateContext();
 	ImGuiIO& io = ImGui::GetIO(); (void)io;
 	io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;       // Enable Keyboard Controls
 	io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;           // Enable Docking
@@ -161,6 +164,7 @@ int main(int, char**)
 	// Cleanup
 	ImGui_ImplOpenGL3_Shutdown();
 	ImGui_ImplSDL2_Shutdown();
+	ImPlot::DestroyContext();
 	ImGui::DestroyContext();
 
     curl_global_cleanup();

@@ -23,6 +23,7 @@ SOFTWARE.
 */
 
 #include <imgui/imgui.h>
+#include <implot/implot.h>
 
 #include "atlas/tilestreamer.h"
 #include "windows/settingswindow.h"
@@ -35,7 +36,8 @@ namespace Turbine
 CommandBar::CommandBar()
 {
     m_ShowAtlasTileStreamer = false;
-    m_ShowDemoWindow = false;
+    m_ShowImGuiDemoWindow = false;
+    m_ShowImPlotDemoWindow = false;
 }
 
 void CommandBar::Render()
@@ -73,10 +75,16 @@ void CommandBar::Render()
                     g_pTurbine->GetDeploymentWindow()->Show(deploymentWindowOpen);
                 }
 
-				if (ImGui::MenuItem("ImGui demo window", nullptr, m_ShowDemoWindow))
+				if (ImGui::MenuItem("ImGui demo window", nullptr, m_ShowImGuiDemoWindow))
 				{
-					m_ShowDemoWindow = !m_ShowDemoWindow;
+					m_ShowImGuiDemoWindow = !m_ShowImGuiDemoWindow;
 				}
+
+                if (ImGui::MenuItem("ImPlot demot window", nullptr, m_ShowImPlotDemoWindow))
+                {
+                    m_ShowImPlotDemoWindow = !m_ShowImPlotDemoWindow;
+                }
+
 				ImGui::EndMenu();
 			}
 
@@ -99,9 +107,14 @@ void CommandBar::Render()
         TileStreamer::ShowDebugUI(&m_ShowAtlasTileStreamer);
     }
 
-    if (m_ShowDemoWindow)
+    if (m_ShowImGuiDemoWindow)
     {
-        ImGui::ShowDemoWindow(&m_ShowDemoWindow);
+        ImGui::ShowDemoWindow(&m_ShowImGuiDemoWindow);
+    }
+
+    if (m_ShowImPlotDemoWindow)
+    {
+        ImPlot::ShowDemoWindow(&m_ShowImPlotDemoWindow);
     }
 
     ImGui::End();
