@@ -80,7 +80,7 @@ void CommandBar::Render()
 					m_ShowImGuiDemoWindow = !m_ShowImGuiDemoWindow;
 				}
 
-                if (ImGui::MenuItem("ImPlot demot window", nullptr, m_ShowImPlotDemoWindow))
+                if (ImGui::MenuItem("ImPlot demo window", nullptr, m_ShowImPlotDemoWindow))
                 {
                     m_ShowImPlotDemoWindow = !m_ShowImPlotDemoWindow;
                 }
