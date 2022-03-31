@@ -24,8 +24,9 @@ SOFTWARE.
 
 #include <sstream>
 
-#include "imgui/imgui.h"
-#include "imgui/imgui_stdlib.h"
+#include <imgui/imgui.h>
+#include <imgui/imgui_stdlib.h>
+#include <implot/implot.h>
 
 #include "bridge/bridge.h"
 #include "bridge/bridgestats.hpp"
@@ -79,20 +80,8 @@ void BridgeWindow::Render()
 
     ImGui::TextUnformatted("Stats:");
 
-    BridgeStats* pStats = pBridge->GetStats();
-    size_t numEntries = pStats->GetEntryCount();
-    for (size_t i = 0; i < numEntries; ++i)
-    {
-        ImGui::TextUnformatted(pStats->GetDate(i).c_str());
-        ImGui::Text("- IPv4 users: %d", pStats->GetIpv4Stats(i));
-        ImGui::Text("- IPv6 users: %d", pStats->GetIpv6Stats(i));
-        ImGui::TextUnformatted("- Per country:");
-        const PerCountryStats& perCountryStats = pStats->GetPerCountryStats(i);
-        for (auto& pair : perCountryStats)
-        {
-            ImGui::Text("  - %s: %d", pair.first.c_str(), pair.second);
-        }
-    }
+    BridgeStatsSharedPtr pStats = pBridge->GetStats();
+    pStats->RenderPerCountryStats();
 
 	ImGui::End();
 }

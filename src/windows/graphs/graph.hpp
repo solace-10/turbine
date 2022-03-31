@@ -26,15 +26,24 @@ SOFTWARE.
 
 #include <memory>
 
+#include "bridge/bridge.fwd.hpp"
+
 namespace Turbine
 {
 
-class Bridge;
-using BridgeWeakPtr = std::weak_ptr<Bridge>;
-using BridgeSharedPtr = std::shared_ptr<Bridge>;
+class Graph
+{
+public:
+    Graph(BridgeStatsSharedPtr& pBridgeStats);
+	virtual void Render();
 
-class BridgeStats;
-using BridgeStatsWeakPtr = std::weak_ptr<BridgeStats>;
-using BridgeStatsSharedPtr = std::shared_ptr<BridgeStats>;
+protected:
+    virtual void OnBridgeStatsChanged();
+
+    BridgeStatsWeakPtr m_pStats;
+
+private:
+    int m_LastStatsVersion;
+};
 
 } // namespace Turbine

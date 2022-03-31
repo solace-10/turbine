@@ -51,7 +51,7 @@ m_DistributionMechanism("unknown")
     m_pStateMachine->SetState(initialState, true);
 
     m_BridgePath = g_pTurbine->GetSettings()->GetStoragePath() / "bridges" / GetName();
-    m_pBridgeStats = std::make_unique<BridgeStats>(this);
+    m_pBridgeStats = std::make_shared<BridgeStats>(this);
 
     OnMonitoredDataUpdated();
 }
@@ -142,9 +142,14 @@ const std::string& Bridge::GetHashedFingerprint() const
     return m_HashedFingerprint;
 }
 
-BridgeStats* Bridge::GetStats() const
+const BridgeStatsSharedPtr& Bridge::GetStats() const
 {
-    return m_pBridgeStats.get();
+    return m_pBridgeStats;
+}
+
+BridgeStatsSharedPtr& Bridge::GetStats()
+{
+    return m_pBridgeStats;
 }
 
 const std::string& Bridge::GetDistributionMechanism() const

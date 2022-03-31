@@ -22,19 +22,32 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-#pragma once
-
-#include <memory>
+#include "bridge/bridgestats.hpp"
+#include "windows/graphs/graph.hpp"
 
 namespace Turbine
 {
+    
+Graph::Graph(BridgeStatsSharedPtr& pBridgeStats) :
+m_pStats(pBridgeStats),
+m_LastStatsVersion(0)
+{
 
-class Bridge;
-using BridgeWeakPtr = std::weak_ptr<Bridge>;
-using BridgeSharedPtr = std::shared_ptr<Bridge>;
+}
 
-class BridgeStats;
-using BridgeStatsWeakPtr = std::weak_ptr<BridgeStats>;
-using BridgeStatsSharedPtr = std::shared_ptr<BridgeStats>;
+void Graph::Render()
+{
+    BridgeStatsSharedPtr pStats = m_pStats.lock();
+    if (pStats && pStats->GetVersion() != m_LastStatsVersion)
+    {
+        m_LastStatsVersion = pStats->GetVersion();
+        OnBridgeStatsChanged();
+    }
+}
+
+void Graph::OnBridgeStatsChanged()
+{
+    
+}
 
 } // namespace Turbine

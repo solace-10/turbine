@@ -52,6 +52,10 @@ public:
     int GetIpv6Stats(size_t entryId) const;
     const PerCountryStats& GetPerCountryStats(size_t entryId) const;
 
+    void RenderPerCountryStats();
+
+    int GetVersion() const;
+
 private:
     void ReadArchive();
     void WriteArchive();
@@ -80,6 +84,8 @@ private:
     std::filesystem::path m_BridgeStatsArchivePath;
     std::filesystem::path m_BridgeStatsRawPath;
     EntryVector m_Entries;
+
+    int m_Version;
 };
 
 inline size_t BridgeStats::GetEntryCount() const
@@ -105,6 +111,11 @@ inline int BridgeStats::GetIpv6Stats(size_t entryId) const
 inline const PerCountryStats& BridgeStats::GetPerCountryStats(size_t entryId) const
 {
     return m_Entries.at(entryId).usage;
+}
+
+inline int BridgeStats::GetVersion() const
+{
+    return m_Version;
 }
 
 } // namespace Turbine

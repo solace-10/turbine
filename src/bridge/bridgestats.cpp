@@ -26,6 +26,9 @@ SOFTWARE.
 #include <filesystem>
 #include <fstream>
 
+#include <imgui/imgui.h>
+#include <implot/implot.h>
+
 #include "bridge/bridge.h"
 #include "bridge/bridgestats.hpp"
 #include "core/stringops.hpp"
@@ -35,7 +38,8 @@ namespace Turbine
 {
 
 BridgeStats::BridgeStats(Bridge* pBridge) :
-m_pBridge(pBridge)
+m_pBridge(pBridge),
+m_Version(0)
 {
     // The raw file contains the bridge-stats file which we download from the bridge via Ansible. 
     // This file only contains stats for the last 24h.
@@ -50,6 +54,49 @@ m_pBridge(pBridge)
 
 BridgeStats::~BridgeStats()
 {
+
+}
+
+void BridgeStats::RenderPerCountryStats()
+{
+    if (m_Entries.empty())
+    {
+        return;
+    }
+
+    size_t numEntries = GetEntryCount();
+    for (size_t i = 0; i < numEntries; ++i)
+    {
+        ImGui::TextUnformatted(GetDate(i).c_str());
+        ImGui::Text("- IPv4 users: %d", GetIpv4Stats(i));
+        ImGui::Text("- IPv6 users: %d", GetIpv6Stats(i));
+        ImGui::TextUnformatted("- Per country:");
+        const PerCountryStats& perCountryStats = GetPerCountryStats(i);
+        for (auto& pair : perCountryStats)
+        {
+            ImGui::Text("  - %s: %d", pair.first.c_str(), pair.second);
+        }
+    }
+
+    //const size_t numEntries = GetEntryCount();
+    std::vector<float> posX;
+    std::vector<float> posY;
+    posX.resize(numEntries);
+    posY.resize(numEntries);
+    for (size_t i = 0; i < numEntries; ++i)
+    {
+        posX[i] = static_cast<float>(i) / static_cast<float>(numEntries);
+        posY[i] = static_cast<float>(m_Entries[i].v4);
+    }
+
+    if (ImPlot::BeginPlot("Line Plot")) 
+    {
+        ImPlot::SetupAxes("Date","Users");
+        ImPlot::PlotLine("IPv4", posX.data(), posY.data(), numEntries);
+        //ImPlot::SetNextMarkerStyle(ImPlotMarker_Circle);
+        //ImPlot::PlotLine("x^2", xs2, ys2, 11);
+        ImPlot::EndPlot();
+    }
 
 }
 
@@ -72,6 +119,8 @@ void BridgeStats::ReadArchive()
             entry.usage = e["usage"].get<PerCountryStats>();
             m_Entries.push_back(std::move(entry));
         }
+
+        m_Version++;
     }
 }
 
@@ -127,6 +176,8 @@ void BridgeStats::OnMonitoredDataUpdated()
         {
             WriteArchive();
         }
+
+        m_Version++;
     }
 }
 

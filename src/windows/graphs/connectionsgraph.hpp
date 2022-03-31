@@ -24,17 +24,19 @@ SOFTWARE.
 
 #pragma once
 
-#include <memory>
+#include "windows/graphs/graph.hpp"
 
 namespace Turbine
 {
 
-class Bridge;
-using BridgeWeakPtr = std::weak_ptr<Bridge>;
-using BridgeSharedPtr = std::shared_ptr<Bridge>;
+class ConnectionsGraph : public Graph
+{
+public:
+    ConnectionsGraph(BridgeStatsSharedPtr& pBridgeStats);
+	virtual void Render() override;
 
-class BridgeStats;
-using BridgeStatsWeakPtr = std::weak_ptr<BridgeStats>;
-using BridgeStatsSharedPtr = std::shared_ptr<BridgeStats>;
+protected:
+    virtual void OnBridgeStatsChanged() override;
+};
 
 } // namespace Turbine

@@ -34,9 +34,6 @@ SOFTWARE.
 namespace Turbine
 {
 
-class BridgeStats;
-using BridgeStatsUniquePtr = std::unique_ptr<BridgeStats>;
-
 class BridgeSummaryWidget;
 using BridgeSummaryWidgetUniquePtr = std::unique_ptr<BridgeSummaryWidget>;
 
@@ -67,7 +64,8 @@ public:
     std::filesystem::path GetStoragePath() const;
     const std::string& GetFingerprint() const;
     const std::string& GetHashedFingerprint() const;
-    BridgeStats* GetStats() const;
+    const BridgeStatsSharedPtr& GetStats() const;
+    BridgeStatsSharedPtr& GetStats();
     const std::string& GetDistributionMechanism() const;
 
     void OnMonitoredDataUpdated();
@@ -93,7 +91,7 @@ private:
     unsigned int m_ExtPort;
     std::string m_Fingerprint;
     std::string m_HashedFingerprint;
-    BridgeStatsUniquePtr m_pBridgeStats;
+    BridgeStatsSharedPtr m_pBridgeStats;
     std::filesystem::path m_BridgePath;
     std::string m_DistributionMechanism;
 };
