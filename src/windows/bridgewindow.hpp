@@ -30,14 +30,19 @@ SOFTWARE.
 namespace Turbine
 {
 
+class Graph;
+using GraphUniquePtr = std::unique_ptr<Graph>;
+
 class BridgeWindow : public Window
 {
 public:
     BridgeWindow(BridgeSharedPtr& pBridge);
+    virtual ~BridgeWindow();
 	virtual void Render() override;
 
 private:
     BridgeWeakPtr m_pBridge;
+    GraphUniquePtr m_pConnectionsGraph;
 };
 
 } // namespace Turbine

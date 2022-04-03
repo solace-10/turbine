@@ -22,6 +22,10 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+#include <imgui/imgui.h>
+#include <implot/implot.h>
+
+#include "bridge/bridgestats.hpp"
 #include "windows/graphs/connectionsgraph.hpp"
 
 namespace Turbine
@@ -30,23 +34,54 @@ namespace Turbine
 ConnectionsGraph::ConnectionsGraph(BridgeStatsSharedPtr& pBridgeStats) :
 Graph(pBridgeStats)
 {
-
+    
 }
 
 void ConnectionsGraph::Render()
 {
     Graph::Render();
 
-    BridgeStatsSharedPtr pStats = m_pStats.lock();
-    if (pStats == nullptr)
+    if (m_Dates.empty() == false && ImPlot::BeginPlot("Connections")) 
     {
-        return;
+        
+        ImPlot::SetupAxis(ImAxis_X1, nullptr, ImPlotAxisFlags_Time);
+        ImPlot::SetupAxesLimits(m_DomainX[0], m_DomainX[1], m_DomainY[0], m_DomainY[1]);
+        ImPlot::SetupAxis(ImAxis_Y1, "Connections");
+        ImPlot::PlotLine("IPv4", m_Dates.data(), m_ConnectionsIPv4.data(), m_Dates.size());
+        ImPlot::PlotLine("IPv6", m_Dates.data(), m_ConnectionsIPv6.data(), m_Dates.size());
+        ImPlot::EndPlot();
     }
 }
 
 void ConnectionsGraph::OnBridgeStatsChanged()
 {
     Graph::OnBridgeStatsChanged();
+
+    BridgeStatsSharedPtr pStats = m_pStats.lock();
+    if (pStats == nullptr)
+    {
+        return;
+    }
+
+    m_Dates.clear();
+    m_ConnectionsIPv4.clear();
+    m_ConnectionsIPv6.clear();
+
+    const size_t numEntries = pStats->GetEntryCount();
+    m_Dates.resize(numEntries);
+    m_ConnectionsIPv4.resize(numEntries);
+    m_ConnectionsIPv6.resize(numEntries);
+    for (size_t i = 0; i < numEntries; ++i)
+    {
+        m_Dates[i] = ToUnixTimestamp(pStats->GetDate(i));
+        m_ConnectionsIPv4[i] = static_cast<double>(pStats->GetIpv4Stats(i));
+        m_ConnectionsIPv6[i] = static_cast<double>(pStats->GetIpv6Stats(i));
+
+        m_DomainY[1] = std::max(std::max(m_DomainY[1], m_ConnectionsIPv4[i]), m_ConnectionsIPv6[i]);
+    }
+    m_DomainX[0] = m_Dates.front();
+    m_DomainX[1] = m_Dates.back();
+    m_DomainY[1] = m_DomainY[1] + 10; // Ensure we don't get clipped at the top of the graph.
 }
 
 } // namespace Turbine

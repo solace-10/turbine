@@ -24,6 +24,8 @@ SOFTWARE.
 
 #pragma once
 
+#include <vector>
+
 #include "windows/graphs/graph.hpp"
 
 namespace Turbine
@@ -37,6 +39,10 @@ public:
 
 protected:
     virtual void OnBridgeStatsChanged() override;
+
+    std::vector<double> m_ConnectionsIPv4;
+    std::vector<double> m_ConnectionsIPv6;
+    std::vector<double> m_Dates;
 };
 
 } // namespace Turbine

@@ -22,6 +22,9 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+#include <chrono>
+#include <sstream>
+
 #include "bridge/bridgestats.hpp"
 #include "windows/graphs/graph.hpp"
 
@@ -32,7 +35,8 @@ Graph::Graph(BridgeStatsSharedPtr& pBridgeStats) :
 m_pStats(pBridgeStats),
 m_LastStatsVersion(0)
 {
-
+    m_DomainX[0] = m_DomainX[1] = 0.0;
+    m_DomainY[0] = m_DomainY[1] = 0.0;
 }
 
 void Graph::Render()
@@ -47,7 +51,17 @@ void Graph::Render()
 
 void Graph::OnBridgeStatsChanged()
 {
-    
+    m_DomainX[0] = m_DomainX[1] = 0.0;
+    m_DomainY[0] = m_DomainY[1] = 0.0;
+}
+
+double Graph::ToUnixTimestamp(const std::string& date) const
+{
+    std::tm tm = {};
+    strptime(date.c_str(), "%Y-%m-%d", &tm);
+    auto tp = std::chrono::system_clock::from_time_t(std::mktime(&tm));
+    int64_t count = std::chrono::duration<double>(tp.time_since_epoch()).count();
+    return static_cast<double>(count);
 }
 
 } // namespace Turbine

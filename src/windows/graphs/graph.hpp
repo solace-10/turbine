@@ -25,6 +25,7 @@ SOFTWARE.
 #pragma once
 
 #include <memory>
+#include <string>
 
 #include "bridge/bridge.fwd.hpp"
 
@@ -40,7 +41,11 @@ public:
 protected:
     virtual void OnBridgeStatsChanged();
 
+    double ToUnixTimestamp(const std::string& date) const;
+
     BridgeStatsWeakPtr m_pStats;
+    double m_DomainX[2];
+    double m_DomainY[2];
 
 private:
     int m_LastStatsVersion;
