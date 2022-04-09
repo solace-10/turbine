@@ -43,6 +43,7 @@ public:
 private:
     BridgeWeakPtr m_pBridge;
     GraphUniquePtr m_pConnectionsGraph;
+    GraphUniquePtr m_pPerCountryStatsGraph;
 };
 
 } // namespace Turbine

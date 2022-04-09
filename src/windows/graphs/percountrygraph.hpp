@@ -24,32 +24,31 @@ SOFTWARE.
 
 #pragma once
 
-#include <memory>
-#include <string>
+#include <map>
+#include <set>
+#include <vector>
 
-#include "bridge/bridge.fwd.hpp"
+#include "windows/graphs/graph.hpp"
 
 namespace Turbine
 {
 
-class Graph
+class PerCountryGraph : public Graph
 {
 public:
-    Graph(BridgeStatsSharedPtr& pBridgeStats);
-    virtual ~Graph() {}
-	virtual void Render();
+    PerCountryGraph(BridgeStatsSharedPtr& pBridgeStats);
+	virtual void Render() override;
 
 protected:
-    virtual void OnBridgeStatsChanged();
+    virtual void OnBridgeStatsChanged() override;
+    double GetCountryMax(const std::string& country);
 
-    double ToUnixTimestamp(const std::string& date) const;
-
-    BridgeStatsWeakPtr m_pStats;
-    double m_DomainX[2];
-    double m_DomainY[2];
-
-private:
-    int m_LastStatsVersion;
+    std::string m_Title;
+    std::set<std::string> m_AllCountries;
+    std::map<std::string, std::vector<double>> m_CountryData;
+    std::vector<double> m_Dates;
+    bool m_UseSimplified;
+    std::vector<std::string> m_SimplifiedCountries;
 };
 
 } // namespace Turbine

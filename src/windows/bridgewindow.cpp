@@ -32,6 +32,7 @@ SOFTWARE.
 #include "bridge/bridgestats.hpp"
 #include "providers/provider.h"
 #include "windows/graphs/connectionsgraph.hpp"
+#include "windows/graphs/percountrygraph.hpp"
 #include "windows/bridgewindow.hpp"
 #include "settings.h"
 #include "turbine.h"
@@ -43,6 +44,7 @@ BridgeWindow::BridgeWindow(BridgeSharedPtr& pBridge)
 {
     m_pBridge = pBridge;
     m_pConnectionsGraph = std::make_unique<ConnectionsGraph>(pBridge->GetStats());
+    m_pPerCountryStatsGraph = std::make_unique<PerCountryGraph>(pBridge->GetStats());
 }
 
 BridgeWindow::~BridgeWindow()
@@ -88,6 +90,7 @@ void BridgeWindow::Render()
     ImGui::TextUnformatted("Stats:");
 
     m_pConnectionsGraph->Render();
+    m_pPerCountryStatsGraph->Render();
 
 	ImGui::End();
 }
