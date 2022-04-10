@@ -231,6 +231,11 @@ std::string Bridge::ReadFingerprint(const std::filesystem::path filePath) const
 
 void Bridge::RetrieveDistributionMechanism()
 {
+    if (m_HashedFingerprint.empty())
+    {
+        return;
+    }
+
     using json = nlohmann::json;
 
     std::stringstream url;
