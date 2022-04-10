@@ -94,7 +94,7 @@ void Deployment::ExecuteDeployments(const BridgeWeakPtrList& pendingDeployments)
 std::string Deployment::GetAnsibleCommand() const
 {
     std::stringstream cmd;
-    cmd << "ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook -i ~/.local/share/turbine/inventory $(pwd)/data/ansible/deploybrige.yaml -e '{\"servers\": [\"DeploymentPending\"]}'";
+    cmd << "ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook -i ~/.local/share/turbine/inventory $(pwd)/data/ansible/deploybridge.yaml -e '{\"servers\": [\"DeploymentPending\"]}'";
     return cmd.str();
 }
 

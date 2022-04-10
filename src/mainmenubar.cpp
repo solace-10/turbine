@@ -89,6 +89,16 @@ void MainMenuBar::Render()
             ImGui::EndMenu();
         }
 
+        if (ImGui::BeginMenu("View"))
+        {
+            bool overviewWindowOpen = g_pTurbine->GetOverviewWindow()->IsOpen();
+            if (ImGui::MenuItem("Overview", nullptr, &overviewWindowOpen))
+            {
+                g_pTurbine->GetOverviewWindow()->Show(overviewWindowOpen);
+            }
+            ImGui::EndMenu();
+        }
+
         if (ImGui::BeginMenu("Help"))
         {
             ImGui::MenuItem("About", nullptr, nullptr, false);

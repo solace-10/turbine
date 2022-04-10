@@ -31,20 +31,42 @@ SOFTWARE.
 namespace Turbine
 {
     
-Graph::Graph(BridgeStatsSharedPtr& pBridgeStats) :
-m_pStats(pBridgeStats),
-m_LastStatsVersion(0)
+Graph::Graph(BridgeStatsSharedPtr& pBridgeStats)
 {
     m_DomainX[0] = m_DomainX[1] = 0.0;
     m_DomainY[0] = m_DomainY[1] = 0.0;
+    m_Stats.push_back(pBridgeStats);
+    m_LastStatsVersion.push_back(0);
+}
+
+Graph::Graph(std::vector<BridgeStatsSharedPtr>& bridgeStats)
+{
+    m_DomainX[0] = m_DomainX[1] = 0.0;
+    m_DomainY[0] = m_DomainY[1] = 0.0;
+
+    for (BridgeStatsSharedPtr& pBridgeStats : bridgeStats)
+    {
+        m_Stats.push_back(pBridgeStats);
+        m_LastStatsVersion.push_back(0);
+    }
 }
 
 void Graph::Render()
 {
-    BridgeStatsSharedPtr pStats = m_pStats.lock();
-    if (pStats && pStats->GetVersion() != m_LastStatsVersion)
+    bool statsChanged = true;
+    const size_t numStats = m_Stats.size();
+    for (size_t i = 0; i < numStats; ++i)
     {
-        m_LastStatsVersion = pStats->GetVersion();
+        BridgeStatsSharedPtr pStats = m_Stats[i].lock();
+        if (pStats && pStats->GetVersion() != m_LastStatsVersion[i])
+        {
+            m_LastStatsVersion[i] = pStats->GetVersion();
+            statsChanged = true;
+        }
+    }
+
+    if (statsChanged)
+    {
         OnBridgeStatsChanged();
     }
 }

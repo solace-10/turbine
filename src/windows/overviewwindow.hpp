@@ -24,34 +24,30 @@ SOFTWARE.
 
 #pragma once
 
-#include <memory>
-#include <string>
-#include <vector>
-
 #include "bridge/bridge.fwd.hpp"
+#include "windows/window.h"
 
 namespace Turbine
 {
 
-class Graph
+class Graph;
+using GraphUniquePtr = std::unique_ptr<Graph>;
+
+class OverviewWindow : public Window
 {
 public:
-    Graph(BridgeStatsSharedPtr& pBridgeStats);
-    Graph(std::vector<BridgeStatsSharedPtr>& bridgeStats);
-    virtual ~Graph() {}
-	virtual void Render();
-
-protected:
-    virtual void OnBridgeStatsChanged();
-
-    double ToUnixTimestamp(const std::string& date) const;
-
-    std::vector<BridgeStatsWeakPtr> m_Stats;
-    double m_DomainX[2];
-    double m_DomainY[2];
+    OverviewWindow();
+    virtual ~OverviewWindow();
+	virtual void Render() override;
+    void OnBridgeAdded();
 
 private:
-    std::vector<int> m_LastStatsVersion;
+    void RebuildGraphs();
+
+    bool m_RebuildGraphs;
+    GraphUniquePtr m_pDistributionGraph;
+    GraphUniquePtr m_pConnectionsGraph;
+    GraphUniquePtr m_pPerCountryStatsGraph;
 };
 
 } // namespace Turbine

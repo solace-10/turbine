@@ -41,6 +41,7 @@ SOFTWARE.
 #include "windows/bridgeswindow.h"
 #include "windows/createbridgewindow.h"
 #include "windows/deploymentwindow.hpp"
+#include "windows/overviewwindow.hpp"
 #include "windows/settingswindow.h"
 #include "windows/summarywindow.h"
 #include "geolocationdata.h"
@@ -72,6 +73,7 @@ m_Active(true)
 	m_pMonitor = std::make_unique<Monitor>();
 	m_pCreateBridgeWindow = std::make_unique<CreateBridgeWindow>();
 	m_pDeploymentWindow = std::make_unique<DeploymentWindow>();
+	m_pOverviewWindow = std::make_unique<OverviewWindow>();
 	m_pSettingsWindow = std::make_unique<SettingsWindow>();
 	m_pSummaryWindow = std::make_unique<SummaryWindow>();
 	m_pWebClient = std::make_unique<WebClient>();
@@ -118,6 +120,7 @@ void Turbine::Update()
 	m_pBridgesWindow->Update(delta);
 	m_pCreateBridgeWindow->Update(delta);
 	m_pDeploymentWindow->Update(delta);
+	m_pOverviewWindow->Update(delta);
 	m_pSettingsWindow->Update(delta);
 	m_pSummaryWindow->Update(delta);
 
@@ -137,6 +140,7 @@ void Turbine::Update()
 	m_pBridgesWindow->Render();
 	m_pCreateBridgeWindow->Render();
 	m_pDeploymentWindow->Render();
+	m_pOverviewWindow->Render();
 	m_pSettingsWindow->Render();
 	m_pSummaryWindow->Render();
 	m_pNotificationLogger->Render();
@@ -153,6 +157,7 @@ void Turbine::AddBridge(BridgeSharedPtr&& pBridge)
 	m_Bridges[pBridge->GetId()] = pBridge;
 	m_BridgeWindows[pBridge->GetId()] = std::make_unique<BridgeWindow>(pBridge);
 	m_pDeployment->OnBridgeAdded(pBridge);
+	reinterpret_cast<OverviewWindow*>(m_pOverviewWindow.get())->OnBridgeAdded();
 
 	// Notify the monitor to retrieve monitored data from the new bridge.
 	m_pMonitor->Retrieve();

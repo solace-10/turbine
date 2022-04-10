@@ -76,7 +76,7 @@ void PerCountryGraph::OnBridgeStatsChanged()
 {
     Graph::OnBridgeStatsChanged();
 
-    BridgeStatsSharedPtr pStats = m_pStats.lock();
+    BridgeStatsSharedPtr pStats = m_Stats[0].lock();
     if (pStats == nullptr)
     {
         return;

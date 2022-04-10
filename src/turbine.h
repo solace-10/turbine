@@ -75,6 +75,7 @@ public:
 	Window* GetBridgesWindow();
 	Window* GetCreateBridgeWindow();
 	Window* GetDeploymentWindow();
+	Window* GetOverviewWindow();
 	Window* GetSettingsWindow();
 	Window* GetBridgeWindow(Bridge* pBridge);
 
@@ -100,6 +101,7 @@ private:
 	WindowUniquePtr m_pBridgesWindow;
 	WindowUniquePtr m_pCreateBridgeWindow;
 	WindowUniquePtr m_pDeploymentWindow;
+	WindowUniquePtr m_pOverviewWindow;
 	WindowUniquePtr m_pSettingsWindow;
 	WindowUniquePtr m_pSummaryWindow;
 	
@@ -146,6 +148,11 @@ inline Window* Turbine::GetCreateBridgeWindow()
 inline Window* Turbine::GetDeploymentWindow()
 {
 	return m_pDeploymentWindow.get();
+}
+
+inline Window* Turbine::GetOverviewWindow()
+{
+	return m_pOverviewWindow.get();
 }
 
 inline Window* Turbine::GetSettingsWindow()

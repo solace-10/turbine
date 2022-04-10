@@ -35,6 +35,7 @@ class ConnectionsGraph : public Graph
 {
 public:
     ConnectionsGraph(BridgeStatsSharedPtr& pBridgeStats);
+    ConnectionsGraph(std::vector<BridgeStatsSharedPtr>& bridgeStats);
 	virtual void Render() override;
 
 protected:

@@ -22,6 +22,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+#include <map>
+
 #include <imgui/imgui.h>
 #include <implot/implot.h>
 
@@ -37,13 +39,18 @@ Graph(pBridgeStats)
     
 }
 
+ConnectionsGraph::ConnectionsGraph(std::vector<BridgeStatsSharedPtr>& bridgeStats) :
+Graph(bridgeStats)
+{
+
+}
+
 void ConnectionsGraph::Render()
 {
     Graph::Render();
 
     if (m_Dates.empty() == false && ImPlot::BeginPlot("Connections")) 
     {
-        
         ImPlot::SetupAxis(ImAxis_X1, nullptr, ImPlotAxisFlags_Time);
         ImPlot::SetupAxesLimits(m_DomainX[0], m_DomainX[1], m_DomainY[0], m_DomainY[1]);
         ImPlot::SetupAxis(ImAxis_Y1, "Connections");
@@ -57,28 +64,55 @@ void ConnectionsGraph::OnBridgeStatsChanged()
 {
     Graph::OnBridgeStatsChanged();
 
-    BridgeStatsSharedPtr pStats = m_pStats.lock();
-    if (pStats == nullptr)
-    {
-        return;
-    }
-
     m_Dates.clear();
     m_ConnectionsIPv4.clear();
     m_ConnectionsIPv6.clear();
 
-    const size_t numEntries = pStats->GetEntryCount();
-    m_Dates.resize(numEntries);
-    m_ConnectionsIPv4.resize(numEntries);
-    m_ConnectionsIPv6.resize(numEntries);
-    for (size_t i = 0; i < numEntries; ++i)
+    struct Connections
     {
-        m_Dates[i] = ToUnixTimestamp(pStats->GetDate(i));
-        m_ConnectionsIPv4[i] = static_cast<double>(pStats->GetIpv4Stats(i));
-        m_ConnectionsIPv6[i] = static_cast<double>(pStats->GetIpv6Stats(i));
+        Connections()
+        {
+            v4 = 0;
+            v6 = 0;
+        }
 
-        m_DomainY[1] = std::max(std::max(m_DomainY[1], m_ConnectionsIPv4[i]), m_ConnectionsIPv6[i]);
+        int v4;
+        int v6;
+    };
+
+    std::map<std::string, Connections> dataPoints;
+
+    for (BridgeStatsWeakPtr& pWeakStats : m_Stats)
+    {
+        BridgeStatsSharedPtr pStats = pWeakStats.lock();
+        if (pStats == nullptr)
+        {
+            continue;
+        }
+
+        const size_t numEntries = pStats->GetEntryCount();
+        for (size_t i = 0; i < numEntries; ++i)
+        {
+            dataPoints[pStats->GetDate(i)].v4 += pStats->GetIpv4Stats(i);
+            dataPoints[pStats->GetDate(i)].v6 += pStats->GetIpv4Stats(i);
+        }
     }
+
+    size_t numDataPoints = dataPoints.size();
+    m_Dates.resize(numDataPoints);
+    m_ConnectionsIPv4.resize(numDataPoints);
+    m_ConnectionsIPv6.resize(numDataPoints);
+    size_t idx = 0;
+    for (auto& dataPoint : dataPoints)
+    {
+        m_Dates[idx] = ToUnixTimestamp(dataPoint.first);
+        m_ConnectionsIPv4[idx] = static_cast<double>(dataPoint.second.v4);
+        m_ConnectionsIPv6[idx] = static_cast<double>(dataPoint.second.v6);
+
+        m_DomainY[1] = std::max(std::max(m_DomainY[1],  m_ConnectionsIPv4[idx]),  m_ConnectionsIPv6[idx]);
+        idx++;
+    }
+
     m_DomainX[0] = m_Dates.front();
     m_DomainX[1] = m_Dates.back();
     m_DomainY[1] = m_DomainY[1] + 10; // Ensure we don't get clipped at the top of the graph.
