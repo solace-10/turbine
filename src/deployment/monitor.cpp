@@ -100,7 +100,7 @@ void Monitor::ExecuteDeployments(const BridgeWeakPtrList& pendingDeployments)
 std::string Monitor::GetAnsibleCommand() const
 {
     std::stringstream cmd;
-    cmd << "/home/hostilenode/.local/bin/ansible-playbook -i /home/hostilenode/.local/share/turbine/inventory /home/hostilenode/Dev/turbine/bin/data/ansible/monitor.yaml -e '{\"servers\": [\"Deployed\"]}'";
+    cmd << "ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook -i ~/.local/share/turbine/inventory $(pwd)/data/ansible/monitor.yaml -e '{\"servers\": [\"Deployed\"]}'";
     return cmd.str();
 }
 
