@@ -34,7 +34,7 @@ Depending on what you are making, it can be a good idea to include screenshots o
 
 ## Installation
 Requirements: 
-- sudo apt install ansible
+- sudo apt install ansible libcurl4-openssl-dev libsdl2-dev libsdl2-image-dev
 - ansible-galaxy install alphacorvus.ansible_tor_bridge
 
 ## Usage
