@@ -26,9 +26,9 @@ SOFTWARE.
 #include "imgui/imgui.h"
 
 #include "atlas/atlas.h"
-#include "commandbar.h"
 #include "icons.h"
 #include "log.h"
+#include "mainmenubar.hpp"
 #include "textureloader.h"
 #include "turbinerep.h"
 #include "turbine.h"
@@ -49,7 +49,7 @@ m_SelectCamera(false)
 	int windowHeight;
 	SDL_GetWindowSize(m_pWindow, &windowWidth, &windowHeight);
 	m_pAtlas = std::make_unique<Atlas>(windowWidth, windowHeight);
-    m_pCommandBar = std::make_unique<CommandBar>();
+    m_pMainMenuBar = std::make_unique<MainMenuBar>();
 
 	SetUserInterfaceStyle();
 
@@ -213,7 +213,7 @@ void TurbineRep::Render()
 	ImGui::Begin("Turbine", nullptr, flags);
 	ImDrawList* pDrawList = ImGui::GetWindowDrawList();
 	m_pAtlas->Render();
-    m_pCommandBar->Render();
+    m_pMainMenuBar->Render();
 	ImGui::End();
 
 	// CameraVector cameras = g_pTurbine->GetCameras();

@@ -27,26 +27,22 @@ SOFTWARE.
 
 #include "atlas/tilestreamer.h"
 #include "windows/settingswindow.h"
-#include "commandbar.h"
+#include "mainmenubar.hpp"
 #include "turbine.h"
 
 namespace Turbine
 {
 
-CommandBar::CommandBar()
+MainMenuBar::MainMenuBar()
 {
     m_ShowAtlasTileStreamer = false;
     m_ShowImGuiDemoWindow = false;
     m_ShowImPlotDemoWindow = false;
 }
 
-void CommandBar::Render()
+void MainMenuBar::Render()
 {
-	ImGui::SetNextWindowPos(ImGui::GetMainViewport()->Pos);
-	ImGui::SetNextWindowSize(ImVec2(250, 0));
-	ImGui::Begin("CommandBar", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_MenuBar);
-
-    if (ImGui::BeginMenuBar())
+    if (ImGui::BeginMainMenuBar())
     {
         if (ImGui::BeginMenu("File"))
         {
@@ -99,7 +95,7 @@ void CommandBar::Render()
             ImGui::EndMenu();
         }
 
-        ImGui::EndMenuBar();
+        ImGui::EndMainMenuBar();
     }
 
     if (m_ShowAtlasTileStreamer)
@@ -116,8 +112,6 @@ void CommandBar::Render()
     {
         ImPlot::ShowDemoWindow(&m_ShowImPlotDemoWindow);
     }
-
-    ImGui::End();
 }
 
 } // namespace Turbine

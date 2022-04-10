@@ -31,13 +31,13 @@ SOFTWARE.
 namespace Turbine
 {
 
-class CommandBar;
-using CommandBarUniquePtr = std::unique_ptr<CommandBar>;
+class MainMenuBar;
+using MainMenuBarUniquePtr = std::unique_ptr<MainMenuBar>;
 
-class CommandBar
+class MainMenuBar
 {
 public:
-    CommandBar();
+    MainMenuBar();
 
     void Render();
 

@@ -41,8 +41,8 @@ namespace Turbine
 
 class Atlas;
 using AtlasUniquePtr = std::unique_ptr<Atlas>;
-class CommandBar;
-using CommandBarUniquePtr = std::unique_ptr<CommandBar>;
+class MainMenuBar;
+using MainMenuBarUniquePtr = std::unique_ptr<MainMenuBar>;
 
 class TurbineRep
 {
@@ -66,7 +66,7 @@ private:
 	SDL_Window* m_pWindow;
 	AtlasUniquePtr m_pAtlas;
 	float m_CellSize;
-    CommandBarUniquePtr m_pCommandBar;
+    MainMenuBarUniquePtr m_pMainMenuBar;
 	
 	using CameraRepList = std::list<CameraRep>;
 	CameraRepList m_CameraReps;
