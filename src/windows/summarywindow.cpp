@@ -47,9 +47,10 @@ void SummaryWindow::Render()
 {
     ImVec2 pos(ImGui::GetMainViewport()->Pos);
     pos.x += ImGui::GetMainViewport()->Size.x - 250;
+    pos.y += 17;
 	ImGui::SetNextWindowPos(pos);
 	ImGui::SetNextWindowSize(ImVec2(250, 0));
-	ImGui::Begin("Summary window", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_MenuBar);
+	ImGui::Begin("Summary window", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoTitleBar);
 
     RenderCreateBridgeWidget();
     RenderBridges();
