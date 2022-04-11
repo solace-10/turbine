@@ -32,6 +32,7 @@ SOFTWARE.
 #include "bridge/bridgestats.hpp"
 #include "providers/provider.h"
 #include "windows/graphs/connectionsgraph.hpp"
+#include "windows/graphs/distributionmethodgraph.hpp"
 #include "windows/graphs/percountrygraph.hpp"
 #include "windows/overviewwindow.hpp"
 #include "settings.h"
@@ -75,6 +76,11 @@ void OverviewWindow::Render()
         m_pConnectionsGraph->Render();
     }
 
+    if (m_pDistributionMethodGraph != nullptr)
+    {
+        m_pDistributionMethodGraph->Render();
+    }
+
 	ImGui::End();
 }
 
@@ -96,6 +102,7 @@ void OverviewWindow::RebuildGraphs()
     }
 
     m_pConnectionsGraph = std::make_unique<ConnectionsGraph>(allStats);
+    m_pDistributionMethodGraph = std::make_unique<DistributionMethodGraph>(allStats);
 }
 
 } // namespace Turbine

@@ -52,8 +52,6 @@ public:
     int GetIpv6Stats(size_t entryId) const;
     const PerCountryStats& GetPerCountryStats(size_t entryId) const;
 
-    void RenderPerCountryStats();
-
     int GetVersion() const;
 
 private:
