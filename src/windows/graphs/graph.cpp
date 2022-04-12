@@ -22,6 +22,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+#include <time.h>
+#include <iomanip>
 #include <chrono>
 #include <sstream>
 
@@ -30,6 +32,22 @@ SOFTWARE.
 
 namespace Turbine
 {
+
+#ifdef _WINDOWS
+// strptime is not available on Windows and is needed by Graph::ToUnixTimestamp().
+// An implementation was found here: https://stackoverflow.com/questions/321849/strptime-equivalent-on-windows
+extern "C" char* strptime(const char* s, const char* f, struct tm* tm) 
+{
+    std::istringstream input(s);
+    input.imbue(std::locale(setlocale(LC_ALL, nullptr)));
+    input >> std::get_time(tm, f);
+    if (input.fail()) 
+    {
+        return nullptr;
+    }
+    return (char*)(s + input.tellg());
+}
+#endif
     
 Graph::Graph(BridgeStatsSharedPtr& pBridgeStats)
 {
