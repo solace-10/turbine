@@ -53,7 +53,7 @@ void ConnectionsGraph::Render()
     {
         ImPlot::SetupAxis(ImAxis_X1, nullptr, ImPlotAxisFlags_Time);
         ImPlot::SetupAxesLimits(m_DomainX[0], m_DomainX[1], m_DomainY[0], m_DomainY[1]);
-        ImPlot::SetupAxis(ImAxis_Y1, "Connections");
+        ImPlot::SetupAxis(ImAxis_Y1, "Connections", ImPlotAxisFlags_LockMin);
         ImPlot::PlotLine("IPv4", m_Dates.data(), m_ConnectionsIPv4.data(), m_Dates.size());
         ImPlot::PlotLine("IPv6", m_Dates.data(), m_ConnectionsIPv6.data(), m_Dates.size());
         ImPlot::EndPlot();

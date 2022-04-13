@@ -73,11 +73,11 @@ void DistributionMethodGraph::Render()
         data.push_back(pair.second);
     }
 
-    if (ImPlot::BeginPlot("Distribution methods", ImVec2(250,250), ImPlotFlags_Equal | ImPlotFlags_NoMouseText)) 
+    if (ImPlot::BeginPlot("Distribution methods", ImVec2(-1,300), ImPlotFlags_Equal | ImPlotFlags_NoMouseText | ImPlotFlags_NoInputs)) 
     {
         ImPlot::SetupAxes(nullptr, nullptr, ImPlotAxisFlags_NoDecorations, ImPlotAxisFlags_NoDecorations);
         ImPlot::SetupAxesLimits(0, 1, 0, 1);
-        ImPlot::PlotPieChart(labels.data(), data.data(), labels.size(), 0.5, 0.5, 0.4, true, "%.0f");
+        ImPlot::PlotPieChart(labels.data(), data.data(), labels.size(), 0.5, 0.5, 0.15, true, "%.0f");
         ImPlot::EndPlot();
     }
 }

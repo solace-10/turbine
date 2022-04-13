@@ -49,7 +49,7 @@ void PerCountryGraph::Render()
     if (m_Dates.empty() == false && ImPlot::BeginPlot(m_Title.c_str())) 
     {        
         ImPlot::SetupAxis(ImAxis_X1, nullptr, ImPlotAxisFlags_Time);
-        ImPlot::SetupAxis(ImAxis_Y1, "Connections");
+        ImPlot::SetupAxis(ImAxis_Y1, "Connections", ImPlotAxisFlags_LockMin);
         ImPlot::SetupAxesLimits(m_DomainX[0], m_DomainX[1], m_DomainY[0], m_DomainY[1]);
 
         if (m_UseSimplified)
