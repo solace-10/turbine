@@ -34,6 +34,9 @@ SOFTWARE.
 namespace Turbine
 {
 
+class BridgeGeolocation;
+using BridgeGeolocationUniquePtr = std::unique_ptr<BridgeGeolocation>;
+
 class BridgeSummaryWidget;
 using BridgeSummaryWidgetUniquePtr = std::unique_ptr<BridgeSummaryWidget>;
 
@@ -67,6 +70,7 @@ public:
     const BridgeStatsSharedPtr& GetStats() const;
     BridgeStatsSharedPtr& GetStats();
     const std::string& GetDistributionMechanism() const;
+    BridgeGeolocation* GetGeolocation() const;
 
     void OnMonitoredDataUpdated();
 
@@ -94,6 +98,7 @@ private:
     BridgeStatsSharedPtr m_pBridgeStats;
     std::filesystem::path m_BridgePath;
     std::string m_DistributionMechanism;
+    BridgeGeolocationUniquePtr m_pGeolocation;
 };
 
 } // namespace Turbine

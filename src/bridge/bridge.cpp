@@ -26,6 +26,7 @@ SOFTWARE.
 #include <fstream>
 
 #include "bridge/bridge.h"
+#include "bridge/bridgegeolocation.hpp"
 #include "bridge/bridgestats.hpp"
 #include "bridge/bridgesummarywidget.h"
 #include "bridge/statemachine.h"
@@ -52,6 +53,7 @@ m_DistributionMechanism("unknown")
 
     m_BridgePath = g_pTurbine->GetSettings()->GetStoragePath() / "bridges" / GetName();
     m_pBridgeStats = std::make_shared<BridgeStats>(this);
+    m_pGeolocation = std::make_unique<BridgeGeolocation>(this);
 
     OnMonitoredDataUpdated();
 }
@@ -155,6 +157,11 @@ BridgeStatsSharedPtr& Bridge::GetStats()
 const std::string& Bridge::GetDistributionMechanism() const
 {
     return m_DistributionMechanism;
+}
+
+BridgeGeolocation* Bridge::GetGeolocation() const
+{
+    return m_pGeolocation.get();
 }
 
 void Bridge::RenderSummaryWidget()
