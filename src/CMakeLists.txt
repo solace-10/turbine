@@ -63,8 +63,11 @@ set_target_properties(${NAME} PROPERTIES
 )
 
 target_compile_options(turbine PRIVATE
-    $<$<OR:$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:GNU>>:
+    $<$<CXX_COMPILER_ID:Clang>:
         -fstandalone-debug
+    >
+    $<$<CXX_COMPILER_ID:GNU>:
+        -ggdb
     >
     $<$<CXX_COMPILER_ID:MSVC>:
         /permissive-
