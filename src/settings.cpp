@@ -45,6 +45,7 @@ namespace Turbine
 {
 
 Settings::Settings() :
+m_IPInfoAPIKey("89878eac78b8fc"),
 m_DigitalOceanDropletSize("s-1vcpu-1gb"),
 m_DigitalOceanDropletImage("debian-11-x64")
 {
@@ -82,7 +83,8 @@ void Settings::Save()
 	using json = nlohmann::json;
 	json settings = {
 		{ "general", {
-			{ "email", m_ContactEmail }
+			{ "email", m_ContactEmail },
+			{ "ipinfo_api_key", m_IPInfoAPIKey }
 		}},
 		{ "providers", {
 			{ "digital_ocean", {
@@ -119,6 +121,12 @@ void Settings::Load()
 			if (it != general.end() && it->is_string())
 			{
 				m_ContactEmail = it->get<std::string>();
+			}
+
+			it = general.find("ipinfo_api_key");
+			if (it != general.end() && it->is_string())
+			{
+				m_IPInfoAPIKey = it->get<std::string>();
 			}
 		}
 

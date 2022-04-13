@@ -55,6 +55,12 @@ void SettingsWindow::Render()
 		{
 			pSettings->SetContactEmail(sEmail);
 		}
+
+		static std::string sIPInfoAPIKey = pSettings->GetIPInfoAPIKey();
+		if (ImGui::InputText("IPInfo API key", &sIPInfoAPIKey))
+		{
+			pSettings->SetIPInfoAPIKey(sIPInfoAPIKey);
+		}
 	}
 
 	if (ImGui::CollapsingHeader("Providers", ImGuiTreeNodeFlags_DefaultOpen))
