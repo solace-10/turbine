@@ -29,6 +29,7 @@ SOFTWARE.
 #include <implot/implot.h>
 
 #include "bridge/bridge.h"
+#include "bridge/bridgegeolocation.hpp"
 #include "bridge/bridgestats.hpp"
 #include "providers/provider.h"
 #include "windows/graphs/connectionsgraph.hpp"
@@ -75,17 +76,20 @@ void BridgeWindow::Render()
 		return;
 	}
 
-    ImGui::Text("Name %s", pBridge->GetName().c_str());
-
-    ImGui::Text("IPv4: %s", pBridge->GetIPv4().c_str());
-    ImGui::Text("IPv6: %s", pBridge->GetIPv6().c_str());
-
-    ImGui::Text("Distribution mechanism: %s", pBridge->GetDistributionMechanism().c_str());
-
+    std::string name = pBridge->GetName();
+    ImGui::InputText("Name", &name, ImGuiInputTextFlags_ReadOnly);
+    std::string ipv4 = pBridge->GetIPv4();
+    ImGui::InputText("IPv4", &ipv4, ImGuiInputTextFlags_ReadOnly);
+    std::string ipv6 = pBridge->GetIPv6();
+    ImGui::InputText("IPv6", &ipv6, ImGuiInputTextFlags_ReadOnly);
+    std::string distributionMethod = pBridge->GetDistributionMechanism();
+    ImGui::InputText("Distribution method", &distributionMethod, ImGuiInputTextFlags_ReadOnly);
     std::string fingerprint = pBridge->GetFingerprint();
     ImGui::InputText("Fingerprint", &fingerprint, ImGuiInputTextFlags_ReadOnly);
     std::string hashedFingerprint = pBridge->GetHashedFingerprint();
     ImGui::InputText("Hashed fingerprint", &hashedFingerprint, ImGuiInputTextFlags_ReadOnly);
+
+    RenderGeolocation();
 
     ImGui::TextUnformatted("Stats:");
 
@@ -93,6 +97,21 @@ void BridgeWindow::Render()
     m_pPerCountryStatsGraph->Render();
 
 	ImGui::End();
+}
+
+void BridgeWindow::RenderGeolocation()
+{
+    BridgeGeolocation* pGeolocation = m_pBridge.lock()->GetGeolocation();
+    if (pGeolocation != nullptr)
+    {
+        ImGui::TextUnformatted("Location:");
+        std::string country = pGeolocation->GetCountry();
+        ImGui::InputText("Country", &country, ImGuiInputTextFlags_ReadOnly);
+        std::string city = pGeolocation->GetCity();
+        ImGui::InputText("City", &city, ImGuiInputTextFlags_ReadOnly);
+        std::string organisation = pGeolocation->GetOrganisation();
+        ImGui::InputText("Organisation", &organisation, ImGuiInputTextFlags_ReadOnly);
+    }
 }
 
 } // namespace Turbine

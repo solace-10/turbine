@@ -41,6 +41,8 @@ public:
 	virtual void Render() override;
 
 private:
+    void RenderGeolocation();
+
     BridgeWeakPtr m_pBridge;
     GraphUniquePtr m_pConnectionsGraph;
     GraphUniquePtr m_pPerCountryStatsGraph;

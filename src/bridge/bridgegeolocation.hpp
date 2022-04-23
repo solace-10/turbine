@@ -35,7 +35,7 @@ class Bridge;
 class BridgeGeolocation
 {
 public:
-	BridgeGeolocation(Bridge* pBridge);
+	BridgeGeolocation(const std::string& address);
 
     bool IsValid() const;
 
@@ -47,7 +47,13 @@ public:
 	float GetLongitude() const;
 
 private:
+	std::string CreateHash(const std::string& value) const;
+    bool LoadFromFile();
+    void RequestGeolocation();
+
     bool m_IsValid;
+	std::string m_Address;
+	std::string m_Hash;
 	std::string m_City;
 	std::string m_Region;
 	std::string m_Country;

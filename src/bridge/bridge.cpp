@@ -53,7 +53,6 @@ m_DistributionMechanism("unknown")
 
     m_BridgePath = g_pTurbine->GetSettings()->GetStoragePath() / "bridges" / GetName();
     m_pBridgeStats = std::make_shared<BridgeStats>(this);
-    m_pGeolocation = std::make_unique<BridgeGeolocation>(this);
 
     OnMonitoredDataUpdated();
 }
@@ -100,11 +99,13 @@ const std::string& Bridge::GetIPv6() const
 void Bridge::SetIPv4(const std::string& ip)
 {
     m_Ipv4 = ip;
+    m_pGeolocationIPv4 = std::make_unique<BridgeGeolocation>(ip);
 }
 
 void Bridge::SetIPv6(const std::string& ip)
 {
     m_Ipv6 = ip;
+    m_pGeolocationIPv6 = std::make_unique<BridgeGeolocation>(ip);
 }
 
 unsigned int Bridge::GetORPort() const
@@ -161,7 +162,7 @@ const std::string& Bridge::GetDistributionMechanism() const
 
 BridgeGeolocation* Bridge::GetGeolocation() const
 {
-    return m_pGeolocation.get();
+    return m_pGeolocationIPv4 ? m_pGeolocationIPv4.get() : m_pGeolocationIPv6.get();
 }
 
 void Bridge::RenderSummaryWidget()

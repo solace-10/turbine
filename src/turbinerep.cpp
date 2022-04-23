@@ -26,6 +26,8 @@ SOFTWARE.
 #include "imgui/imgui.h"
 
 #include "atlas/atlas.h"
+#include "bridge/bridge.h"
+#include "bridge/bridgegeolocation.hpp"
 #include "icons.h"
 #include "log.h"
 #include "mainmenubar.hpp"
@@ -216,24 +218,25 @@ void TurbineRep::Render()
     m_pMainMenuBar->Render();
 	ImGui::End();
 
-	// CameraVector cameras = g_pTurbine->GetCameras();
-	// for (CameraSharedPtr& camera : cameras)
-	// {
-	// 	GeolocationData* pGeolocationData = camera->GetGeolocationData();
-	// 	if (pGeolocationData != nullptr)
-	// 	{
-	// 		float locationX, locationY;
-	// 		m_pAtlas->GetScreenCoordinates(pGeolocationData->GetLongitude(), pGeolocationData->GetLatitude(), locationX, locationY);
-	// 		pDrawList->AddImage(
-	// 			reinterpret_cast<ImTextureID>(uintptr_t(Icons::GetIcon(IconId::Pin))),
-	// 			ImVec2(locationX - sPinHalfWidth, locationY - sPinHeight),
-	// 			ImVec2(locationX + sPinHalfWidth, locationY),
-	// 			ImVec2(0, 0),
-	// 			ImVec2(1, 1),
-	// 			GetPinColor(camera->GetState())
-	// 		);
-	// 	}
-	// }
+
+	const BridgeList& bridges = g_pTurbine->GetBridges();
+	for (auto& pBridge : g_pTurbine->GetBridges())
+	{
+		BridgeGeolocation* pGeolocation = pBridge->GetGeolocation();
+		if (pGeolocation != nullptr)
+		{
+			float locationX, locationY;
+			m_pAtlas->GetScreenCoordinates(pGeolocation->GetLongitude(), pGeolocation->GetLatitude(), locationX, locationY);
+			pDrawList->AddImage(
+				reinterpret_cast<ImTextureID>(uintptr_t(Icons::GetIcon(IconId::Pin))),
+				ImVec2(locationX - sPinHalfWidth, locationY - sPinHeight),
+				ImVec2(locationX + sPinHalfWidth, locationY),
+				ImVec2(0, 0),
+				ImVec2(1, 1),
+				ImColor(1.0f, 0.0f, 0.0f, 1.0f) /*GetPinColor(camera->GetState())*/
+			);
+		}
+	}
 
 	OpenPickedCamera();
 	RenderCameras();

@@ -98,7 +98,8 @@ private:
     BridgeStatsSharedPtr m_pBridgeStats;
     std::filesystem::path m_BridgePath;
     std::string m_DistributionMechanism;
-    BridgeGeolocationUniquePtr m_pGeolocation;
+    BridgeGeolocationUniquePtr m_pGeolocationIPv4;
+    BridgeGeolocationUniquePtr m_pGeolocationIPv6;
 };
 
 } // namespace Turbine
