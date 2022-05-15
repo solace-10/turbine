@@ -201,6 +201,7 @@ void TurbineRep::Render()
 	flags |= ImGuiWindowFlags_NoTitleBar;
 	flags |= ImGuiWindowFlags_NoBringToFrontOnFocus;
 	flags |= ImGuiWindowFlags_NoInputs;
+	flags |= ImGuiWindowFlags_NoScrollbar;
 
 	ImGuiIO& io = ImGui::GetIO();
 	ImTextureID my_tex_id = io.Fonts->TexID;
