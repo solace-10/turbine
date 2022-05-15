@@ -39,7 +39,7 @@ void PinStack::Render()
 {
     ImDrawList* pDrawList = ImGui::GetWindowDrawList();
     const float pinRadius = 8.0f;
-    pDrawList->AddCircleFilled(m_Position, pinRadius, ImColor(1.0f, 0.0f, 0.0f, 1.0f));
+    pDrawList->AddCircleFilled(m_Position, pinRadius, ImColor(0.0f, 1.0f, 1.0f, 1.0f));
     pDrawList->AddCircle(m_Position, pinRadius, ImColor(0.0f, 0.0f, 0.0f, 1.0f));
     
     size_t numBridges = m_Bridges.size();
