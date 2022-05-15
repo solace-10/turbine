@@ -25,8 +25,11 @@ SOFTWARE.
 #include <algorithm>
 #include <sstream>
 #include <string>
+
 #include <SDL.h>
+
 #include "atlas/atlas.h"
+#include "atlas/pins.hpp"
 #include "atlas/tilestreamer.h"
 #include "imgui/imgui.h"
 #include "log.h"
@@ -44,7 +47,8 @@ m_OffsetY( 0 ),
 m_WindowWidth( windowWidth ),
 m_WindowHeight( windowHeight )
 {
-	m_pTileStreamer = std::make_unique< TileStreamer >();
+	m_pPins = std::make_unique<Pins>(this);
+	m_pTileStreamer = std::make_unique<TileStreamer>();
 	OnWindowSizeChanged( windowWidth, windowHeight );
 }
 
@@ -133,6 +137,7 @@ void Atlas::CalculateVisibleTiles( TileVector& visibleTiles )
 
 void Atlas::Update(float delta)
 {
+	m_pPins->Update(delta);
 	m_pTileStreamer->Update(delta);
 }
 
@@ -160,20 +165,29 @@ void Atlas::Render()
 			pDrawList->AddImage(reinterpret_cast<ImTextureID>(uintptr_t(pTile->Texture())), p1, p2);
 		}
 	}
+
+	m_pPins->Render();
 }
 
-void Atlas::GetScreenCoordinates( float longitude, float latitude, float& x, float& y ) const
+int Atlas::GetCurrentZoomLevel() const
+{
+	return m_CurrentZoomLevel;
+}
+
+ImVec2 Atlas::GetScreenCoordinates(float longitude, float latitude) const
 {
 	// Uniform to Mercator projection, as per https://wiki.openstreetmap.org/wiki/Slippy_map_tilenames#Resolution_and_Scale
-	const int stride = static_cast< int >( pow( 2, m_CurrentZoomLevel ) );
-	const float pi = static_cast< float >( M_PI );
-	x = ( longitude + 180.0f ) / 360.0f * stride;
-	y = ( 1.0f - logf( tanf( latitude * pi / 180.0f ) + 1.0f / cosf( latitude * pi / 180.0f ) ) / pi ) / 2.0f * stride;
+	const int stride = static_cast<int>(pow(2, m_CurrentZoomLevel));
+	const float pi = static_cast<float>(M_PI);
+	float x = (longitude + 180.0f) / 360.0f * stride;
+	float y = (1.0f - logf(tanf(latitude * pi / 180.0f) + 1.0f / cosf(latitude * pi / 180.0f)) / pi) / 2.0f * stride;
 
 	// To screenspace.
 	const ImVec2 viewportPos = ImGui::GetMainViewport()->Pos;
 	x = x * sTileSize + m_OffsetX + viewportPos.x;
 	y = y * sTileSize + m_OffsetY + viewportPos.y;
+	
+	return ImVec2(x, y);
 }
 
 } // namespace Turbine

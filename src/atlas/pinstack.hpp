@@ -24,63 +24,37 @@ SOFTWARE.
 
 #pragma once
 
-#include <array>
-#include <memory>
 #include <string>
 #include <vector>
 
-#include <SDL_opengl.h>
-
-#include "atlas/tile.h"
 #include "imgui/imgui.h"
+
+#include "bridge/bridge.fwd.hpp"
 
 namespace Turbine
 {
 
 class Atlas;
-class Pins;
-class TileStreamer;
-using AtlasUniquePtr = std::unique_ptr<Atlas>;
 
-static const int sTileSize = 256;
-static const int sMaxZoomLevels = 11;
-
-class Atlas
+class PinStack
 {
 public:
-	Atlas( int windowWidth, int windowHeight );
-	~Atlas();
+    PinStack(const ImVec2& position, Bridge* pBridge);
 
-	void Update(float delta);
-	void Render();
-	ImVec2 GetScreenCoordinates(float longitude, float latitude) const;
-	int GetCurrentZoomLevel() const;
+    void Render();
 
-	void OnWindowSizeChanged( int width, int height );
-	void OnMouseDrag( int deltaX, int deltaY );
-	void OnZoomIn();
-	void OnZoomOut();
+    const ImVec2& GetPosition() const;
+    void AddBridge(Bridge* pBridge);
 
 private:
-	void ClampOffset();
-	void CalculateVisibleTiles( TileVector& visibleTiles );
-
-	using TileTextureIdVector = std::vector< GLuint >;
-	using TileMaps = std::vector< TileTextureIdVector >;
-	TileMaps m_TileMaps;
-	int m_MinimumZoomLevel;
-	int m_CurrentZoomLevel;
-	int m_MaxVisibleTilesX;
-	int m_MaxVisibleTilesY;
-	int m_OffsetX;
-	int m_OffsetY;
-	int m_WindowWidth;
-	int m_WindowHeight;
-
-	std::vector<int> m_TilesToDraw;
-	std::unique_ptr<TileStreamer> m_pTileStreamer;
-
-	std::unique_ptr<Pins> m_pPins;
+    ImVec2 m_Position;
+    std::vector<Bridge*> m_Bridges;
+    std::string m_BridgesText;
 };
+
+inline const ImVec2& PinStack::GetPosition() const
+{
+    return m_Position;
+}
 
 } // namespace Turbine

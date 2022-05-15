@@ -213,30 +213,9 @@ void TurbineRep::Render()
 	ImGui::SetNextWindowPos(ImGui::GetMainViewport()->Pos);
 	ImGui::SetNextWindowSize(windowSize);
 	ImGui::Begin("Turbine", nullptr, flags);
-	ImDrawList* pDrawList = ImGui::GetWindowDrawList();
 	m_pAtlas->Render();
     m_pMainMenuBar->Render();
 	ImGui::End();
-
-
-	const BridgeList& bridges = g_pTurbine->GetBridges();
-	for (auto& pBridge : g_pTurbine->GetBridges())
-	{
-		BridgeGeolocation* pGeolocation = pBridge->GetGeolocation();
-		if (pGeolocation != nullptr)
-		{
-			float locationX, locationY;
-			m_pAtlas->GetScreenCoordinates(pGeolocation->GetLongitude(), pGeolocation->GetLatitude(), locationX, locationY);
-			pDrawList->AddImage(
-				reinterpret_cast<ImTextureID>(uintptr_t(Icons::GetIcon(IconId::Pin))),
-				ImVec2(locationX - sPinHalfWidth, locationY - sPinHeight),
-				ImVec2(locationX + sPinHalfWidth, locationY),
-				ImVec2(0, 0),
-				ImVec2(1, 1),
-				ImColor(1.0f, 0.0f, 0.0f, 1.0f) /*GetPinColor(camera->GetState())*/
-			);
-		}
-	}
 
 	OpenPickedCamera();
 	RenderCameras();
