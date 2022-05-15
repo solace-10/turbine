@@ -33,8 +33,7 @@ namespace Turbine
 {
 
 Pins::Pins(Atlas* pAtlas) :
-m_pAtlas(pAtlas),
-m_ZoomLevel(-1)
+m_pAtlas(pAtlas)
 {
 
 }

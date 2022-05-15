@@ -34,8 +34,6 @@ SOFTWARE.
 namespace Turbine
 {
 
-class Atlas;
-
 class PinStack
 {
 public:

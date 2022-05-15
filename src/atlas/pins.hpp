@@ -24,10 +24,7 @@ SOFTWARE.
 
 #pragma once
 
-#include <list>
 #include <vector>
-
-#include "bridge/bridge.fwd.hpp"
 
 namespace Turbine
 {
@@ -48,10 +45,8 @@ private:
     float DistanceBetweenSquared(const ImVec2& p1, const ImVec2& p2) const;
 
     Atlas* m_pAtlas;
-    std::list<BridgeSharedPtr> m_UnassignedBridges;
     using PinStackUniquePtr = std::unique_ptr<PinStack>;
     std::vector<PinStackUniquePtr> m_PinStacks;
-    int m_ZoomLevel;
 };
 
 }

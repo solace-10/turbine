@@ -24,13 +24,7 @@ SOFTWARE.
 
 #include <sstream>
 
-#include <SDL.h>
-
-#include "atlas/atlas.h"
 #include "atlas/pinstack.hpp"
-#include "bridge/bridge.h"
-#include "bridge/bridgegeolocation.hpp"
-#include "turbine.h"
 
 namespace Turbine
 {
