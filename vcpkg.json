@@ -1,0 +1,35 @@
+{
+    "name": "turbine",
+    "version-string": "1.0.0",
+    "license": "MIT",
+    "dependencies": [
+        {
+            "name": "curl",
+            "features": [
+                "openssl"
+            ]
+        },
+        {
+            "name": "freetype"
+        },
+        {
+            "name": "glew"
+        },
+        {
+            "name": "nlohmann-json"
+        },
+        {
+            "name": "sdl2",
+            "features": [
+                "wayland"
+            ]
+        },
+        {
+            "name": "sdl2-image",
+            "features": [
+                "libjpeg-turbo"
+            ]
+        }
+    ],
+    "builtin-baseline": "934a99dc13cabb330824ae1a5ab4a53a9acc5a49"
+}

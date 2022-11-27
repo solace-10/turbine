@@ -1,21 +1,17 @@
 cmake_minimum_required(VERSION 3.8)
-project(turbine)
 
-set_property(GLOBAL PROPERTY USE_FOLDERS ON)
+# Setup vcpkg script with CMake (note: should be placed before project() call)
+set(CMAKE_TOOLCHAIN_FILE ${CMAKE_CURRENT_SOURCE_DIR}/vcpkg/scripts/buildsystems/vcpkg.cmake CACHE STRING "Vcpkg toolchain file")
+
+project(turbine)
 
 set(CMAKE_CXX_STANDARD            17)
 set(CMAKE_CXX_STANDARD_REQUIRED   YES)
 
-if (WIN32)
-	list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/cmake/windows)
-else()
-	list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/cmake/linux)
-endif()
-
-if (DEFINED MSVC_VERSION)
-    if (MSVC_VERSION GREATER_EQUAL 1910)
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /permissive-")
-    endif()
-endif()
+# vcpkg dependencies
+find_package(CURL CONFIG REQUIRED)
+find_package(GLEW CONFIG REQUIRED)
+find_package(SDL2 CONFIG REQUIRED)
+find_package(sdl2-image CONFIG REQUIRED)
 
 add_subdirectory(src)
