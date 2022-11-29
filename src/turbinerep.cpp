@@ -86,7 +86,7 @@ void TurbineRep::SetUserInterfaceStyle()
 	ImVec4* colors = ImGui::GetStyle().Colors;
 	colors[ImGuiCol_Text] = ImVec4(1.00f, 1.00f, 1.00f, 0.95f);
 	colors[ImGuiCol_TextDisabled] = ImVec4(0.50f, 0.50f, 0.50f, 1.00f);
-	colors[ImGuiCol_WindowBg] = ImVec4(0.13f, 0.12f, 0.12f, 0.90f);
+	colors[ImGuiCol_WindowBg] = ImVec4(0.10f, 0.10f, 0.12f, 0.25f);
 	colors[ImGuiCol_ChildBg] = ImVec4(1.00f, 1.00f, 1.00f, 0.00f);
 	colors[ImGuiCol_PopupBg] = ImVec4(0.05f, 0.05f, 0.05f, 0.94f);
 	colors[ImGuiCol_Border] = ImVec4(0.53f, 0.53f, 0.53f, 0.46f);
@@ -213,8 +213,19 @@ void TurbineRep::Render()
 
 	ImGui::SetNextWindowPos(ImGui::GetMainViewport()->Pos);
 	ImGui::SetNextWindowSize(windowSize);
+	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
 	ImGui::Begin("Turbine", nullptr, flags);
-	m_pAtlas->Render();
+	ImGui::PopStyleVar();
+
+	//m_pAtlas->Render();
+
+	ImDrawList* pDrawList = ImGui::GetWindowDrawList();
+	ImVec2 p0 = ImGui::GetCursorScreenPos();
+	ImVec2 p1 = ImVec2(p0.x + windowSize.x, p0.y + windowSize.y);
+	ImU32 colorA = ImGui::GetColorU32(IM_COL32(0, 0, 0, 255));
+	ImU32 colorB = ImGui::GetColorU32(IM_COL32(17, 43, 60, 255));
+	pDrawList->AddRectFilledMultiColor(p0, p1, colorA, colorA, colorB, colorB);
+
     m_pMainMenuBar->Render();
 	ImGui::End();
 

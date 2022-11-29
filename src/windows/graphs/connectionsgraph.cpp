@@ -98,24 +98,27 @@ void ConnectionsGraph::OnBridgeStatsChanged()
         }
     }
 
-    size_t numDataPoints = dataPoints.size();
-    m_Dates.resize(numDataPoints);
-    m_ConnectionsIPv4.resize(numDataPoints);
-    m_ConnectionsIPv6.resize(numDataPoints);
-    size_t idx = 0;
-    for (auto& dataPoint : dataPoints)
+    const size_t numDataPoints = dataPoints.size();
+    if (numDataPoints > 0)
     {
-        m_Dates[idx] = ToUnixTimestamp(dataPoint.first);
-        m_ConnectionsIPv4[idx] = static_cast<double>(dataPoint.second.v4);
-        m_ConnectionsIPv6[idx] = static_cast<double>(dataPoint.second.v6);
+        m_Dates.resize(numDataPoints);
+        m_ConnectionsIPv4.resize(numDataPoints);
+        m_ConnectionsIPv6.resize(numDataPoints);
+        size_t idx = 0;
+        for (auto& dataPoint : dataPoints)
+        {
+            m_Dates[idx] = ToUnixTimestamp(dataPoint.first);
+            m_ConnectionsIPv4[idx] = static_cast<double>(dataPoint.second.v4);
+            m_ConnectionsIPv6[idx] = static_cast<double>(dataPoint.second.v6);
 
-        m_DomainY[1] = std::max(std::max(m_DomainY[1],  m_ConnectionsIPv4[idx]),  m_ConnectionsIPv6[idx]);
-        idx++;
+            m_DomainY[1] = std::max(std::max(m_DomainY[1],  m_ConnectionsIPv4[idx]),  m_ConnectionsIPv6[idx]);
+            idx++;
+        }
+
+        m_DomainX[0] = m_Dates.front();
+        m_DomainX[1] = m_Dates.back();
+        m_DomainY[1] = m_DomainY[1] + 10; // Ensure we don't get clipped at the top of the graph.
     }
-
-    m_DomainX[0] = m_Dates.front();
-    m_DomainX[1] = m_Dates.back();
-    m_DomainY[1] = m_DomainY[1] + 10; // Ensure we don't get clipped at the top of the graph.
 }
 
 } // namespace Turbine

@@ -90,9 +90,6 @@ Turbine::~Turbine()
 void Turbine::InitialiseLoggers(SDL_Window* pWindow)
 {
 	Log::AddLogTarget(std::make_shared<FileLogger>("log.txt"));
-#ifdef _WIN32
-	Log::AddLogTarget(std::make_shared<VisualStudioLogger>());
-#endif
 
 	m_pNotificationLogger = std::make_shared<NotificationLogger>(pWindow);
 	Log::AddLogTarget(m_pNotificationLogger);

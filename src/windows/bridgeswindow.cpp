@@ -35,17 +35,12 @@ namespace Turbine
 
 void BridgesWindow::Render()
 {
-	if (IsOpen() == false)
-	{
-		return;
-	}
-
-	ImGui::SetNextWindowSize(ImVec2(650, 400), ImGuiCond_FirstUseEver);
-	if (!ImGui::Begin("Bridges", &m_IsOpen))
-	{
-		ImGui::End();
-		return;
-	}
+	ImGuiViewport* pViewport = ImGui::GetMainViewport();
+	int menuHeight = 17;
+    ImVec2 pos(pViewport->Pos.x, pViewport->Pos.y + menuHeight);
+	ImGui::SetNextWindowPos(pos);
+	ImGui::SetNextWindowSize(ImVec2(pViewport->Size.x - 250, pViewport->Size.y - menuHeight));
+	ImGui::Begin("Bridges", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoTitleBar);
 
 	static ImGuiTableFlags flags = ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg;
 	if (ImGui::BeginTable("Bridges", 3, flags))
