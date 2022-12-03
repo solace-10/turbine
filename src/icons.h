@@ -36,6 +36,7 @@ enum class IconId
 	Pin,
 	TaskDisabled,
 	TaskError,
+	Server,
 
 	Count
 };
