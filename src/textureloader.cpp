@@ -122,7 +122,7 @@ GLuint TextureLoader::LoadTexture(const std::filesystem::path& path)
 	if (bpp == 3 || bpp == 4)
 	{
 		int internalFormat = (bpp == 4) ? GL_RGBA : GL_RGB;
-		int format = (bpp == 4) ? GL_BGRA_EXT : GL_BGR_EXT;
+		int format = (bpp == 4) ? GL_RGBA : GL_RGB;
 		glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, pSurface->w, pSurface->h, 0, format, GL_UNSIGNED_BYTE, pSurface->pixels);
 	}
 	else if (bpp == 1)
