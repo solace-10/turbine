@@ -26,6 +26,7 @@ SOFTWARE.
 #include "imgui/imgui_stdlib.h"
 
 #include "windows/deploymentwindow.hpp"
+#include "fonts.h"
 
 namespace Turbine
 {
@@ -48,7 +49,9 @@ void DeploymentWindow::Render()
 		return;
 	}
 
+	ImGui::PushFont(Fonts::GetFont(FontId::Inconsolata16));
     ImGui::TextWrapped("%s", m_Output.c_str());
+	ImGui::PopFont();
 
 	ImGui::End();
 }

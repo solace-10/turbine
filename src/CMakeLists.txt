@@ -15,6 +15,7 @@ add_executable(${PROJECT_NAME} ${SOURCE_FILES} ${RESOURCES})
 target_link_libraries(
     ${PROJECT_NAME} PRIVATE
     CURL::libcurl
+    freetype
     GL
     pthread
     SDL2::SDL2 

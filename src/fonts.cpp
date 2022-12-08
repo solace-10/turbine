@@ -23,6 +23,7 @@ SOFTWARE.
 */
 
 #include <SDL.h>
+#include "imgui/misc/freetype/imgui_freetype.h"
 #include "fonts.h"
 
 namespace Turbine
@@ -32,14 +33,21 @@ std::array<ImFont*, static_cast<size_t>(FontId::Count)> Fonts::m_Fonts;
 
 void Fonts::Load()
 {
-	ImGuiIO& io = ImGui::GetIO();
-	m_Fonts[static_cast<size_t>(FontId::DroidSans18)] = io.Fonts->AddFontFromFileTTF("fonts/droid-sans.regular.ttf", 18.0f);
+	AddFont(FontId::DroidSans16, "fonts/droid-sans.regular.ttf", 16.0f);
+	AddFont(FontId::Inconsolata16, "fonts/inconsolata/Inconsolata.otf", 18.0f);
 }
 
 ImFont* Fonts::GetFont(FontId id)
 {
 	SDL_assert(id != FontId::Count);
 	return m_Fonts[static_cast<size_t>(id)];
+}
+
+void Fonts::AddFont(FontId id, const char* pPath, float size)
+{
+	SDL_assert(id != FontId::Count);
+	SDL_assert(size >= 8.0f);
+	m_Fonts[static_cast<size_t>(id)] = ImGui::GetIO().Fonts->AddFontFromFileTTF(pPath, size);	
 }
 
 } // namespace Turbine

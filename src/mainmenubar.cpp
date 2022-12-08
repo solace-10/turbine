@@ -42,6 +42,8 @@ MainMenuBar::MainMenuBar()
 
 void MainMenuBar::Render()
 {
+    ImGui::PushStyleColor(ImGuiCol_MenuBarBg, IM_COL32(17, 43, 60, 255));
+    ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(75, 171, 225, 255));
     if (ImGui::BeginMainMenuBar())
     {
         if (ImGui::BeginMenu("File"))
@@ -122,6 +124,8 @@ void MainMenuBar::Render()
     {
         ImPlot::ShowDemoWindow(&m_ShowImPlotDemoWindow);
     }
+
+    ImGui::PopStyleColor(2);
 }
 
 } // namespace Turbine

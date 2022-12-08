@@ -33,7 +33,8 @@ namespace Turbine
 
 enum class FontId
 {
-	DroidSans18,
+	DroidSans16,
+	Inconsolata16,
 
 	Count
 };
@@ -45,6 +46,8 @@ public:
 	static ImFont* GetFont(FontId id);
 
 private:
+	static void AddFont(FontId id, const char* pPath, float size);
+	
 	static std::array<ImFont*, static_cast<size_t>(FontId::Count)> m_Fonts;
 };
 

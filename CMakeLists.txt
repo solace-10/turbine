@@ -10,6 +10,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED   YES)
 
 # vcpkg dependencies
 find_package(CURL CONFIG REQUIRED)
+find_package(freetype CONFIG REQUIRED)
 find_package(GLEW CONFIG REQUIRED)
 find_package(SDL2 CONFIG REQUIRED)
 find_package(sdl2-image CONFIG REQUIRED)

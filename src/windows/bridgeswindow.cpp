@@ -36,14 +36,23 @@ namespace Turbine
 
 void BridgesWindow::Render()
 {
-	ImGuiViewport* pViewport = ImGui::GetMainViewport();
+	using namespace ImGui;
+
+	ImGuiViewport* pViewport = GetMainViewport();
 	int menuHeight = 22;
     ImVec2 pos(pViewport->Pos.x, pViewport->Pos.y + menuHeight);
-	ImGui::SetNextWindowPos(pos);
-	ImGui::SetNextWindowSize(ImVec2(pViewport->Size.x - 250, pViewport->Size.y - menuHeight));
-	ImGui::Begin("Bridges", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoTitleBar);
+	SetNextWindowPos(pos);
+	SetNextWindowSize(ImVec2(pViewport->Size.x - 250, pViewport->Size.y - menuHeight));
+	
+	ImGuiWindowFlags flags = 0 |
+		ImGuiWindowFlags_NoResize |
+		ImGuiWindowFlags_NoMove |
+		ImGuiWindowFlags_NoSavedSettings |
+		ImGuiWindowFlags_NoTitleBar |
+		ImGuiWindowFlags_NoBringToFrontOnFocus |
+		ImGuiWindowFlags_NoBackground;
+	Begin("Bridges", nullptr, flags);
 
-    using namespace ImGui;
     PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
 
 	BridgeList pBridges = g_pTurbine->GetBridges();
@@ -70,7 +79,7 @@ void BridgesWindow::Render()
 		TextUnformatted(pBridge->GetState().c_str());
 
 		SetCursorScreenPos(pos);
-		if (ImGui::InvisibleButton("BridgeSummaryButton", ImGui::GetWindowSize()))
+		if (InvisibleButton("BridgeSummaryButton", GetWindowSize()))
 		{
 			Window* pWindow = g_pTurbine->GetBridgeWindow(pBridge);
 			if (pWindow != nullptr)
@@ -84,8 +93,7 @@ void BridgesWindow::Render()
 	}
 
     PopStyleVar();
-
-	ImGui::End();
+	End();
 }
 
 } // namespace Turbine
