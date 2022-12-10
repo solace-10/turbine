@@ -24,6 +24,7 @@ SOFTWARE.
 
 #include <filesystem>
 #include <fstream>
+#include <regex>
 
 #include "bridge/bridge.h"
 #include "core/shellcommand/shellcommand.hpp"
@@ -35,7 +36,9 @@ SOFTWARE.
 namespace Turbine
 {
 
-AnsibleCommand::AnsibleCommand()
+AnsibleCommand::AnsibleCommand() :
+m_GatheringFacts(false),
+m_PlayRecap(false)
 {
 
 }
@@ -43,6 +46,73 @@ AnsibleCommand::AnsibleCommand()
 AnsibleCommand::~AnsibleCommand()
 {
 
+}
+
+void AnsibleCommand::OnDeploymentCommandOutput(const std::string& output)
+{
+    HandleGatheringFacts(output);
+    HandlePlayRecap(output);
+}
+
+void AnsibleCommand::HandleGatheringFacts(const std::string& output)
+{
+    if (m_GatheringFacts == false && output.rfind("TASK [Gathering Facts]", 0) == 0)
+    {
+        m_GatheringFacts = true;
+    }
+    else if (m_GatheringFacts && output.rfind("TASK [", 0) == 0)
+    {
+        m_GatheringFacts = false;
+    }
+    else if (m_GatheringFacts)
+    {
+        Bridge* pBridge = GetBridgeFromOutput(output);
+        if (pBridge != nullptr)
+        {
+            GatheringFactsResult result;
+            result.pBridge = pBridge;
+            result.ok = (output.rfind("ok: ", 0) == 0);
+            result.details = {};
+            if (!result.ok)
+            {
+                const size_t firstBrace = output.find("{");
+                const size_t lastBrace = output.rfind("}");
+                if (firstBrace != std::string::npos && lastBrace != std::string::npos)
+                {
+                    const std::string rawJson = output.substr(firstBrace, lastBrace - firstBrace + 1);
+                    result.details = nlohmann::json::parse(rawJson);
+                }
+            }
+            m_GatheringFactsResults.push_back(result);
+        }
+    }
+}
+
+void AnsibleCommand::HandlePlayRecap(const std::string& output)
+{
+    if (m_PlayRecap == false && output.rfind("PLAY RECAP *", 0) == 0)
+    {
+        m_PlayRecap = true;
+    }
+    else if (m_PlayRecap)
+    {
+        Bridge* pBridge = GetBridgeFromOutput(output);
+        if (pBridge != nullptr)
+        {
+            if (output.find("unreachable=1", 0) != std::string::npos)
+            {
+                OnUnreachable(pBridge, "");
+            }
+            else if (output.find("failed=0", 0) != std::string::npos)
+            {
+                OnFailed(pBridge, "");
+            }
+            else
+            {
+                OnSuccess(pBridge);
+            }
+        }
+    }
 }
 
 void AnsibleCommand::GenerateInventory()
@@ -56,14 +126,14 @@ void AnsibleCommand::GenerateInventory()
     {
         for (int i = 0; i < 2; ++i)
         {
-            std::string state = (i == 0) ? "Deployment pending" : "Deployed";
+            Bridge::DeploymentState deploymentState = (i == 0) ? Bridge::DeploymentState::DeploymentPending : Bridge::DeploymentState::Deployed;
             std::string group = (i == 0) ? "DeploymentPending" : "Deployed";
 
             file << "[" << group << "]\n";
 
             for (auto& pBridge : g_pTurbine->GetBridges())
             {
-                if (pBridge->GetState() != state)
+                if (pBridge->GetDeploymentState() != deploymentState)
                 {
                     continue;
                 }
@@ -102,6 +172,25 @@ void AnsibleCommand::GenerateInventory()
         }
         file.close();
     }
+}
+
+Bridge* AnsibleCommand::GetBridgeFromOutput(const std::string& output) const
+{
+    // Regular expression that can be used to detect both IPv4 and IPv6 addresses.
+    static const std::regex ipRegex("((\\d{1,3}\\.){3}\\d{1,3})|(([\\da-fA-F]{1,4}:){7}[\\da-fA-F]{1,4})");
+    std::smatch match;
+    if (std::regex_search(output, match, ipRegex)) 
+    {
+        const std::string ip = match.str();
+        for (Bridge* pBridge : g_pTurbine->GetBridges())
+        {
+            if (pBridge && (ip == pBridge->GetIPv4() || ip == pBridge->GetIPv6()))
+            {
+                return pBridge;
+            }
+        }
+    }
+    return nullptr;
 }
 
 } // namespace Turbine

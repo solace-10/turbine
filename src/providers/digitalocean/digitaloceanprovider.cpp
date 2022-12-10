@@ -425,21 +425,18 @@ void DigitalOceanProvider::UpdateDropletMonitor(float delta)
 							const std::string& ipv6 = ExtractIP(droplet, "v6");
 							
 							Bridge* pExistingBridge = g_pTurbine->GetBridge(id);
+							Bridge::VPSState vpsState = Bridge::VPSState::Unknown;
+							Bridge::DeploymentState deploymentState = Bridge::DeploymentState::Unknown;
+							GetBridgeState(dropletState, tags, vpsState, deploymentState);
 							if (pExistingBridge)
 							{
-								if (ShouldChangeBridgeState(dropletState, pExistingBridge->GetState()))
-								{
-									const std::string& bridgeState = GetBridgeState(dropletState, tags);
-									pExistingBridge->SetState(bridgeState);
-								}
-
+								pExistingBridge->SetVPSState(vpsState);
 								pExistingBridge->SetIPv4(ipv4);
 								pExistingBridge->SetIPv6(ipv6);
 							}
 							else
 							{
-								const std::string& initialState = GetBridgeState(dropletState, tags);
-								BridgeSharedPtr pBridge = std::make_shared<Bridge>(this, id, name, initialState);
+								BridgeSharedPtr pBridge = std::make_shared<Bridge>(this, id, name, vpsState, deploymentState, Bridge::TorState::Unknown);
 								pBridge->SetIPv4(ipv4);
 								pBridge->SetIPv6(ipv6);
 								pBridge->SetORPort(this->ExtractORPort(tags));
@@ -489,51 +486,31 @@ std::string DigitalOceanProvider::ExtractIP(const nlohmann::json& droplet, const
 	return "";
 }
 
-bool DigitalOceanProvider::ShouldChangeBridgeState(const std::string& dropletState, const std::string& currentBridgeState) const
+void DigitalOceanProvider::GetBridgeState(const std::string& dropletState, const std::vector<std::string>& tags, Bridge::VPSState& vpsState, Bridge::DeploymentState& deploymentState) const
 {
 	if (dropletState == "active")
 	{
-		const std::vector<std::string> hostStates = 
-		{
-			"Offline", "Shutting down", "New"
-		};
-		for (const std::string& hostState : hostStates)
-		{
-			if (currentBridgeState == hostState)
-			{
-				return true;
-			}
-		}
-		return false;
-	}
-	return true;
-}
-
-const std::string& DigitalOceanProvider::GetBridgeState(const std::string& dropletState, const std::vector<std::string>& tags) const
-{
-	if (dropletState == "active")
-	{
+		vpsState = Bridge::VPSState::Active;
 		static const std::string sDeploymentPendingState("Deployment pending");
 		static const std::string sDeployedState("Deployed");
 		const bool deploymentPending = std::find(tags.begin(), tags.end(), "turbine_deployment_pending") != tags.end();
-		return deploymentPending ? sDeploymentPendingState : sDeployedState;
+		deploymentState = deploymentPending ? Bridge::DeploymentState::DeploymentPending : Bridge::DeploymentState::Deployed; 
 	}
 	else if (dropletState == "new")
 	{
-		static std::string sNewState("New");
-		return sNewState;
+		vpsState = Bridge::VPSState::New;
+		deploymentState = Bridge::DeploymentState::Unknown;
 	}
 	else if (dropletState == "off")
 	{
-		static std::string sOfflineState("Offline");
-		return sOfflineState;
+		vpsState = Bridge::VPSState::Offline;
+		deploymentState = Bridge::DeploymentState::Unknown;
 	}
 	else
 	{
-		static std::string sUnknownState("unknown");
-		return sUnknownState;
+		vpsState = Bridge::VPSState::Unknown;
+		deploymentState = Bridge::DeploymentState::Unknown;
 	}
-
 }
 
 std::string DigitalOceanProvider::ArrayToInputField(const std::vector<std::string>& value) const

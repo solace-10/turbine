@@ -24,6 +24,13 @@ SOFTWARE.
 
 #pragma once
 
+#include "bridge/bridge.fwd.hpp"
+
+#include <json.hpp>
+
+#include <string>
+#include <vector>
+
 namespace Turbine
 {
 
@@ -33,8 +40,26 @@ public:
     AnsibleCommand();
     ~AnsibleCommand();
 
+    virtual void OnDeploymentCommandOutput(const std::string& output);
+    virtual void OnSuccess(Bridge* pBridge) {}
+    virtual void OnUnreachable(Bridge* pBridge, const std::string& error) {}
+    virtual void OnFailed(Bridge* pBridge, const std::string& error) {}
+
 protected:
     void GenerateInventory();
+    Bridge* GetBridgeFromOutput(const std::string& output) const;
+    void HandleGatheringFacts(const std::string& output);
+    void HandlePlayRecap(const std::string& output);
+
+    struct GatheringFactsResult
+    {
+        Bridge* pBridge;
+        bool ok;
+        nlohmann::json details;
+    };
+    std::vector<GatheringFactsResult> m_GatheringFactsResults;
+    bool m_GatheringFacts;
+    bool m_PlayRecap;
 };
 
 } // namespace Turbine

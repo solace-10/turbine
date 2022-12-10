@@ -76,7 +76,7 @@ void Deployment::ExecuteDeployments(const BridgeWeakPtrList& pendingDeployments)
         BridgeSharedPtr pBridge = pPendingDeployment.lock();
         if (pBridge)
         {
-            pBridge->SetState("Deploying");
+            pBridge->SetDeploymentState(Bridge::DeploymentState::Deploying);
         }
     }
 
@@ -110,7 +110,7 @@ Deployment::BridgeWeakPtrList Deployment::GetPendingDeployments() const
     for (auto& pDeployment : m_Deployments)
     {
         BridgeSharedPtr pBridge = pDeployment.lock();
-        if (pBridge && pBridge->GetState() == "Deployment pending")
+        if (pBridge && pBridge->GetDeploymentState() == Bridge::DeploymentState::DeploymentPending)
         {
             pendingDeployments.push_back(pDeployment);
         }
@@ -121,16 +121,16 @@ Deployment::BridgeWeakPtrList Deployment::GetPendingDeployments() const
 
 void Deployment::OnDeploymentComplete(Bridge* pBridge, bool success)
 {
-    if (pBridge->GetState() == "Deploying")
+    if (pBridge->GetDeploymentState() == Bridge::DeploymentState::Deploying)
     {
         if (success)
         {
-            pBridge->SetState("Deployed");
+            pBridge->SetDeploymentState(Bridge::DeploymentState::Deployed);
             pBridge->GetProvider()->OnBridgeDeployed(pBridge);
         }
         else
         {
-            pBridge->SetState("Deployment failed");
+            pBridge->SetDeploymentState(Bridge::DeploymentState::DeploymentFailed);
         }
     }
 }
@@ -142,6 +142,8 @@ void Deployment::OnDeploymentCommandFinished(int result)
 
 void Deployment::OnDeploymentCommandOutput(const std::string& output)
 {
+    AnsibleCommand::OnDeploymentCommandOutput(output);
+
     DeploymentWindow* pWindow = reinterpret_cast<DeploymentWindow*>(g_pTurbine->GetDeploymentWindow());
     pWindow->AddOutput(output + "\n");
 
@@ -157,24 +159,6 @@ void Deployment::OnDeploymentCommandOutput(const std::string& output)
             OnDeploymentComplete(pBridge, GetSuccessFromOutput(output));
         }
     }
-}
-
-Bridge* Deployment::GetBridgeFromOutput(const std::string& output) const
-{
-    size_t ipEndIdx = output.find(' ');
-    if (ipEndIdx != std::string::npos)
-    {
-        const std::string ip = output.substr(0, ipEndIdx);
-        for (BridgeWeakPtr pBridgeWeak : m_Deployments)
-        {
-            BridgeSharedPtr pBridge = pBridgeWeak.lock();
-            if (pBridge && (ip == pBridge->GetIPv4() || ip == pBridge->GetIPv6()))
-            {
-                return pBridge.get();
-            }
-        }
-    }
-    return nullptr;
 }
 
 bool Deployment::GetSuccessFromOutput(const std::string& output) const

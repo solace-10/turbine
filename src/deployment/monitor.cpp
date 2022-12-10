@@ -111,6 +111,8 @@ void Monitor::OnDeploymentCommandFinished(int result)
 
 void Monitor::OnDeploymentCommandOutput(const std::string& output)
 {
+    AnsibleCommand::OnDeploymentCommandOutput(output);
+    
     DeploymentWindow* pWindow = reinterpret_cast<DeploymentWindow*>(g_pTurbine->GetDeploymentWindow());
     pWindow->AddOutput(output + "\n");
 
@@ -128,21 +130,19 @@ void Monitor::OnDeploymentCommandOutput(const std::string& output)
     }
 }
 
-Bridge* Monitor::GetBridgeFromOutput(const std::string& output) const
+void Monitor::OnSuccess(Bridge* pBridge) 
 {
-    size_t ipEndIdx = output.find(' ');
-    if (ipEndIdx != std::string::npos)
-    {
-        const std::string ip = output.substr(0, ipEndIdx);
-        for (Bridge* pBridge : g_pTurbine->GetBridges())
-        {
-            if (pBridge && (ip == pBridge->GetIPv4() || ip == pBridge->GetIPv6()))
-            {
-                return pBridge;
-            }
-        }
-    }
-    return nullptr;
+    pBridge->OnMonitoredDataUpdated();
+}
+
+void Monitor::OnUnreachable(Bridge* pBridge, const std::string& error)
+{
+    pBridge->SetTorState(Bridge::TorState::Unreachable);
+}
+
+void Monitor::OnFailed(Bridge* pBridge, const std::string& error) 
+{
+    pBridge->SetTorState(Bridge::TorState::Unknown);
 }
 
 } // namespace Turbine

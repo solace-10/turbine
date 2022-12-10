@@ -53,25 +53,25 @@ void BridgeSummaryWidget::Render(Bridge* pBridge)
 
     ImVec2 pos = GetCursorScreenPos();
     
-    if (pBridge->GetState() == "Deployed")
-	{
-        float timer = m_SpinnerTimer / 2.0f;
-		SetCursorScreenPos(ImVec2(pos.x + 8, pos.y + 4));
-		SpinnerFilled(10.0f, 4, IM_COL32(0, 255, 255, 255), &timer);
-		SetCursorScreenPos(ImVec2(pos.x + 38, pos.y + 4));
-		Text("%s", pBridge->GetName().c_str());
-		SetCursorScreenPos(ImVec2(pos.x + 38, pos.y + 20));
-		TextUnformatted(pBridge->GetState().c_str());
-	}
-    else
-    {
-        SetCursorScreenPos(ImVec2(pos.x + 8, pos.y + 4));
-        Spinner(10.0f, 4, IM_COL32(0, 255, 255, 255), &m_SpinnerTimer);
-        SetCursorScreenPos(ImVec2(pos.x + 38, pos.y + 4));
-        Text("%s", pBridge->GetName().c_str());
-        SetCursorScreenPos(ImVec2(pos.x + 38, pos.y + 20));
-        TextUnformatted(pBridge->GetState().c_str());
-    }
+    // if (pBridge->GetState() == "Deployed")
+	// {
+    //     float timer = m_SpinnerTimer / 2.0f;
+	// 	SetCursorScreenPos(ImVec2(pos.x + 8, pos.y + 4));
+	// 	SpinnerFilled(10.0f, 4, IM_COL32(0, 255, 255, 255), &timer);
+	// 	SetCursorScreenPos(ImVec2(pos.x + 38, pos.y + 4));
+	// 	Text("%s", pBridge->GetName().c_str());
+	// 	SetCursorScreenPos(ImVec2(pos.x + 38, pos.y + 20));
+	// 	TextUnformatted(pBridge->GetState().c_str());
+	// }
+    // else
+    // {
+    //     SetCursorScreenPos(ImVec2(pos.x + 8, pos.y + 4));
+    //     Spinner(10.0f, 4, IM_COL32(0, 255, 255, 255), &m_SpinnerTimer);
+    //     SetCursorScreenPos(ImVec2(pos.x + 38, pos.y + 4));
+    //     Text("%s", pBridge->GetName().c_str());
+    //     SetCursorScreenPos(ImVec2(pos.x + 38, pos.y + 20));
+    //     TextUnformatted(pBridge->GetState().c_str());
+    // }
 
     SetCursorScreenPos(pos);
     if (ImGui::InvisibleButton("BridgeSummaryButton", ImGui::GetWindowSize()))

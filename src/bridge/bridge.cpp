@@ -29,7 +29,6 @@ SOFTWARE.
 #include "bridge/bridgegeolocation.hpp"
 #include "bridge/bridgestats.hpp"
 #include "bridge/bridgesummarywidget.h"
-#include "bridge/statemachine.h"
 #include "deployment/deployment.h"
 #include "webclient/webclient.h"
 #include "settings.h"
@@ -38,19 +37,18 @@ SOFTWARE.
 namespace Turbine
 {
 
-Bridge::Bridge(Provider* pProvider, const std::string& id, const std::string& name, const std::string& initialState) :
+Bridge::Bridge(Provider* pProvider, const std::string& id, const std::string& name, VPSState vpsState, DeploymentState deploymentState, TorState torState) :
 m_pProvider(pProvider),
 m_Id(id),
 m_Name(name),
 m_ORPort(0),
 m_ExtPort(0),
-m_DistributionMechanism("unknown")
+m_DistributionMechanism("unknown"),
+m_VPSState(vpsState),
+m_DeploymentState(deploymentState),
+m_TorState(torState)
 {
     m_pBridgeSummaryWidget = std::make_unique<BridgeSummaryWidget>();
-    m_pStateMachine = std::make_unique<StateMachine>(name);
-    InitialiseStateMachine();
-    m_pStateMachine->SetState(initialState, true);
-
     m_BridgePath = g_pTurbine->GetSettings()->GetStoragePath() / "bridges" / GetName();
     m_pBridgeStats = std::make_shared<BridgeStats>(this);
 
@@ -74,16 +72,6 @@ const std::string& Bridge::GetId() const
 const std::string& Bridge::GetName() const
 {
     return m_Name;
-}
-
-const std::string& Bridge::GetState() const
-{
-    return m_pStateMachine->GetState();
-}
-    
-void Bridge::SetState(const std::string& state, bool force /* = false */)
-{
-    m_pStateMachine->SetState(state, force);
 }
 
 const std::string& Bridge::GetIPv4() const
@@ -168,26 +156,6 @@ BridgeGeolocation* Bridge::GetGeolocation() const
 void Bridge::RenderSummaryWidget()
 {
     m_pBridgeSummaryWidget->Render(this);
-}
-
-void Bridge::InitialiseStateMachine()
-{
-    m_pStateMachine->AddState("Offline");
-    m_pStateMachine->AddState("Shutting down");
-    m_pStateMachine->AddState("New");
-    m_pStateMachine->AddState("Deployment pending");
-    m_pStateMachine->AddState("Deploying");
-    m_pStateMachine->AddState("Deployed");
-    m_pStateMachine->AddState("Deployment failed");
-
-    m_pStateMachine->LinkStates("Offline", "New");
-
-    m_pStateMachine->LinkStates("Shutting down", "Offline");
-
-	m_pStateMachine->LinkStates("New", "Shutting down");
-	m_pStateMachine->LinkStates("New", "Offline");
-    m_pStateMachine->LinkStates("New", "Deployment needed");
-    m_pStateMachine->LinkStates("New", "Deploying");
 }
 
 void Bridge::OnMonitoredDataUpdated()
@@ -278,6 +246,75 @@ void Bridge::RetrieveDistributionMechanism()
             }
 		}
 	);
+}
+
+Bridge::VPSState Bridge::GetVPSState() const
+{
+    return m_VPSState;
+}
+
+void Bridge::SetVPSState(VPSState state)
+{
+    m_VPSState = state;
+}
+
+Bridge::DeploymentState Bridge::GetDeploymentState() const 
+{
+    return m_DeploymentState;
+}
+
+void Bridge::SetDeploymentState(DeploymentState state)
+{
+    m_DeploymentState = state;
+}
+
+Bridge::TorState Bridge::GetTorState() const
+{
+    return m_TorState;
+}
+
+void Bridge::SetTorState(TorState state)
+{
+    m_TorState = state;
+}
+
+std::string Bridge::GetStateText() const
+{
+    static std::array<std::string, static_cast<size_t>(VPSState::Count)> sVPSStateText =
+    {
+        "VPS active",
+        "New VPS",
+        "Offline",
+        "Unknown VPS state"
+    };
+
+    static std::array<std::string, static_cast<size_t>(DeploymentState::Count)> sDeploymentStateText =
+    {
+        "Unknown",
+        "Deploying",
+        "Deployed",
+        "Deployment failed",
+        "Unreachable"
+    };
+
+    static std::array<std::string, static_cast<size_t>(TorState::Count)> sTorStateText =
+    {
+        "Unknown",
+        "Unreachable"
+    };
+
+    if (GetVPSState() != VPSState::Active)
+    {
+        return sVPSStateText[static_cast<size_t>(GetVPSState())];
+    }
+    else if (GetDeploymentState() != DeploymentState::Deployed)
+    {
+        return sDeploymentStateText[static_cast<size_t>(GetDeploymentState())];
+    }
+    else
+    {
+        return sTorStateText[static_cast<size_t>(GetTorState())];
+    }
 }
 
 } // namespace Turbine

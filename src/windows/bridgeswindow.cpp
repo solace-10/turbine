@@ -74,9 +74,9 @@ void BridgesWindow::Render()
 		SetCursorScreenPos(ImVec2(pos.x + childSize.x / 2 - nameSize.x / 2, pos.y + 88));
 		TextUnformatted(pBridge->GetName().c_str());
 
-		const ImVec2 stateSize = CalcTextSize(pBridge->GetState().c_str());
+		const ImVec2 stateSize = CalcTextSize(pBridge->GetStateText().c_str());
 		SetCursorScreenPos(ImVec2(pos.x + childSize.x / 2 - stateSize.x / 2, pos.y + 96 + nameSize.y));
-		TextUnformatted(pBridge->GetState().c_str());
+		TextUnformatted(pBridge->GetStateText().c_str());
 
 		SetCursorScreenPos(pos);
 		if (InvisibleButton("BridgeSummaryButton", GetWindowSize()))

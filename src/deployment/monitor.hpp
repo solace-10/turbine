@@ -43,6 +43,11 @@ public:
     Monitor();
     ~Monitor();
 
+    virtual void OnDeploymentCommandOutput(const std::string& output) override;
+    virtual void OnSuccess(Bridge* pBridge) override;
+    virtual void OnUnreachable(Bridge* pBridge, const std::string& error) override;
+    virtual void OnFailed(Bridge* pBridge, const std::string& error) override;
+
     void Update(float delta);
     void Retrieve();
 
@@ -52,10 +57,7 @@ private:
     void ExecuteDeployments(const BridgeWeakPtrList& pendingDeployments);
     std::string GetAnsibleCommand() const;
     void OnDeploymentCommandFinished(int result);
-    void OnDeploymentCommandOutput(const std::string& output);
-    Bridge* GetBridgeFromOutput(const std::string& output) const;
 
-    BridgeWeakPtrList m_Deployments;
     ShellCommandUniquePtr m_pAnsibleCommand;
     bool m_ParsingResults;
 

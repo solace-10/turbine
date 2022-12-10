@@ -44,10 +44,13 @@ public:
     Deployment();
     ~Deployment();
 
+    virtual void OnDeploymentCommandOutput(const std::string& output) override;
+
     void Update(float delta);
     void OnBridgeAdded(BridgeSharedPtr& pBridge);
 
 private:
+
     using BridgeWeakPtrList = std::list<BridgeWeakPtr>;
 
     BridgeWeakPtrList GetPendingDeployments() const;
@@ -55,8 +58,6 @@ private:
     std::string GetAnsibleCommand() const;
     void OnDeploymentComplete(Bridge* pBridge, bool success);
     void OnDeploymentCommandFinished(int result);
-    void OnDeploymentCommandOutput(const std::string& output);
-    Bridge* GetBridgeFromOutput(const std::string& output) const;
     bool GetSuccessFromOutput(const std::string& output) const;
 
     BridgeWeakPtrList m_Deployments;
