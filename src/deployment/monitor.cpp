@@ -36,8 +36,7 @@ SOFTWARE.
 namespace Turbine
 {
 
-Monitor::Monitor() :
-m_ParsingResults(false)
+Monitor::Monitor()
 {
     using namespace std::literals;
     m_RetrivalInterval = 4h;
@@ -54,7 +53,6 @@ void Monitor::Update(float delta)
     if (m_NextRetrieval < std::chrono::system_clock::now())
     {
         GenerateInventory();
-        m_ParsingResults = false;
         m_pAnsibleCommand = std::make_unique<ShellCommand>(
             GetAnsibleCommand(),
             std::bind(&Monitor::OnDeploymentCommandFinished, this, std::placeholders::_1),
@@ -88,7 +86,6 @@ void Monitor::ExecuteDeployments(const BridgeWeakPtrList& pendingDeployments)
 {
     GenerateInventory();
 
-    m_ParsingResults = false;
     m_pAnsibleCommand = std::make_unique<ShellCommand>(
         GetAnsibleCommand(),
         std::bind(&Monitor::OnDeploymentCommandFinished, this, std::placeholders::_1),
@@ -115,19 +112,6 @@ void Monitor::OnDeploymentCommandOutput(const std::string& output)
     
     DeploymentWindow* pWindow = reinterpret_cast<DeploymentWindow*>(g_pTurbine->GetDeploymentWindow());
     pWindow->AddOutput(output + "\n");
-
-    if (m_ParsingResults == false && output.rfind("PLAY RECAP *", 0) == 0)
-    {
-        m_ParsingResults = true;
-    }
-    else if (m_ParsingResults)
-    {
-        Bridge* pBridge = GetBridgeFromOutput(output);
-        if (pBridge != nullptr)
-        {
-            pBridge->OnMonitoredDataUpdated();
-        }
-    }
 }
 
 void Monitor::OnSuccess(Bridge* pBridge) 

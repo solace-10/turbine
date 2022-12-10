@@ -52,8 +52,6 @@ m_Error(false)
     m_pBridgeSummaryWidget = std::make_unique<BridgeSummaryWidget>();
     m_BridgePath = g_pTurbine->GetSettings()->GetStoragePath() / "bridges" / GetName();
     m_pBridgeStats = std::make_shared<BridgeStats>(this);
-
-    OnMonitoredDataUpdated();
 }
 
 Bridge::~Bridge()
@@ -161,10 +159,39 @@ void Bridge::RenderSummaryWidget()
 
 void Bridge::OnMonitoredDataUpdated()
 {
+    ReadTorProcess();
     ReadBridgeStats();
     ReadFingerprint();
     ReadHashedFingerprint();
     RetrieveDistributionMechanism();
+}
+
+void Bridge::ReadTorProcess()
+{
+    std::streamoff length = 0u;
+    std::ifstream file(m_BridgePath / "tor-process", std::ifstream::in);
+    if (file.good())
+    {
+        file.seekg(0, std::ios_base::end);
+        std::streamoff length = file.tellg();
+        file.close();
+
+        if (length == 0)
+        {
+            SetError(true, "Tor process isn't running.");
+            SetTorState(TorState::Inactive);
+        }
+        else
+        {
+            SetError(false, "");
+            SetTorState(TorState::Running);
+        }
+    }
+    else
+    {
+        SetError(true, "Failed to read tor-process file.");
+        SetTorState(TorState::Unknown);
+    }
 }
 
 void Bridge::ReadBridgeStats()
@@ -301,7 +328,9 @@ std::string Bridge::GetStateText() const
     static std::array<std::string, static_cast<size_t>(TorState::Count)> sTorStateText =
     {
         "Unknown",
-        "Unreachable"
+        "Unreachable",
+        "Inactive",
+        "Running"
     };
 
     if (GetVPSState() != VPSState::Active)

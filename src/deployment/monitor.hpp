@@ -59,8 +59,6 @@ private:
     void OnDeploymentCommandFinished(int result);
 
     ShellCommandUniquePtr m_pAnsibleCommand;
-    bool m_ParsingResults;
-
     std::chrono::time_point<std::chrono::system_clock> m_NextRetrieval;
     std::chrono::hours m_RetrivalInterval;
 };

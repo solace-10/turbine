@@ -71,6 +71,8 @@ public:
     {
         Unknown,
         Unreachable,
+        Inactive,
+        Running,
 
         Count
     };
@@ -113,6 +115,7 @@ public:
 
 private:
     std::string ReadFingerprint(const std::filesystem::path filePath) const;
+    void ReadTorProcess();
     void ReadFingerprint();
     void ReadHashedFingerprint();
     void ReadBridgeStats();
