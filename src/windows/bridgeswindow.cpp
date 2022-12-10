@@ -26,6 +26,7 @@ SOFTWARE.
 #include "imgui/imgui_stdlib.h"
 
 #include "icons.h"
+#include "fonts.h"
 #include "providers/provider.h"
 #include "windows/bridgeswindow.h"
 #include "settings.h"
@@ -56,27 +57,67 @@ void BridgesWindow::Render()
     PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
 
 	BridgeList pBridges = g_pTurbine->GetBridges();
-	const ImVec2 childSize(160, 160);
+	const ImVec2 childSize(180, 180);
 	const ImVec2 serverIconSize(64, 64);
 	for (auto& pBridge : pBridges)
 	{
+		const bool hasError = pBridge->GetError();
+		if (hasError)
+		{
+			PushStyleColor(ImGuiCol_Border, IM_COL32(128, 0, 0, 255));
+		}
+		else
+		{
+			PushStyleColor(ImGuiCol_Border, IM_COL32(84, 163, 220, 255));
+		}
+
 		BeginChild(pBridge->GetId().c_str(), childSize, true);
+
+		if (hasError)
+		{
+			ImDrawList* pDrawList = ImGui::GetWindowDrawList();
+			ImVec2 p0 = ImGui::GetCursorScreenPos();
+			ImVec2 p1 = ImVec2(p0.x + childSize.x, p0.y + childSize.y);
+			ImU32 colorA = ImGui::GetColorU32(IM_COL32(255, 0, 0, 0));
+			ImU32 colorB = ImGui::GetColorU32(IM_COL32(255, 0, 0, 20));
+			pDrawList->AddRectFilledMultiColor(p0, p1, colorA, colorA, colorB, colorB);
+		}
 
 		ImVec2 pos = GetCursorScreenPos();
 		
-		SetCursorPos(ImVec2(childSize.x / 2 - serverIconSize.x / 2, 16));
-		Image(reinterpret_cast<ImTextureID>(Icons::GetIcon(IconId::Server)), serverIconSize);
-		
-		SetCursorScreenPos(ImVec2(pos.x + 8, pos.y + 4));
-		//SpinnerFilled(10.0f, 4, IM_COL32(0, 255, 255, 255), &timer);
+		SetCursorPos(ImVec2(childSize.x / 2 - serverIconSize.x / 2, 16));		
+		if (hasError)
+		{
+			Image(reinterpret_cast<ImTextureID>(Icons::GetIcon(IconId::Server)), serverIconSize, ImVec2(0, 0), ImVec2(1, 1), ImVec4(1, 0, 0, 1));
+			PushStyleColor(ImGuiCol_Text, IM_COL32(255, 0, 0, 255));
+		}
+		else
+		{
+			Image(reinterpret_cast<ImTextureID>(Icons::GetIcon(IconId::Server)), serverIconSize);
+			PushStyleColor(ImGuiCol_Text, IM_COL32(84, 163, 220, 255));
+		}
 
+		PushFont(Fonts::GetFont(FontId::AltoVoltaje32));
 		const ImVec2 nameSize = CalcTextSize(pBridge->GetName().c_str());
 		SetCursorScreenPos(ImVec2(pos.x + childSize.x / 2 - nameSize.x / 2, pos.y + 88));
 		TextUnformatted(pBridge->GetName().c_str());
+		PopFont();
 
+		PushFont(Fonts::GetFont(FontId::Inconsolata18));
 		const ImVec2 stateSize = CalcTextSize(pBridge->GetStateText().c_str());
 		SetCursorScreenPos(ImVec2(pos.x + childSize.x / 2 - stateSize.x / 2, pos.y + 96 + nameSize.y));
 		TextUnformatted(pBridge->GetStateText().c_str());
+
+		if (!hasError)
+		{
+			std::string clientsText = "~16 clients";
+			const ImVec2 clientsSize = CalcTextSize(clientsText.c_str());
+			SetCursorScreenPos(ImVec2(pos.x + childSize.x / 2 - clientsSize.x / 2, pos.y + 96 + nameSize.y + stateSize.y));
+			TextUnformatted(clientsText.c_str());
+		}
+		PopFont();
+
+		PopStyleColor();
 
 		SetCursorScreenPos(pos);
 		if (InvisibleButton("BridgeSummaryButton", GetWindowSize()))
@@ -87,6 +128,7 @@ void BridgesWindow::Render()
 				pWindow->Show(true);
 			}
 		}
+		ImGui::PopStyleColor();
 
 		EndChild();
 		SameLine();

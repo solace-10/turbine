@@ -49,7 +49,7 @@ void DeploymentWindow::Render()
 		return;
 	}
 
-	ImGui::PushFont(Fonts::GetFont(FontId::Inconsolata16));
+	ImGui::PushFont(Fonts::GetFont(FontId::Inconsolata18));
     ImGui::TextWrapped("%s", m_Output.c_str());
 	ImGui::PopFont();
 

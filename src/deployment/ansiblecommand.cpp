@@ -103,7 +103,7 @@ void AnsibleCommand::HandlePlayRecap(const std::string& output)
             {
                 OnUnreachable(pBridge, "");
             }
-            else if (output.find("failed=0", 0) != std::string::npos)
+            else if (output.find("failed=0", 0) == std::string::npos)
             {
                 OnFailed(pBridge, "");
             }
@@ -191,6 +191,21 @@ Bridge* AnsibleCommand::GetBridgeFromOutput(const std::string& output) const
         }
     }
     return nullptr;
+}
+
+void AnsibleCommand::OnSuccess(Bridge* pBridge) 
+{
+    pBridge->SetError(false, "");
+}
+
+void AnsibleCommand::OnUnreachable(Bridge* pBridge, const std::string& error)
+{
+    pBridge->SetError(true, error);
+}
+
+void AnsibleCommand::OnFailed(Bridge* pBridge, const std::string& error)
+{
+    pBridge->SetError(true, error);
 }
 
 } // namespace Turbine

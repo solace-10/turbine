@@ -132,16 +132,19 @@ void Monitor::OnDeploymentCommandOutput(const std::string& output)
 
 void Monitor::OnSuccess(Bridge* pBridge) 
 {
+    AnsibleCommand::OnSuccess(pBridge);
     pBridge->OnMonitoredDataUpdated();
 }
 
 void Monitor::OnUnreachable(Bridge* pBridge, const std::string& error)
 {
+    AnsibleCommand::OnUnreachable(pBridge, error);
     pBridge->SetTorState(Bridge::TorState::Unreachable);
 }
 
 void Monitor::OnFailed(Bridge* pBridge, const std::string& error) 
 {
+    AnsibleCommand::OnFailed(pBridge, error);
     pBridge->SetTorState(Bridge::TorState::Unknown);
 }
 

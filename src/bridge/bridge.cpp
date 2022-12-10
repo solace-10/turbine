@@ -46,7 +46,8 @@ m_ExtPort(0),
 m_DistributionMechanism("unknown"),
 m_VPSState(vpsState),
 m_DeploymentState(deploymentState),
-m_TorState(torState)
+m_TorState(torState),
+m_Error(false)
 {
     m_pBridgeSummaryWidget = std::make_unique<BridgeSummaryWidget>();
     m_BridgePath = g_pTurbine->GetSettings()->GetStoragePath() / "bridges" / GetName();
@@ -315,6 +316,22 @@ std::string Bridge::GetStateText() const
     {
         return sTorStateText[static_cast<size_t>(GetTorState())];
     }
+}
+
+void Bridge::SetError(bool errorState, const std::string& detail)
+{
+    m_Error = errorState;
+    m_ErrorDetail = detail;
+}
+
+bool Bridge::GetError() const
+{
+    return m_Error;
+}
+
+const std::string& Bridge::GetErrorDetail() const
+{
+    return m_ErrorDetail;
 }
 
 } // namespace Turbine

@@ -103,6 +103,9 @@ public:
     TorState GetTorState() const;
     void SetTorState(TorState state);
     std::string GetStateText() const;
+    void SetError(bool errorState, const std::string& detail);
+    bool GetError() const;
+    const std::string& GetErrorDetail() const;
 
     void OnMonitoredDataUpdated();
 
@@ -133,6 +136,8 @@ private:
     VPSState m_VPSState;
     DeploymentState m_DeploymentState;
     TorState m_TorState;
+    bool m_Error;
+    std::string m_ErrorDetail;
 };
 
 } // namespace Turbine

@@ -26,3 +26,10 @@
         src: /var/log/tor/notices.log
         dest: ~/.local/share/turbine/bridges/{{ ansible_hostname }}/notices.log
         flat: yes
+    - name: Check Tor process
+      ansible.builtin.shell: ps aux | grep tor | grep -v grep > /tmp/tor-process
+    - name: Fetch Tor process
+      ansible.builtin.fetch:
+        src: /tmp/tor-process
+        dest: ~/.local/share/turbine/bridges/{{ ansible_hostname }}/tor-process
+        flat: yes

@@ -34,7 +34,8 @@ std::array<ImFont*, static_cast<size_t>(FontId::Count)> Fonts::m_Fonts;
 void Fonts::Load()
 {
 	AddFont(FontId::DroidSans16, "fonts/droid-sans.regular.ttf", 16.0f);
-	AddFont(FontId::Inconsolata16, "fonts/inconsolata/Inconsolata.otf", 18.0f);
+	AddFont(FontId::AltoVoltaje32, "fonts/altovoltaje/Alto Voltaje.ttf", 32.0f, 2.0f);
+	AddFont(FontId::Inconsolata18, "fonts/inconsolata/Inconsolata.otf", 18.0f);
 }
 
 ImFont* Fonts::GetFont(FontId id)
@@ -43,11 +44,15 @@ ImFont* Fonts::GetFont(FontId id)
 	return m_Fonts[static_cast<size_t>(id)];
 }
 
-void Fonts::AddFont(FontId id, const char* pPath, float size)
+void Fonts::AddFont(FontId id, const char* pPath, float size, float glyphExtraSpacing /* = 0.0f */)
 {
 	SDL_assert(id != FontId::Count);
 	SDL_assert(size >= 8.0f);
-	m_Fonts[static_cast<size_t>(id)] = ImGui::GetIO().Fonts->AddFontFromFileTTF(pPath, size);	
+
+	ImFontConfig fontConfig;
+	fontConfig.GlyphExtraSpacing = ImVec2(glyphExtraSpacing, 0.0f);
+
+	m_Fonts[static_cast<size_t>(id)] = ImGui::GetIO().Fonts->AddFontFromFileTTF(pPath, size, &fontConfig);
 }
 
 } // namespace Turbine
