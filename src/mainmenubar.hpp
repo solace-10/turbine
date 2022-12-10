@@ -42,7 +42,6 @@ public:
     void Render();
 
 private:
-    bool m_ShowAtlasTileStreamer;
     bool m_ShowImGuiDemoWindow;
     bool m_ShowImPlotDemoWindow;
 };

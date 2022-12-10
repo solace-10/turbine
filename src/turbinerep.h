@@ -30,17 +30,12 @@ SOFTWARE.
 
 #include <SDL_opengl.h>
 
-#include "camera.h"
-#include "camerarep.h"
-
 struct SDL_Surface;
 struct SDL_Window;
 
 namespace Turbine
 {
 
-class Atlas;
-using AtlasUniquePtr = std::unique_ptr<Atlas>;
 class MainMenuBar;
 using MainMenuBarUniquePtr = std::unique_ptr<MainMenuBar>;
 
@@ -56,23 +51,9 @@ public:
 
 private:
 	void SetUserInterfaceStyle();
-	CameraVector GetHoveredCameras();
-
-	void RenderCameras();
-	void OpenPickedCamera();
-	void FlushClosedCameras();
-	const ImColor& GetPinColor(Camera::State state) const;
 
 	SDL_Window* m_pWindow;
-	AtlasUniquePtr m_pAtlas;
-	float m_CellSize;
     MainMenuBarUniquePtr m_pMainMenuBar;
-	
-	using CameraRepList = std::list<CameraRep>;
-	CameraRepList m_CameraReps;
-	bool m_SelectCamera;
-
-	std::array<ImColor, static_cast<size_t>(Camera::State::Count)> m_PinColor;
 };
 
 } // namespace Turbine

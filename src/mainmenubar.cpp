@@ -25,7 +25,6 @@ SOFTWARE.
 #include <imgui/imgui.h>
 #include <implot/implot.h>
 
-#include "atlas/tilestreamer.h"
 #include "windows/settingswindow.h"
 #include "mainmenubar.hpp"
 #include "turbine.h"
@@ -35,7 +34,6 @@ namespace Turbine
 
 MainMenuBar::MainMenuBar()
 {
-    m_ShowAtlasTileStreamer = false;
     m_ShowImGuiDemoWindow = false;
     m_ShowImPlotDemoWindow = false;
 }
@@ -62,11 +60,6 @@ void MainMenuBar::Render()
 
 			if (ImGui::BeginMenu("Development"))
 			{
-				if (ImGui::MenuItem("Atlas tile streamer", nullptr, m_ShowAtlasTileStreamer))
-				{
-					m_ShowAtlasTileStreamer = !m_ShowAtlasTileStreamer;
-				}
-
                 bool deploymentWindowOpen = g_pTurbine->GetDeploymentWindow()->IsOpen();
                 if (ImGui::MenuItem("Deployments", nullptr, &deploymentWindowOpen))
                 {
@@ -108,11 +101,6 @@ void MainMenuBar::Render()
         }
 
         ImGui::EndMainMenuBar();
-    }
-
-    if (m_ShowAtlasTileStreamer)
-    {
-        TileStreamer::ShowDebugUI(&m_ShowAtlasTileStreamer);
     }
 
     if (m_ShowImGuiDemoWindow)

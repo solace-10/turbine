@@ -25,7 +25,6 @@ SOFTWARE.
 #include <SDL.h>
 #include "imgui/imgui.h"
 
-#include "atlas/atlas.h"
 #include "bridge/bridge.h"
 #include "bridge/bridgegeolocation.hpp"
 #include "icons.h"
@@ -43,23 +42,16 @@ static unsigned int sPinHeight = 26;
 static unsigned int sPinHalfWidth = sPinWidth / 2;
 
 TurbineRep::TurbineRep(SDL_Window* pWindow) :
-m_pWindow(pWindow),
-m_CellSize(128.0f),
-m_SelectCamera(false)
+m_pWindow(pWindow)
 {
 	int windowWidth;
 	int windowHeight;
 	SDL_GetWindowSize(m_pWindow, &windowWidth, &windowHeight);
-	m_pAtlas = std::make_unique<Atlas>(windowWidth, windowHeight);
     m_pMainMenuBar = std::make_unique<MainMenuBar>();
 
 	SetUserInterfaceStyle();
 
 	Icons::Load();
-
-	m_PinColor[static_cast<size_t>(Camera::State::Unknown)]			= ImColor(123, 123, 123);
-	m_PinColor[static_cast<size_t>(Camera::State::StreamAvailable)] = ImColor(  0, 200, 0);
-	m_PinColor[static_cast<size_t>(Camera::State::Unauthorised)]	= ImColor(255,   0, 0);
 }
 
 TurbineRep::~TurbineRep()
@@ -138,58 +130,12 @@ void TurbineRep::SetUserInterfaceStyle()
 
 void TurbineRep::ProcessEvent(const SDL_Event& event)
 {
-	if (event.type == SDL_MOUSEMOTION && ImGui::GetIO().WantCaptureMouse == false)
-	{
-		const SDL_MouseMotionEvent* ev = reinterpret_cast<const SDL_MouseMotionEvent*>(&event);
-		if ((ev->state & SDL_BUTTON_LMASK) > 0)
-		{
-			m_pAtlas->OnMouseDrag(ev->xrel, ev->yrel);
-		}
-	}
-	else if (event.type == SDL_MOUSEWHEEL && ImGui::GetIO().WantCaptureMouse == false)
-	{
-		const SDL_MouseWheelEvent* ev = reinterpret_cast<const SDL_MouseWheelEvent*>(&event);
-		if (ev->y > 0)
-		{
-			m_pAtlas->OnZoomIn();
-		}
-		else if (ev->y <= 0)
-		{
-			m_pAtlas->OnZoomOut();
-		}
-	}
-	else if (event.type == SDL_MOUSEBUTTONDOWN && ImGui::GetIO().WantCaptureMouse == false)
-	{
-		m_SelectCamera = true;
-	}
-	else if (event.type == SDL_WINDOWEVENT)
-	{
-		if (event.window.event == SDL_WINDOWEVENT_RESIZED || event.window.event == SDL_WINDOWEVENT_SIZE_CHANGED)
-		{
-			if (event.window.windowID == 1)
-			{
-				m_pAtlas->OnWindowSizeChanged(event.window.data1, event.window.data2);
-			}
-		}
-	}
+
 }
 
 void TurbineRep::Update(float delta)
 {
-	static const float sBaseCellSize = 128.0f;
-	m_CellSize = sBaseCellSize;
 
-	m_pAtlas->Update(delta);
-
-    for (auto& cameraDisplay : m_CameraReps)
-    {
-        cameraDisplay.Update();
-    }
-}
-
-const ImColor& TurbineRep::GetPinColor(Camera::State state) const
-{
-	return m_PinColor[static_cast<size_t>(state)];
 }
 
 void TurbineRep::Render()
@@ -226,105 +172,6 @@ void TurbineRep::Render()
 
     m_pMainMenuBar->Render();
 	ImGui::End();
-
-	OpenPickedCamera();
-	RenderCameras();
-	FlushClosedCameras();
-}
-
-void TurbineRep::OpenPickedCamera()
-{
-	if (ImGui::GetIO().WantCaptureMouse == false)
-	{
-		// TODO: This needs to support multiple overlapping cameras, with a dropdown menu to choose from.
-		CameraVector hoveredCameras = GetHoveredCameras();
-		for (CameraSharedPtr& pCamera : hoveredCameras)
-		{
-			GeolocationData* pGeo = pCamera->GetGeolocationData();
-			if (pGeo == nullptr)
-			{
-				ImGui::SetTooltip("%s", pCamera->GetAddress().ToString().c_str());
-			}
-			else
-			{
-				ImGui::SetTooltip("%s (%s, %s)", pCamera->GetAddress().ToString().c_str(), pGeo->GetCity().c_str(), pGeo->GetCountry().c_str());
-			}
-		}
-
-		if (hoveredCameras.size() > 0 && m_SelectCamera)
-		{
-			bool found = false;
-			for (auto& cameraDisplay : m_CameraReps)
-			{
-				CameraSharedPtr pCamera = cameraDisplay.GetCameraWeakPtr().lock();
-				if (pCamera != nullptr && pCamera->GetURL() == hoveredCameras.front()->GetURL())
-				{
-					found = true;
-					break;
-				}
-			}
-
-			if (found == false)
-			{
-				m_CameraReps.emplace_back(hoveredCameras.front());
-
-				json message =
-				{
-					{ "type", "stream_request" },
-					{ "url", hoveredCameras.front()->GetURL() },
-					{ "texture_id", m_CameraReps.back().GetTexture() }
-				};
-				//g_pTurbine->OnMessageReceived(message);
-			}
-		}
-
-		m_SelectCamera = false;
-	}
-}
-
-void TurbineRep::RenderCameras()
-{
-	for (auto& cameraDisplay : m_CameraReps)
-	{
-		cameraDisplay.Render();
-	}
-}
-
-void TurbineRep::FlushClosedCameras()
-{
-	auto ifClosed = [&](const CameraRep& cameraRep) -> bool
-	{
-		return !cameraRep.IsOpen();
-	};
-
-	m_CameraReps.remove_if(ifClosed);
-}
-
-CameraVector TurbineRep::GetHoveredCameras()
-{
-	CameraVector hoveredCameras;
-	// CameraVector cameras = g_pTurbine->GetCameras();
-
-	// int mx, my;
-	// SDL_GetMouseState(&mx, &my);
-
-	// for (CameraSharedPtr pCamera : cameras)
-	// {
-	// 	GeolocationData* pGeolocationData = pCamera->GetGeolocationData();
-	// 	if (pGeolocationData != nullptr)
-	// 	{
-	// 		float locationX, locationY;
-	// 		m_pAtlas->GetScreenCoordinates(pGeolocationData->GetLongitude(), pGeolocationData->GetLatitude(), locationX, locationY);
-
-	// 		if (mx > locationX - sPinHalfWidth && mx < locationX + sPinHalfWidth && 
-	// 			my > locationY - sPinHeight && my < locationY)
-	// 		{
-	// 			hoveredCameras.push_back(pCamera);
-	// 		}
-	// 	}
-	// }
-
-	return hoveredCameras;
 }
 
 } // namespace Turbine
