@@ -319,6 +319,7 @@ std::string Bridge::GetStateText() const
     static std::array<std::string, static_cast<size_t>(DeploymentState::Count)> sDeploymentStateText =
     {
         "Unknown",
+        "Deployment pending",
         "Deploying",
         "Deployed",
         "Deployment failed",

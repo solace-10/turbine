@@ -40,7 +40,7 @@ SOFTWARE.
 #include "windows/bridgewindow.hpp"
 #include "windows/bridgeswindow.h"
 #include "windows/createbridgewindow.h"
-#include "windows/deploymentwindow.hpp"
+#include "windows/logwindow.hpp"
 #include "windows/overviewwindow.hpp"
 #include "windows/settingswindow.h"
 #include "windows/summarywindow.h"
@@ -72,7 +72,7 @@ m_Active(true)
 	m_pDeployment = std::make_unique<Deployment>();
 	m_pMonitor = std::make_unique<Monitor>();
 	m_pCreateBridgeWindow = std::make_unique<CreateBridgeWindow>();
-	m_pDeploymentWindow = std::make_unique<DeploymentWindow>();
+	m_pLogWindow = std::make_unique<LogWindow>();
 	m_pOverviewWindow = std::make_unique<OverviewWindow>();
 	m_pSettingsWindow = std::make_unique<SettingsWindow>();
 	m_pSummaryWindow = std::make_unique<SummaryWindow>();
@@ -116,7 +116,7 @@ void Turbine::Update()
 	m_pWebClient->Update();
 	m_pBridgesWindow->Update(delta);
 	m_pCreateBridgeWindow->Update(delta);
-	m_pDeploymentWindow->Update(delta);
+	m_pLogWindow->Update(delta);
 	m_pOverviewWindow->Update(delta);
 	m_pSettingsWindow->Update(delta);
 	m_pSummaryWindow->Update(delta);
@@ -136,7 +136,7 @@ void Turbine::Update()
 	m_pRep->Render();
 	m_pBridgesWindow->Render();
 	m_pCreateBridgeWindow->Render();
-	m_pDeploymentWindow->Render();
+	m_pLogWindow->Render();
 	m_pOverviewWindow->Render();
 	m_pSettingsWindow->Render();
 	m_pSummaryWindow->Render();

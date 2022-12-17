@@ -60,12 +60,6 @@ void MainMenuBar::Render()
 
 			if (ImGui::BeginMenu("Development"))
 			{
-                bool deploymentWindowOpen = g_pTurbine->GetDeploymentWindow()->IsOpen();
-                if (ImGui::MenuItem("Deployments", nullptr, &deploymentWindowOpen))
-                {
-                    g_pTurbine->GetDeploymentWindow()->Show(deploymentWindowOpen);
-                }
-
 				if (ImGui::MenuItem("ImGui demo window", nullptr, m_ShowImGuiDemoWindow))
 				{
 					m_ShowImGuiDemoWindow = !m_ShowImGuiDemoWindow;
@@ -90,6 +84,12 @@ void MainMenuBar::Render()
             if (ImGui::MenuItem("Overview", nullptr, &overviewWindowOpen))
             {
                 g_pTurbine->GetOverviewWindow()->Show(overviewWindowOpen);
+            }
+
+            bool logWindowOpen = g_pTurbine->GetLogWindow()->IsOpen();
+            if (ImGui::MenuItem("Logs", nullptr, &logWindowOpen))
+            {
+                g_pTurbine->GetLogWindow()->Show(logWindowOpen);
             }
             ImGui::EndMenu();
         }

@@ -74,7 +74,7 @@ public:
 	WebClient* GetWebClient();
 	Window* GetBridgesWindow();
 	Window* GetCreateBridgeWindow();
-	Window* GetDeploymentWindow();
+	Window* GetLogWindow();
 	Window* GetOverviewWindow();
 	Window* GetSettingsWindow();
 	Window* GetBridgeWindow(Bridge* pBridge);
@@ -100,7 +100,7 @@ private:
 	std::shared_ptr<NotificationLogger> m_pNotificationLogger;
 	WindowUniquePtr m_pBridgesWindow;
 	WindowUniquePtr m_pCreateBridgeWindow;
-	WindowUniquePtr m_pDeploymentWindow;
+	WindowUniquePtr m_pLogWindow;
 	WindowUniquePtr m_pOverviewWindow;
 	WindowUniquePtr m_pSettingsWindow;
 	WindowUniquePtr m_pSummaryWindow;
@@ -145,9 +145,9 @@ inline Window* Turbine::GetCreateBridgeWindow()
 	return m_pCreateBridgeWindow.get();
 }
 
-inline Window* Turbine::GetDeploymentWindow()
+inline Window* Turbine::GetLogWindow()
 {
-	return m_pDeploymentWindow.get();
+	return m_pLogWindow.get();
 }
 
 inline Window* Turbine::GetOverviewWindow()

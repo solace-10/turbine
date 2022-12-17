@@ -29,7 +29,7 @@ SOFTWARE.
 #include "core/shellcommand/shellcommand.hpp"
 #include "deployment/monitor.hpp"
 #include "providers/provider.h"
-#include "windows/deploymentwindow.hpp"
+#include "windows/logwindow.hpp"
 #include "settings.h"
 #include "turbine.h"
 
@@ -110,8 +110,8 @@ void Monitor::OnDeploymentCommandOutput(const std::string& output)
 {
     AnsibleCommand::OnDeploymentCommandOutput(output);
     
-    DeploymentWindow* pWindow = reinterpret_cast<DeploymentWindow*>(g_pTurbine->GetDeploymentWindow());
-    pWindow->AddOutput(output + "\n");
+    LogWindow* pWindow = reinterpret_cast<LogWindow*>(g_pTurbine->GetLogWindow());
+    pWindow->AddOutput("Monitor", output + "\n");
 }
 
 void Monitor::OnSuccess(Bridge* pBridge) 

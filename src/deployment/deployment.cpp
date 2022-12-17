@@ -29,7 +29,7 @@ SOFTWARE.
 #include "core/shellcommand/shellcommand.hpp"
 #include "deployment/deployment.h"
 #include "providers/provider.h"
-#include "windows/deploymentwindow.hpp"
+#include "windows/logwindow.hpp"
 #include "settings.h"
 #include "turbine.h"
 
@@ -144,8 +144,8 @@ void Deployment::OnDeploymentCommandOutput(const std::string& output)
 {
     AnsibleCommand::OnDeploymentCommandOutput(output);
 
-    DeploymentWindow* pWindow = reinterpret_cast<DeploymentWindow*>(g_pTurbine->GetDeploymentWindow());
-    pWindow->AddOutput(output + "\n");
+    LogWindow* pWindow = reinterpret_cast<LogWindow*>(g_pTurbine->GetLogWindow());
+    pWindow->AddOutput("Deployment", output + "\n");
 
     if (m_ParsingResults == false && output.rfind("PLAY RECAP *", 0) == 0)
     {

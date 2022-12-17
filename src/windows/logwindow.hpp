@@ -25,23 +25,42 @@ SOFTWARE.
 #pragma once
 
 #include <string>
+#include <vector>
 
 #include "windows/window.h"
 
 namespace Turbine
 {
 
-class DeploymentWindow : public Window
+class LogWindow : public Window
 {
 public:
-	DeploymentWindow();
+	LogWindow();
 	virtual void Render() override;
 	virtual void OnOpen() override;
 
-    void AddOutput(const std::string& output);
+    void AddOutput(const std::string& category, const std::string& output);
 
 private:
-    std::string m_Output;
+	enum class OutputType
+	{
+		StdOut,
+		StdErr
+	};
+
+	struct OutputLine
+	{
+		OutputType type;
+		std::string timestamp;
+		std::string content;
+	};
+
+	struct Category
+	{
+		std::string name;
+		std::vector<OutputLine> lines;
+	};
+	std::vector<Category> m_Categories;
 };
 
 } // namespace Turbine
