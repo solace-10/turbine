@@ -32,10 +32,43 @@ On some READMEs, you may see small images that convey metadata, such as whether 
 ## Visuals
 Depending on what you are making, it can be a good idea to include screenshots or even a video (you'll frequently see GIFs rather than actual videos). Tools like ttygif can help, but check out Asciinema for a more sophisticated method.
 
+## Building from source
+
+Turbine currently has no binary releases and must be built from source.
+
+### Prerequisites
+
+The following packages are needed: `clang` and `cmake`.
+
+In Debian, you'd install them via `apt`, e.g.:
+`sudo apt install clang cmake`
+
+### Cloning the repository
+
+Clone the repository using:
+`git clone --recurse-submodules https://github.com/edgerunnerdev/turbine.git`
+
+### Building Turbine
+
+```
+cd vcpkg
+./bootstrap-vcpkg.sh
+./vcpkg integrate install
+cd ..
+mkdir build
+cd build
+cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Debug ..
+```
+
 ## Installation
-Requirements: 
-- sudo apt install ansible libcurl4-openssl-dev libsdl2-dev libsdl2-image-dev
-- ansible-galaxy install alphacorvus.ansible_tor_bridge
+
+The main third party requirement is Ansible, which can be installed via your package manager of choice.
+
+In Debian, that would be:
+`sudo apt install ansible`
+
+Once Ansible is installed, run the following command:
+`ansible-galaxy install alphacorvus.ansible_tor_bridge`
 
 ## Usage
 Use examples liberally, and show the expected output if you can. It's helpful to have inline the smallest example of usage that you can demonstrate, while providing links to more sophisticated examples if they are too long to reasonably include in the README.
