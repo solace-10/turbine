@@ -24,6 +24,7 @@ SOFTWARE.
 
 #include <array>
 #include <fstream>
+#include <regex>
 
 #include "bridge/bridge.h"
 #include "bridge/bridgegeolocation.hpp"
@@ -163,6 +164,7 @@ void Bridge::OnMonitoredDataUpdated()
     ReadBridgeStats();
     ReadFingerprint();
     ReadHashedFingerprint();
+    ReadHeartbeatUsers();
     RetrieveDistributionMechanism();
 }
 
@@ -231,6 +233,32 @@ std::string Bridge::ReadFingerprint(const std::filesystem::path filePath) const
     }
 
     return "";
+}
+
+void Bridge::ReadHeartbeatUsers()
+{
+    std::ifstream file(m_BridgePath / "notices.log", std::ifstream::in);
+    static const std::string sHeartbeatString("Heartbeat: Since last heartbeat message");
+    static const std::regex sPattern("I have seen ([0-9]+) unique clients");
+    if (file.good())
+    {
+        std::string line;
+        std::vector<std::string> tokens;
+
+        while (getline(file, line))
+        {
+            if (line.find(sHeartbeatString) != std::string::npos)
+            {
+                std::smatch matches;
+                if (std::regex_search(line, matches, sPattern)) 
+                {
+                    m_UniqueClients = std::stoi(matches[1]);
+                }
+            }
+        }
+        file.close();
+
+    }
 }
 
 void Bridge::RetrieveDistributionMechanism()
@@ -362,6 +390,11 @@ bool Bridge::GetError() const
 const std::string& Bridge::GetErrorDetail() const
 {
     return m_ErrorDetail;
+}
+
+std::optional<int> Bridge::GetUniqueClients() const
+{
+    return m_UniqueClients;
 }
 
 } // namespace Turbine

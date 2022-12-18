@@ -108,12 +108,13 @@ void BridgesWindow::Render()
 		SetCursorScreenPos(ImVec2(pos.x + childSize.x / 2 - stateSize.x / 2, pos.y + 96 + nameSize.y));
 		TextUnformatted(pBridge->GetStateText().c_str());
 
-		if (!hasError)
+		if (!hasError && pBridge->GetTorState() == Bridge::TorState::Running && pBridge->GetUniqueClients().has_value())
 		{
-			std::string clientsText = "~16 clients";
-			const ImVec2 clientsSize = CalcTextSize(clientsText.c_str());
+			std::stringstream clientsText;
+			clientsText << "~" << pBridge->GetUniqueClients().value() << " clients";
+			const ImVec2 clientsSize = CalcTextSize(clientsText.str().c_str());
 			SetCursorScreenPos(ImVec2(pos.x + childSize.x / 2 - clientsSize.x / 2, pos.y + 96 + nameSize.y + stateSize.y));
-			TextUnformatted(clientsText.c_str());
+			TextUnformatted(clientsText.str().c_str());
 		}
 		PopFont();
 

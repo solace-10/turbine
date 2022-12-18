@@ -26,6 +26,7 @@ SOFTWARE.
 
 #include <filesystem>
 #include <memory>
+#include <optional>
 #include <string>
 
 #include "bridge/bridge.fwd.hpp"
@@ -108,6 +109,7 @@ public:
     void SetError(bool errorState, const std::string& detail);
     bool GetError() const;
     const std::string& GetErrorDetail() const;
+    std::optional<int> GetUniqueClients() const;
 
     void OnMonitoredDataUpdated();
 
@@ -119,6 +121,7 @@ private:
     void ReadFingerprint();
     void ReadHashedFingerprint();
     void ReadBridgeStats();
+    void ReadHeartbeatUsers();
     void RetrieveDistributionMechanism();
 
     Provider* m_pProvider;
@@ -141,6 +144,7 @@ private:
     TorState m_TorState;
     bool m_Error;
     std::string m_ErrorDetail;
+    std::optional<int> m_UniqueClients;
 };
 
 } // namespace Turbine
