@@ -41,13 +41,14 @@ SOFTWARE.
 namespace Turbine 
 {
 
-ShellCommandLinux::ShellCommandLinux(const std::string& command, ShellCommandOnCompletionCallback completionCallback, ShellCommandOnOutputCallback outputCallback) :
-ShellCommandImpl(command, completionCallback, outputCallback),
+ShellCommandLinux::ShellCommandLinux(const std::string& command, ShellCommandOnCompletionCallback completionCallback, ShellCommandOnOutputCallback stdOutCallback, ShellCommandOnOutputCallback stdErrCallback) :
+ShellCommandImpl(command, completionCallback, stdOutCallback, stdErrCallback),
 m_State(ShellCommand::State::PendingExecution),
 m_CompletionCallback(completionCallback),
-m_OutputCallback(outputCallback),
+m_StdOutCallback(stdOutCallback),
+m_StdErrCallback(stdErrCallback),
 m_Command(command),
-m_LineBufferIndex(0u)
+m_LineBufferStdOutIndex(0u)
 {
 
 }
@@ -67,7 +68,7 @@ void ShellCommandLinux::Run()
 		return;
 	}
 
-	if (pipe2(m_Pipe, O_NONBLOCK) < 0)
+	if (pipe2(m_PipeStdOut, O_NONBLOCK) < 0 || pipe2(m_PipeStdErr, O_NONBLOCK) < 0)
 	{
 		Log::Error("Error creating pipe.");
 		return;
@@ -76,18 +77,21 @@ void ShellCommandLinux::Run()
 	m_Pid = fork();
 	if (m_Pid == 0)
 	{
-		close(m_Pipe[0]);
-		if (dup2(m_Pipe[1], STDOUT_FILENO) == -1)
+		close(m_PipeStdOut[0]);
+		close(m_PipeStdErr[0]);
+		if (dup2(m_PipeStdOut[1], STDOUT_FILENO) == -1 || dup2(m_PipeStdErr[1], STDERR_FILENO) == -1)
 		{
 			exit(errno);
 		}
 		int r = execl("/bin/bash", "/bin/bash", "-c", m_Command.c_str(), nullptr);
-		close(m_Pipe[1]);
+		close(m_PipeStdOut[1]);
+		close(m_PipeStdErr[1]);
 		exit(r == -1 ? errno : 0);
 	}
 	else
 	{
-		close(m_Pipe[1]);
+		close(m_PipeStdOut[1]);
+		close(m_PipeStdErr[1]);
 		m_State = ShellCommand::State::Running;
 	}
 }
@@ -96,42 +100,8 @@ void ShellCommandLinux::Update()
 {
 	if (GetState() == ShellCommand::State::Running)
 	{
-		const int cBufferSize = 32; 
-		char buffer[cBufferSize];
-		char c;
-		while (1)
-		{
-			ssize_t bytesRead = read(m_Pipe[0], &c, 1);
-			if (bytesRead == 0)
-			{
-				AddLineToOutput();
-				break;
-			}
-			else if (bytesRead > 0)
-			{
-				if (c == '\n' || m_LineBufferIndex >= m_LineBuffer.size() - 1)
-				{
-					AddLineToOutput();
-				}
-				else
-				{
-					m_LineBuffer[m_LineBufferIndex++] = c;
-				}
-			}
-			else if (bytesRead == -1)
-			{
-				if (errno == EAGAIN || errno == EWOULDBLOCK)
-				{
-					break;
-				}
-				else
-				{
-					Log::Warning("Error during read() for command '%s': %s.", m_Command.c_str(), strerror(errno));
-					m_State = ShellCommand::State::FailedToRun;
-					break;
-				}
-			}
-		}
+		ProcessPipe(m_PipeStdOut[0], m_LineBufferStdOut, m_LineBufferStdOutIndex, m_StdOutCallback);
+		ProcessPipe(m_PipeStdErr[0], m_LineBufferStdErr, m_LineBufferStdErrIndex, m_StdErrCallback);
 
 		int waitStatus;
 		int result = waitpid(m_Pid, &waitStatus, WNOHANG);
@@ -145,12 +115,14 @@ void ShellCommandLinux::Update()
 			}
 
 			m_State = (exitStatus == 0) ? ShellCommand::State::Completed : ShellCommand::State::FailedToRun;
-			close(m_Pipe[0]);
+			close(m_PipeStdOut[0]);
+			close(m_PipeStdErr[0]);
 		}
 		else if (result == -1)
 		{
 			m_State = ShellCommand::State::FailedToRun;
-			close(m_Pipe[0]);
+			close(m_PipeStdOut[0]);
+			close(m_PipeStdErr[0]);
 			Log::Warning("Error during waidpid() for command '%s': %s.", m_Command.c_str(), strerror(errno));
 		}
 	}
@@ -166,17 +138,55 @@ const std::vector<std::string>& ShellCommandLinux::GetOutput() const
 	return m_Output;
 }
 
-void ShellCommandLinux::AddLineToOutput()
+void ShellCommandLinux::ProcessPipe(int pipe, LineBufferType& lineBuffer, size_t& lineBufferIndex, ShellCommandOnOutputCallback onOutputCallback)
 {
-	if (m_LineBufferIndex > 0)
+	auto AddLineToOutput = [&]()
 	{
-		m_LineBuffer[m_LineBufferIndex] = '\0';
-		m_Output.push_back(m_LineBuffer.data());
-		m_LineBufferIndex = 0;
-
-		if (m_OutputCallback != nullptr)
+		if (lineBufferIndex > 0)
 		{
-			m_OutputCallback(m_Output.back());
+			lineBuffer[lineBufferIndex] = '\0';
+			lineBufferIndex = 0;
+			if (onOutputCallback != nullptr)
+			{
+				onOutputCallback(lineBuffer.data());
+			}
+		}
+	};
+
+	const int cBufferSize = 32; 
+	char buffer[cBufferSize];
+	char c;
+	while (1)
+	{
+		ssize_t bytesRead = read(pipe, &c, 1);
+		if (bytesRead == 0)
+		{
+			AddLineToOutput();
+			break;
+		}
+		else if (bytesRead > 0)
+		{
+			if (c == '\n' || lineBufferIndex >= lineBuffer.size() - 1)
+			{
+				AddLineToOutput();
+			}
+			else
+			{
+				lineBuffer[lineBufferIndex++] = c;
+			}
+		}
+		else if (bytesRead == -1)
+		{
+			if (errno == EAGAIN || errno == EWOULDBLOCK)
+			{
+				break;
+			}
+			else
+			{
+				Log::Warning("Error during read() for command '%s': %s.", m_Command.c_str(), strerror(errno));
+				m_State = ShellCommand::State::FailedToRun;
+				break;
+			}
 		}
 	}
 }

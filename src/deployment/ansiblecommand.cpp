@@ -48,10 +48,15 @@ AnsibleCommand::~AnsibleCommand()
 
 }
 
-void AnsibleCommand::OnDeploymentCommandOutput(const std::string& output)
+void AnsibleCommand::OnDeploymentCommandStandardOutput(const std::string& output)
 {
     HandleGatheringFacts(output);
     HandlePlayRecap(output);
+}
+
+void AnsibleCommand::OnDeploymentCommandErrorOutput(const std::string& output)
+{
+
 }
 
 void AnsibleCommand::HandleGatheringFacts(const std::string& output)

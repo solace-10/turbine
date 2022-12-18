@@ -44,7 +44,8 @@ public:
     Deployment();
     ~Deployment();
 
-    virtual void OnDeploymentCommandOutput(const std::string& output) override;
+    virtual void OnDeploymentCommandStandardOutput(const std::string& output) override;
+    virtual void OnDeploymentCommandErrorOutput(const std::string& output) override;
 
     void Update(float delta);
     void OnBridgeAdded(BridgeSharedPtr& pBridge);

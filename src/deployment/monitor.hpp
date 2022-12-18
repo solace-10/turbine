@@ -43,7 +43,8 @@ public:
     Monitor();
     ~Monitor();
 
-    virtual void OnDeploymentCommandOutput(const std::string& output) override;
+    virtual void OnDeploymentCommandStandardOutput(const std::string& output) override;
+    virtual void OnDeploymentCommandErrorOutput(const std::string& output) override;
     virtual void OnSuccess(Bridge* pBridge) override;
     virtual void OnUnreachable(Bridge* pBridge, const std::string& error) override;
     virtual void OnFailed(Bridge* pBridge, const std::string& error) override;

@@ -40,7 +40,8 @@ public:
     AnsibleCommand();
     ~AnsibleCommand();
 
-    virtual void OnDeploymentCommandOutput(const std::string& output);
+    virtual void OnDeploymentCommandStandardOutput(const std::string& output);
+    virtual void OnDeploymentCommandErrorOutput(const std::string& output);
     virtual void OnSuccess(Bridge* pBridge);
     virtual void OnUnreachable(Bridge* pBridge, const std::string& error);
     virtual void OnFailed(Bridge* pBridge, const std::string& error);

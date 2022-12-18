@@ -42,7 +42,7 @@ class ShellCommandImpl;
 class ShellCommand
 {
 public:
-	ShellCommand(const std::string& command, ShellCommandOnCompletionCallback completionCallback = nullptr, ShellCommandOnOutputCallback outputCallback = nullptr);
+	ShellCommand(const std::string& command, ShellCommandOnCompletionCallback completionCallback = nullptr, ShellCommandOnOutputCallback stdOutCallback = nullptr, ShellCommandOnOutputCallback stdErrCallback = nullptr);
 	~ShellCommand();
 
 	enum class State

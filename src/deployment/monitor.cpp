@@ -56,7 +56,7 @@ void Monitor::Update(float delta)
         m_pAnsibleCommand = std::make_unique<ShellCommand>(
             GetAnsibleCommand(),
             std::bind(&Monitor::OnDeploymentCommandFinished, this, std::placeholders::_1),
-            std::bind(&Monitor::OnDeploymentCommandOutput, this, std::placeholders::_1)
+            std::bind(&Monitor::OnDeploymentCommandStandardOutput, this, std::placeholders::_1)
         );
         m_pAnsibleCommand->Run();
         m_NextRetrieval = std::chrono::system_clock::now() + m_RetrivalInterval;
@@ -89,7 +89,8 @@ void Monitor::ExecuteDeployments(const BridgeWeakPtrList& pendingDeployments)
     m_pAnsibleCommand = std::make_unique<ShellCommand>(
         GetAnsibleCommand(),
         std::bind(&Monitor::OnDeploymentCommandFinished, this, std::placeholders::_1),
-        std::bind(&Monitor::OnDeploymentCommandOutput, this, std::placeholders::_1)
+        std::bind(&Monitor::OnDeploymentCommandStandardOutput, this, std::placeholders::_1),
+        std::bind(&Monitor::OnDeploymentCommandErrorOutput, this, std::placeholders::_1)
     );
     m_pAnsibleCommand->Run();
 }
@@ -106,9 +107,17 @@ void Monitor::OnDeploymentCommandFinished(int result)
 
 }
 
-void Monitor::OnDeploymentCommandOutput(const std::string& output)
+void Monitor::OnDeploymentCommandStandardOutput(const std::string& output)
 {
-    AnsibleCommand::OnDeploymentCommandOutput(output);
+    AnsibleCommand::OnDeploymentCommandStandardOutput(output);
+    
+    LogWindow* pWindow = reinterpret_cast<LogWindow*>(g_pTurbine->GetLogWindow());
+    pWindow->AddOutput("Monitor", output + "\n");
+}
+
+void Monitor::OnDeploymentCommandErrorOutput(const std::string& output)
+{
+    AnsibleCommand::OnDeploymentCommandErrorOutput(output);
     
     LogWindow* pWindow = reinterpret_cast<LogWindow*>(g_pTurbine->GetLogWindow());
     pWindow->AddOutput("Monitor", output + "\n");

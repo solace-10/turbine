@@ -86,7 +86,8 @@ void Deployment::ExecuteDeployments(const BridgeWeakPtrList& pendingDeployments)
     m_pAnsibleCommand = std::make_unique<ShellCommand>(
         GetAnsibleCommand(),
         std::bind(&Deployment::OnDeploymentCommandFinished, this, std::placeholders::_1),
-        std::bind(&Deployment::OnDeploymentCommandOutput, this, std::placeholders::_1)
+        std::bind(&Deployment::OnDeploymentCommandStandardOutput, this, std::placeholders::_1),
+        std::bind(&Deployment::OnDeploymentCommandErrorOutput, this, std::placeholders::_1)
     );
     m_pAnsibleCommand->Run();
 }
@@ -140,9 +141,9 @@ void Deployment::OnDeploymentCommandFinished(int result)
 
 }
 
-void Deployment::OnDeploymentCommandOutput(const std::string& output)
+void Deployment::OnDeploymentCommandStandardOutput(const std::string& output)
 {
-    AnsibleCommand::OnDeploymentCommandOutput(output);
+    AnsibleCommand::OnDeploymentCommandStandardOutput(output);
 
     LogWindow* pWindow = reinterpret_cast<LogWindow*>(g_pTurbine->GetLogWindow());
     pWindow->AddOutput("Deployment", output + "\n");
@@ -159,6 +160,14 @@ void Deployment::OnDeploymentCommandOutput(const std::string& output)
             OnDeploymentComplete(pBridge, GetSuccessFromOutput(output));
         }
     }
+}
+
+void Deployment::OnDeploymentCommandErrorOutput(const std::string& output)
+{
+    AnsibleCommand::OnDeploymentCommandErrorOutput(output);
+
+    LogWindow* pWindow = reinterpret_cast<LogWindow*>(g_pTurbine->GetLogWindow());
+    pWindow->AddOutput("Deployment", output + "\n");
 }
 
 bool Deployment::GetSuccessFromOutput(const std::string& output) const

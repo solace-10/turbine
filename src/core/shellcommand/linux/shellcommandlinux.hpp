@@ -44,7 +44,7 @@ namespace Turbine
 class ShellCommandLinux : public ShellCommandImpl
 {
 public:
-	ShellCommandLinux(const std::string& command, ShellCommandOnCompletionCallback completionCallback = nullptr, ShellCommandOnOutputCallback outputCallback = nullptr);
+	ShellCommandLinux(const std::string& command, ShellCommandOnCompletionCallback completionCallback = nullptr, ShellCommandOnOutputCallback stdOutCallback = nullptr, ShellCommandOnOutputCallback stdErrCallback = nullptr);
 	~ShellCommandLinux();
 
 	virtual void Run() override;
@@ -53,17 +53,23 @@ public:
 	virtual const std::vector<std::string>& GetOutput() const override;
 
 private:
-	void AddLineToOutput();
+	using LineBufferType = std::array<char, 1024>;
+
+	void ProcessPipe(int pipe, LineBufferType& lineBuffer, size_t& lineBufferIndex, ShellCommandOnOutputCallback outputCallback);
 	ShellCommand::State m_State;
 	ShellCommandOnCompletionCallback m_CompletionCallback;
-	ShellCommandOnOutputCallback m_OutputCallback;
+	ShellCommandOnOutputCallback m_StdOutCallback;
+	ShellCommandOnOutputCallback m_StdErrCallback;
 	std::string m_Command;
-	std::array<char, 1024> m_LineBuffer;
-	size_t m_LineBufferIndex;
+	LineBufferType m_LineBufferStdOut;
+	size_t m_LineBufferStdOutIndex;
+	LineBufferType m_LineBufferStdErr;
+	size_t m_LineBufferStdErrIndex;
 	std::vector<std::string> m_Output;
 
 	pid_t m_Pid;
-	int m_Pipe[2];
+	int m_PipeStdOut[2];
+	int m_PipeStdErr[2];
 };
 
 } // namespace Turbine

@@ -35,12 +35,12 @@ SOFTWARE.
 namespace Turbine 
 {
 
-ShellCommand::ShellCommand(const std::string& command, ShellCommandOnCompletionCallback completionCallback, ShellCommandOnOutputCallback outputCallback)
+ShellCommand::ShellCommand(const std::string& command, ShellCommandOnCompletionCallback completionCallback, ShellCommandOnOutputCallback stdOutCallback, ShellCommandOnOutputCallback stdErrCallback)
 {
 #if defined(TARGET_PLATFORM_LINUX)
-    m_pImpl = std::make_unique<ShellCommandLinux>(command, completionCallback, outputCallback);
+    m_pImpl = std::make_unique<ShellCommandLinux>(command, completionCallback, stdOutCallback, stdErrCallback);
 #elif defined(TARGET_PLATFORM_WINDOWS)
-    m_pImpl = std::make_unique<ShellCommandWindows>(command, completionCallback, outputCallback);
+    m_pImpl = std::make_unique<ShellCommandWindows>(command, completionCallback, stdOutCallback, stdErrCallback);
 #else
     static_assert(false); // NOT IMPLEMENTED
 #endif

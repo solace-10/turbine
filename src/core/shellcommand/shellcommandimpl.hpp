@@ -32,7 +32,7 @@ namespace Turbine
 class ShellCommandImpl
 {
 public:
-	ShellCommandImpl(const std::string& command, ShellCommandOnCompletionCallback completionCallback = nullptr, ShellCommandOnOutputCallback outputCallback = nullptr) {}
+	ShellCommandImpl(const std::string& command, ShellCommandOnCompletionCallback completionCallback = nullptr, ShellCommandOnOutputCallback stdOutCallback = nullptr, ShellCommandOnOutputCallback stdErrCallback = nullptr) {}
 	virtual ~ShellCommandImpl() {}
 
 	virtual void Run() = 0;
