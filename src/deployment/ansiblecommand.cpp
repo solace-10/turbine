@@ -36,9 +36,10 @@ SOFTWARE.
 namespace Turbine
 {
 
-AnsibleCommand::AnsibleCommand() :
+AnsibleCommand::AnsibleCommand(const std::string& inventoryName) :
 m_GatheringFacts(false),
-m_PlayRecap(false)
+m_PlayRecap(false),
+m_InventoryName(inventoryName)
 {
 
 }
@@ -120,19 +121,24 @@ void AnsibleCommand::HandlePlayRecap(const std::string& output)
     }
 }
 
+const std::string& AnsibleCommand::GetInventoryName() const
+{
+    return m_InventoryName;
+}
+
 void AnsibleCommand::GenerateInventory()
 {
     Settings* pSettings = g_pTurbine->GetSettings();
-    std::filesystem::path storagePath = pSettings->GetStoragePath();
-
-	std::filesystem::path filePath = storagePath / "inventory";
+    const std::filesystem::path inventoryPath = pSettings->GetStoragePath() / "inventory";
+    std::filesystem::create_directories(inventoryPath);
+	const std::filesystem::path filePath = inventoryPath / GetInventoryName();
 	std::ofstream file(filePath, std::ofstream::out | std::ofstream::trunc);
     if (file.good())
     {
         for (int i = 0; i < 2; ++i)
         {
             Bridge::DeploymentState deploymentState = (i == 0) ? Bridge::DeploymentState::DeploymentPending : Bridge::DeploymentState::Deployed;
-            std::string group = (i == 0) ? "DeploymentPending" : "Deployed";
+            const std::string group = (i == 0) ? "DeploymentPending" : "Deployed";
 
             file << "[" << group << "]\n";
 

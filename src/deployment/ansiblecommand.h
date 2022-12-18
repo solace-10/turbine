@@ -37,7 +37,7 @@ namespace Turbine
 class AnsibleCommand
 {
 public:
-    AnsibleCommand();
+    AnsibleCommand(const std::string& inventoryName);
     ~AnsibleCommand();
 
     virtual void OnDeploymentCommandStandardOutput(const std::string& output);
@@ -47,6 +47,7 @@ public:
     virtual void OnFailed(Bridge* pBridge, const std::string& error);
 
 protected:
+    const std::string& GetInventoryName() const;
     void GenerateInventory();
     Bridge* GetBridgeFromOutput(const std::string& output) const;
     void HandleGatheringFacts(const std::string& output);
@@ -61,6 +62,9 @@ protected:
     std::vector<GatheringFactsResult> m_GatheringFactsResults;
     bool m_GatheringFacts;
     bool m_PlayRecap;
+
+private:
+    std::string m_InventoryName;
 };
 
 } // namespace Turbine

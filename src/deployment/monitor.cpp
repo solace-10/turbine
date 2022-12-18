@@ -36,7 +36,8 @@ SOFTWARE.
 namespace Turbine
 {
 
-Monitor::Monitor()
+Monitor::Monitor() :
+AnsibleCommand("monitor")
 {
     using namespace std::literals;
     m_RetrivalInterval = 4h;

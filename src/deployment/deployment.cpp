@@ -37,6 +37,7 @@ namespace Turbine
 {
 
 Deployment::Deployment() :
+AnsibleCommand("deployment"),
 m_ParsingResults(false)
 {
 
@@ -71,6 +72,8 @@ void Deployment::Update(float delta)
 
 void Deployment::ExecuteDeployments(const BridgeWeakPtrList& pendingDeployments)
 {
+    GenerateInventory();
+
     for (auto& pPendingDeployment : pendingDeployments)
     {
         BridgeSharedPtr pBridge = pPendingDeployment.lock();
@@ -79,8 +82,6 @@ void Deployment::ExecuteDeployments(const BridgeWeakPtrList& pendingDeployments)
             pBridge->SetDeploymentState(Bridge::DeploymentState::Deploying);
         }
     }
-
-    GenerateInventory();
 
     m_ParsingResults = false;
     m_pAnsibleCommand = std::make_unique<ShellCommand>(
