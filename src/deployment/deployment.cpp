@@ -128,11 +128,13 @@ void Deployment::OnDeploymentComplete(Bridge* pBridge, bool success)
         if (success)
         {
             pBridge->SetDeploymentState(Bridge::DeploymentState::Deployed);
+            pBridge->SetTorState(Bridge::TorState::Running);
             pBridge->GetProvider()->OnBridgeDeployed(pBridge);
         }
         else
         {
             pBridge->SetDeploymentState(Bridge::DeploymentState::DeploymentFailed);
+            pBridge->SetTorState(Bridge::TorState::Unknown);
         }
     }
 }
