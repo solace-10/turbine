@@ -67,8 +67,11 @@ The main third party requirement is Ansible, which can be installed via your pac
 In Debian, that would be:
 `sudo apt install ansible`
 
-Once Ansible is installed, run the following command:
-`ansible-galaxy install alphacorvus.ansible_tor_bridge`
+Once Ansible is installed, run the following commands:
+```
+ansible-galaxy collection install community.general:==4.8.9
+ansible-galaxy install alphacorvus.ansible_tor_bridge
+```
 
 ## Usage
 Use examples liberally, and show the expected output if you can. It's helpful to have inline the smallest example of usage that you can demonstrate, while providing links to more sophisticated examples if they are too long to reasonably include in the README.
