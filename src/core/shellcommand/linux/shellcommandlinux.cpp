@@ -48,7 +48,8 @@ m_CompletionCallback(completionCallback),
 m_StdOutCallback(stdOutCallback),
 m_StdErrCallback(stdErrCallback),
 m_Command(command),
-m_LineBufferStdOutIndex(0u)
+m_LineBufferStdOutIndex(0u),
+m_LineBufferStdErrIndex(0u)
 {
 
 }
