@@ -66,13 +66,13 @@ void TurbineRep::SetUserInterfaceStyle()
 	st.FramePadding = ImVec2(4.0f, 2.0f);
 	st.ItemSpacing = ImVec2(8.0f, 2.0f);
 	st.WindowBorderSize = 1.0f;
-	//st.TabBorderSize = 1.0f;
+	st.TabBorderSize = 0.0f;
 	st.WindowRounding = 1.0f;
 	st.ChildRounding = 1.0f;
 	st.FrameRounding = 1.0f;
 	st.ScrollbarRounding = 1.0f;
 	st.GrabRounding = 1.0f;
-	//st.TabRounding = 1.0f;
+	st.TabRounding = 0.0f;
 
 	// Setup style
 	ImVec4* colors = ImGui::GetStyle().Colors;
@@ -90,10 +90,10 @@ void TurbineRep::SetUserInterfaceStyle()
 	colors[ImGuiCol_TitleBgActive] = ImColor(44, 170, 255, 255);
 	colors[ImGuiCol_TitleBgCollapsed] = ImVec4(0.00f, 0.00f, 0.00f, 0.51f);
 	colors[ImGuiCol_MenuBarBg] = ImVec4(0.12f, 0.12f, 0.12f, 1.00f);
-	colors[ImGuiCol_ScrollbarBg] = ImVec4(0.02f, 0.02f, 0.02f, 0.53f);
-	colors[ImGuiCol_ScrollbarGrab] = ImVec4(0.31f, 0.31f, 0.31f, 1.00f);
-	colors[ImGuiCol_ScrollbarGrabHovered] = ImVec4(0.41f, 0.41f, 0.41f, 1.00f);
-	colors[ImGuiCol_ScrollbarGrabActive] = ImVec4(0.48f, 0.48f, 0.48f, 1.00f);
+	colors[ImGuiCol_ScrollbarBg] = ImColor(0, 0, 0, 128);
+	colors[ImGuiCol_ScrollbarGrab] = ImColor(40, 109, 178, 255);
+	colors[ImGuiCol_ScrollbarGrabHovered] = ImColor(75, 171, 225, 255);
+	colors[ImGuiCol_ScrollbarGrabActive] = ImColor(75, 171, 225, 255);
 	colors[ImGuiCol_CheckMark] = ImVec4(0.79f, 0.79f, 0.79f, 1.00f);
 	colors[ImGuiCol_SliderGrab] = ImVec4(0.48f, 0.47f, 0.47f, 0.91f);
 	colors[ImGuiCol_SliderGrabActive] = ImVec4(0.56f, 0.55f, 0.55f, 0.62f);
@@ -109,7 +109,7 @@ void TurbineRep::SetUserInterfaceStyle()
 	colors[ImGuiCol_ResizeGrip] = ImVec4(0.87f, 0.87f, 0.87f, 0.53f);
 	colors[ImGuiCol_ResizeGripHovered] = ImVec4(0.87f, 0.87f, 0.87f, 0.74f);
 	colors[ImGuiCol_ResizeGripActive] = ImVec4(0.87f, 0.87f, 0.87f, 0.74f);
-	colors[ImGuiCol_Tab] = ImColor(30, 99, 168, 255);
+	colors[ImGuiCol_Tab] = ImColor(22, 66, 111, 255);
 	colors[ImGuiCol_TabHovered] = ImColor(40, 109, 178, 255);
 	colors[ImGuiCol_TabActive] = ImColor(40, 109, 178, 255);
 	colors[ImGuiCol_TabUnfocused] = ImColor(30, 99, 168, 255);

@@ -57,6 +57,7 @@ void LogWindow::Render()
 	}
 	ImGui::PopStyleColor();
 
+	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(4, 4)); // Not working correctly in ImGui 1.88 WIP.
 	ImGuiTabBarFlags tabBarFlags = ImGuiTabBarFlags_None;
 	if (ImGui::BeginTabBar("LogTabs", tabBarFlags))
 	{
@@ -64,22 +65,27 @@ void LogWindow::Render()
 		{
 			if (ImGui::BeginTabItem(category.name.c_str()))
 			{
-				ImGui::PushFont(Fonts::GetFont(FontId::Inconsolata18));
-				for (auto& line : category.lines)
+				if (ImGui::BeginChild("LogContents"))
 				{
-					ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(255, 255, 225, 255));
-					ImGui::TextUnformatted(line.timestamp.c_str());
-					ImGui::SameLine();
-					ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(75, 171, 225, 255));
-					ImGui::TextWrapped("%s", line.content.c_str());
-					ImGui::PopStyleColor(2);
+					ImGui::PushFont(Fonts::GetFont(FontId::Inconsolata18));
+					for (auto& line : category.lines)
+					{
+						ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(255, 255, 225, 255));
+						ImGui::TextUnformatted(line.timestamp.c_str());
+						ImGui::SameLine();
+						ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(75, 171, 225, 255));
+						ImGui::TextWrapped("%s", line.content.c_str());
+						ImGui::PopStyleColor(2);
+					}
+					ImGui::PopFont();
+					ImGui::EndChild();
 				}
-				ImGui::PopFont();
 				ImGui::EndTabItem();
 			}
 		}
 		ImGui::EndTabBar();
 	}
+	ImGui::PopStyleVar();
 
 	ImGui::End();
 }
