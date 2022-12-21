@@ -160,12 +160,46 @@ void Bridge::RenderSummaryWidget()
 
 void Bridge::OnMonitoredDataUpdated()
 {
+    ReadObfs4ProxyVersion();
     ReadTorProcess();
+    ReadTorVersion();
     ReadBridgeStats();
     ReadFingerprint();
     ReadHashedFingerprint();
     ReadHeartbeatUsers();
     RetrieveDistributionMechanism();
+}
+
+void Bridge::ReadObfs4ProxyVersion()
+{
+    std::ifstream file(m_BridgePath / "obfs4proxy-version", std::ifstream::in);
+    if (file.good())
+    {
+        std::string version;
+        if (getline(file, version))
+        {
+            std::string prefix("obfs4proxy-");
+            if (version.length() > prefix.length())
+            {
+                m_Obfs4ProxyVersion = version.substr(prefix.length());
+            }
+
+            if (m_Obfs4ProxyVersion != g_pTurbine->GetLatestObfs4ProxyVersion())
+            {
+                Log::Warning("%s: outdated obfs4proxy!", GetName().c_str());
+            }
+        }
+        else
+        {
+            SetError(true, "Failed to read obfs4proxy-version file.");
+            SetTorState(TorState::Unknown);
+        }
+    }
+    else
+    {
+        SetError(true, "Failed to read obfs4proxy-version file.");
+        SetTorState(TorState::Unknown);
+    }
 }
 
 void Bridge::ReadTorProcess()
@@ -194,6 +228,11 @@ void Bridge::ReadTorProcess()
         SetError(true, "Failed to read tor-process file.");
         SetTorState(TorState::Unknown);
     }
+}
+
+void Bridge::ReadTorVersion()
+{
+
 }
 
 void Bridge::ReadBridgeStats()

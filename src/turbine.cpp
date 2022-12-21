@@ -25,6 +25,7 @@ SOFTWARE.
 #include <chrono>
 #include <iostream>
 #include <fstream>
+#include <regex>
 #include <sstream>
 
 #include <curl/curl.h>
@@ -80,11 +81,38 @@ m_Active(true)
 	m_pRep = std::make_unique<TurbineRep>(pWindow);
 
 	InitialiseProviders();
+	InitialiseLatestVersions();
 }
 
 Turbine::~Turbine()
 {
 	m_Active = false;
+}
+
+void Turbine::InitialiseLatestVersions()
+{
+	InitialiseLatestTorVersion();
+	InitialiseLatestObfs4ProxyVersion();
+}
+
+void Turbine::InitialiseLatestTorVersion()
+{
+
+}
+
+void Turbine::InitialiseLatestObfs4ProxyVersion()
+{
+	GetWebClient()->Get("https://gitlab.com/yawning/obfs4/-/raw/master/obfs4proxy/obfs4proxy.go", {},
+		[this](const WebClientRequestResult& result)
+		{
+			const std::regex pattern("obfs4proxyVersion\\s*=\\s*\"(\\d+\\.\\d+\\.\\d+)\"");
+			std::smatch match;
+			if (std::regex_search(result.GetData(), match, pattern))
+			{
+				this->m_LatestObfs4ProxyVersion = match[1];
+			}
+		}
+	);
 }
 
 void Turbine::InitialiseLoggers(SDL_Window* pWindow)

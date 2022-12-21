@@ -117,7 +117,9 @@ public:
 
 private:
     std::string ReadFingerprint(const std::filesystem::path filePath) const;
+    void ReadObfs4ProxyVersion();
     void ReadTorProcess();
+    void ReadTorVersion();
     void ReadFingerprint();
     void ReadHashedFingerprint();
     void ReadBridgeStats();
@@ -132,6 +134,8 @@ private:
     std::string m_Ipv6;
     unsigned int m_ORPort;
     unsigned int m_ExtPort;
+    std::string m_Obfs4ProxyVersion;
+    std::string m_TorVersion;
     std::string m_Fingerprint;
     std::string m_HashedFingerprint;
     BridgeStatsSharedPtr m_pBridgeStats;

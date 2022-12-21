@@ -79,6 +79,9 @@ public:
 	Window* GetSettingsWindow();
 	Window* GetBridgeWindow(Bridge* pBridge);
 
+	const std::string& GetLatestTorVersion() const;
+	const std::string& GetLatestObfs4ProxyVersion() const;
+
 	ProviderVector& GetProviders();
 	void AddBridge(BridgeSharedPtr&& bridge);
 	Bridge* GetBridge(const std::string& id);
@@ -88,6 +91,9 @@ public:
 	Monitor* GetMonitor() const;
 
 private:
+	void InitialiseLatestVersions();
+	void InitialiseLatestTorVersion();
+	void InitialiseLatestObfs4ProxyVersion();
 	void InitialiseLoggers(SDL_Window* pWindow);
 	void InitialiseProviders();
 
@@ -104,6 +110,9 @@ private:
 	WindowUniquePtr m_pOverviewWindow;
 	WindowUniquePtr m_pSettingsWindow;
 	WindowUniquePtr m_pSummaryWindow;
+
+	std::string m_LatestObfs4ProxyVersion;
+	std::string m_LatestTorVersion;
 	
 	using BridgeMap = std::unordered_map<std::string, BridgeSharedPtr>;
 	BridgeMap m_Bridges;
@@ -128,6 +137,16 @@ inline WebClient* Turbine::GetWebClient()
 inline Settings* Turbine::GetSettings() const
 {
 	return m_pConfiguration.get();
+}
+
+inline const std::string& Turbine::GetLatestTorVersion() const
+{
+	return m_LatestTorVersion;
+}
+
+inline const std::string& Turbine::GetLatestObfs4ProxyVersion() const
+{
+	return m_LatestObfs4ProxyVersion;
 }
 
 inline ProviderVector& Turbine::GetProviders()
