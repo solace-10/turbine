@@ -26,10 +26,23 @@
         src: /var/log/tor/notices.log
         dest: ~/.local/share/turbine/bridges/{{ ansible_hostname }}/notices.log
         flat: yes
-    - name: Check Tor process
-      ansible.builtin.shell: ps aux | grep tor | grep -v grep > /tmp/tor-process
+    - name: Create Tor info files
+      ansible.builtin.shell: |
+        ps aux | grep tor | grep -v grep > /tmp/tor-process
+        tor --version > /tmp/tor-version
+        obfs4proxy --version > /tmp/obfs4proxy-version
     - name: Fetch Tor process
       ansible.builtin.fetch:
         src: /tmp/tor-process
         dest: ~/.local/share/turbine/bridges/{{ ansible_hostname }}/tor-process
+        flat: yes
+    - name: Fetch Tor version
+      ansible.builtin.fetch:
+        src: /tmp/tor-version
+        dest: ~/.local/share/turbine/bridges/{{ ansible_hostname }}/tor-version
+        flat: yes
+    - name: Fetch obfs4proxy version
+      ansible.builtin.fetch:
+        src: /tmp/obfs4proxy-version
+        dest: ~/.local/share/turbine/bridges/{{ ansible_hostname }}/obfs4proxy-version
         flat: yes
