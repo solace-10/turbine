@@ -28,6 +28,7 @@ SOFTWARE.
 
 #include <sstream>
 
+#include <sys/select.h>
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <fcntl.h>
@@ -69,7 +70,7 @@ void ShellCommandLinux::Run()
 		return;
 	}
 
-	if (pipe2(m_PipeStdOut, O_NONBLOCK) < 0 || pipe2(m_PipeStdErr, O_NONBLOCK) < 0)
+	if (pipe2(m_PipeStdOut, 0) < 0 || pipe2(m_PipeStdErr, 0) < 0)
 	{
 		Log::Error("Error creating pipe.");
 		return;
@@ -134,60 +135,62 @@ ShellCommand::State ShellCommandLinux::GetState() const
 	return m_State;
 }
 
-const std::vector<std::string>& ShellCommandLinux::GetOutput() const
-{
-	return m_Output;
-}
-
 void ShellCommandLinux::ProcessPipe(int pipe, LineBufferType& lineBuffer, size_t& lineBufferIndex, ShellCommandOnOutputCallback onOutputCallback)
 {
-	auto AddLineToOutput = [&]()
+	if (onOutputCallback == nullptr)
 	{
-		if (lineBufferIndex > 0)
+		return;
+	}
+
+	auto ProcessOutput = [&](bool forceFlush)
+	{
+		for (size_t i = lineBufferIndex; i < lineBuffer.size(); ++i)
 		{
-			lineBuffer[lineBufferIndex] = '\0';
-			lineBufferIndex = 0;
-			if (onOutputCallback != nullptr)
+			if (lineBuffer[i] == '\n' || (forceFlush && i == lineBuffer.size() - 1))
 			{
-				onOutputCallback(lineBuffer.data());
+				std::string line = lineBuffer.substr(lineBufferIndex, i - lineBufferIndex + 1);
+				lineBufferIndex = i + 1;
+				onOutputCallback(line);
 			}
 		}
 	};
 
-	const int cBufferSize = 32; 
-	char buffer[cBufferSize];
-	char c;
-	while (1)
+	fd_set fds;
+	FD_ZERO(&fds);
+	FD_SET(pipe, &fds);
+
+	const int cBufferSize = 1024; 
+	char pBuffer[cBufferSize];
+	timeval timeout;
+	timeout.tv_sec = 0;
+	timeout.tv_usec = 0;
+
+	int ret = select(pipe + 1, &fds, nullptr, nullptr, &timeout);
+	if (ret == -1)
 	{
-		ssize_t bytesRead = read(pipe, &c, 1);
+		Log::Warning("Error during select() for command '%s': %d.", m_Command.c_str(), ret);
+		m_State = ShellCommand::State::FailedToRun;
+	}
+	else if (ret > 0 && FD_ISSET(pipe, &fds))
+	{
+		ssize_t bytesRead = read(pipe, pBuffer, cBufferSize);
 		if (bytesRead == 0)
 		{
-			AddLineToOutput();
-			break;
+			ProcessOutput(true);
 		}
 		else if (bytesRead > 0)
 		{
-			if (c == '\n' || lineBufferIndex >= lineBuffer.size() - 1)
+			for (size_t i = 0; i < bytesRead; ++i)
 			{
-				AddLineToOutput();
+				lineBuffer += pBuffer[i];
 			}
-			else
-			{
-				lineBuffer[lineBufferIndex++] = c;
-			}
+
+			ProcessOutput(false);
 		}
 		else if (bytesRead == -1)
 		{
-			if (errno == EAGAIN || errno == EWOULDBLOCK)
-			{
-				break;
-			}
-			else
-			{
-				Log::Warning("Error during read() for command '%s': %s.", m_Command.c_str(), strerror(errno));
-				m_State = ShellCommand::State::FailedToRun;
-				break;
-			}
+			Log::Warning("Error during read() for command '%s': %s.", m_Command.c_str(), strerror(errno));
+			m_State = ShellCommand::State::FailedToRun;
 		}
 	}
 }

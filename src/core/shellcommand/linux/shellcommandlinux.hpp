@@ -28,9 +28,9 @@ SOFTWARE.
 
 #if defined(TARGET_PLATFORM_LINUX)
 
-#include <array>
 #include <memory>
 #include <string>
+#include <vector>
 
 #include <sys/types.h>
 #include <unistd.h>
@@ -50,10 +50,9 @@ public:
 	virtual void Run() override;
 	virtual void Update() override;
 	virtual ShellCommand::State GetState() const override;
-	virtual const std::vector<std::string>& GetOutput() const override;
-
+	
 private:
-	using LineBufferType = std::array<char, 1024>;
+	using LineBufferType = std::string;
 
 	void ProcessPipe(int pipe, LineBufferType& lineBuffer, size_t& lineBufferIndex, ShellCommandOnOutputCallback outputCallback);
 	ShellCommand::State m_State;
@@ -65,7 +64,6 @@ private:
 	size_t m_LineBufferStdOutIndex;
 	LineBufferType m_LineBufferStdErr;
 	size_t m_LineBufferStdErrIndex;
-	std::vector<std::string> m_Output;
 
 	pid_t m_Pid;
 	int m_PipeStdOut[2];

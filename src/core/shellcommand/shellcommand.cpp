@@ -66,9 +66,4 @@ ShellCommand::State ShellCommand::GetState() const
     return m_pImpl->GetState();
 }
 
-const std::vector<std::string>& ShellCommand::GetOutput() const
-{
-    return m_pImpl->GetOutput();
-}
-
 } // namespace Turbine

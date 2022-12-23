@@ -114,7 +114,7 @@ void Monitor::OnDeploymentCommandStandardOutput(const std::string& output)
     AnsibleCommand::OnDeploymentCommandStandardOutput(output);
     
     LogWindow* pWindow = reinterpret_cast<LogWindow*>(g_pTurbine->GetLogWindow());
-    pWindow->AddOutput("Monitor", output + "\n");
+    pWindow->AddOutput("Monitor", output);
 }
 
 void Monitor::OnDeploymentCommandErrorOutput(const std::string& output)
@@ -122,7 +122,7 @@ void Monitor::OnDeploymentCommandErrorOutput(const std::string& output)
     AnsibleCommand::OnDeploymentCommandErrorOutput(output);
     
     LogWindow* pWindow = reinterpret_cast<LogWindow*>(g_pTurbine->GetLogWindow());
-    pWindow->AddOutput("Monitor", output + "\n");
+    pWindow->AddOutput("Monitor", output);
 }
 
 void Monitor::OnSuccess(Bridge* pBridge) 

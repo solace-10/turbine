@@ -56,7 +56,6 @@ public:
 	void Run();
 	void Update();
 	State GetState() const;
-	const std::vector<std::string>& GetOutput() const;
 
 private:
     std::unique_ptr<ShellCommandImpl> m_pImpl;

@@ -149,7 +149,7 @@ void Deployment::OnDeploymentCommandStandardOutput(const std::string& output)
     AnsibleCommand::OnDeploymentCommandStandardOutput(output);
 
     LogWindow* pWindow = reinterpret_cast<LogWindow*>(g_pTurbine->GetLogWindow());
-    pWindow->AddOutput("Deployment", output + "\n");
+    pWindow->AddOutput("Deployment", output);
 
     if (m_ParsingResults == false && output.rfind("PLAY RECAP *", 0) == 0)
     {
@@ -170,7 +170,7 @@ void Deployment::OnDeploymentCommandErrorOutput(const std::string& output)
     AnsibleCommand::OnDeploymentCommandErrorOutput(output);
 
     LogWindow* pWindow = reinterpret_cast<LogWindow*>(g_pTurbine->GetLogWindow());
-    pWindow->AddOutput("Deployment", output + "\n");
+    pWindow->AddOutput("Deployment", output);
 }
 
 bool Deployment::GetSuccessFromOutput(const std::string& output) const

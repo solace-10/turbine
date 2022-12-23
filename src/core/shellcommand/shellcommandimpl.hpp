@@ -38,7 +38,6 @@ public:
 	virtual void Run() = 0;
 	virtual void Update() = 0;
 	virtual ShellCommand::State GetState() const = 0;
-	virtual const std::vector<std::string>& GetOutput() const = 0;
 };
 
 } // namespace Turbine

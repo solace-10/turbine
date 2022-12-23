@@ -97,6 +97,12 @@ void LogWindow::OnOpen()
 
 void LogWindow::AddOutput(const std::string& categoryName, const std::string& output)
 {
+	// Skip empty lines.
+	if (output == "\n")
+	{
+		return;
+	}
+
 	Category* pCategory = nullptr;
 	for (auto& category : m_Categories)
 	{
