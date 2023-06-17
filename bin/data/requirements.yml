@@ -1,0 +1,4 @@
+---
+collections:
+  - source: /home/edgerunner/tor_bridge
+    type: dir

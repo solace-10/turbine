@@ -1,6 +1,8 @@
 .vs/
 .vscode/
 imgui.ini
+bin/data/ansible/ansible_collections/
+bin/data/ansible/roles/
 bin/config.json
 bin/log.txt
 bin/turbine*

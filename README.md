@@ -36,17 +36,23 @@ Depending on what you are making, it can be a good idea to include screenshots o
 
 Turbine currently has no binary releases and must be built from source.
 
-### Prerequisites
-
-The following packages are needed: `clang` and `cmake`.
-
-In Debian, you'd install them via `apt`, e.g.:
-`sudo apt install clang cmake`
-
 ### Cloning the repository
 
 Clone the repository using:
-`git clone --recurse-submodules https://github.com/edgerunnerdev/turbine.git`
+```
+git clone --recurse-submodules https://github.com/solace-10/turbine.git
+```
+
+### Prerequisites
+
+There are two prerequisites, `cmake` and `ansible`.
+
+To install `cmake`, you would normally do so via your distribution's package manager. For example, in Debian:
+```
+sudo apt install clang cmake
+```
+
+For `ansible`, you should follow the [official documentation](https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html#installing-and-upgrading-ansible).
 
 ### Building Turbine
 
@@ -65,7 +71,9 @@ cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Debug ..
 The main third party requirement is Ansible, which can be installed via your package manager of choice.
 
 In Debian, that would be:
-`sudo apt install ansible`
+```
+sudo apt install ansible
+```
 
 Once Ansible is installed, run the following commands:
 ```
