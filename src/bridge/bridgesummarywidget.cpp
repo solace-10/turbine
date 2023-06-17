@@ -50,28 +50,13 @@ void BridgeSummaryWidget::Render(Bridge* pBridge)
     using namespace ImGui;
     PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
     BeginChild(pBridge->GetId().c_str(), ImVec2(0.0f, 40.0f), true);
+    const ImVec2 pos = GetCursorScreenPos();
+    RenderIcon(pBridge);
 
-    ImVec2 pos = GetCursorScreenPos();
-    
-    // if (pBridge->GetState() == "Deployed")
-	// {
-    //     float timer = m_SpinnerTimer / 2.0f;
-	// 	SetCursorScreenPos(ImVec2(pos.x + 8, pos.y + 4));
-	// 	SpinnerFilled(10.0f, 4, IM_COL32(0, 255, 255, 255), &timer);
-	// 	SetCursorScreenPos(ImVec2(pos.x + 38, pos.y + 4));
-	// 	Text("%s", pBridge->GetName().c_str());
-	// 	SetCursorScreenPos(ImVec2(pos.x + 38, pos.y + 20));
-	// 	TextUnformatted(pBridge->GetState().c_str());
-	// }
-    // else
-    // {
-    //     SetCursorScreenPos(ImVec2(pos.x + 8, pos.y + 4));
-    //     Spinner(10.0f, 4, IM_COL32(0, 255, 255, 255), &m_SpinnerTimer);
-    //     SetCursorScreenPos(ImVec2(pos.x + 38, pos.y + 4));
-    //     Text("%s", pBridge->GetName().c_str());
-    //     SetCursorScreenPos(ImVec2(pos.x + 38, pos.y + 20));
-    //     TextUnformatted(pBridge->GetState().c_str());
-    // }
+    SetCursorScreenPos(ImVec2(pos.x + 38, pos.y + 4));
+    Text("%s", pBridge->GetName().c_str());
+    SetCursorScreenPos(ImVec2(pos.x + 38, pos.y + 20));
+    TextUnformatted(pBridge->GetStateText().c_str());
 
     SetCursorScreenPos(pos);
     if (ImGui::InvisibleButton("BridgeSummaryButton", ImGui::GetWindowSize()))
@@ -85,6 +70,45 @@ void BridgeSummaryWidget::Render(Bridge* pBridge)
 
     EndChild();
     PopStyleVar();
+}
+
+void BridgeSummaryWidget::RenderIcon(Bridge* pBridge)
+{
+    using namespace ImGui;
+
+    ImVec2 pos = GetCursorScreenPos();
+
+    bool warningsPresent = false;
+    bool errorsPresent = false;
+    for (auto& pIssue : pBridge->GetBridgeIssues())
+    {
+        if (pIssue->GetType() == BridgeIssue::Type::Warning)
+        {
+            warningsPresent = true;
+        }
+        else if (pIssue->GetType() == BridgeIssue::Type::Error)
+        {
+            errorsPresent = true;
+            break;
+        }
+    }
+
+    if (errorsPresent)
+    {
+        SetCursorScreenPos(ImVec2(pos.x + 7, pos.y + 6));
+        Image(reinterpret_cast<ImTextureID>(Icons::GetIcon(IconId::TaskError)), ImVec2(26, 26), ImVec2(0, 0), ImVec2(1, 1), ImVec4(1, 0, 0, 1));    
+    }
+    else if (warningsPresent)
+    {
+        SetCursorScreenPos(ImVec2(pos.x + 7, pos.y + 6));
+        Image(reinterpret_cast<ImTextureID>(Icons::GetIcon(IconId::TaskError)), ImVec2(26, 26), ImVec2(0, 0), ImVec2(1, 1), ImVec4(1, 0.5, 0, 1));          
+    }
+    else
+    {
+        float timer = m_SpinnerTimer / 2.0f;
+        SetCursorScreenPos(ImVec2(pos.x + 8, pos.y + 4));
+        SpinnerFilled(10.0f, 4, IM_COL32(0, 255, 255, 255), &timer);
+    }
 }
 
 } // namespace Turbine
