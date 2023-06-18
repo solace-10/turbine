@@ -26,6 +26,7 @@ SOFTWARE.
 #include "imgui/imgui_stdlib.h"
 
 #include "windows/logwindow.hpp"
+#include "windows/summarywindow.h"
 #include "fonts.h"
 
 #include <iomanip>
@@ -40,16 +41,29 @@ LogWindow::LogWindow()
 {
 }
 
+int LogWindow::GetHeight()
+{
+	return 400;
+}
+
 void LogWindow::Render()
 {
-	if (IsOpen() == false)
-	{
-		return;
-	}
+	int padding = 2;
+    ImVec2 pos(ImGui::GetMainViewport()->Pos);
+	pos.x += padding;
+    pos.y += ImGui::GetMainViewport()->Size.y - GetHeight();
+	ImGui::SetNextWindowPos(pos);
+	ImGui::SetNextWindowSize(ImVec2(ImGui::GetMainViewport()->Size.x - SummaryWindow::GetWidth() - padding * 2, GetHeight() - padding));
 
-	ImGui::SetNextWindowSize(ImVec2(650, 400), ImGuiCond_FirstUseEver);
 	ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(0, 0, 0, 255));
-	if (!ImGui::Begin("Logs", &m_IsOpen))
+
+	unsigned int flags = 0;
+	flags |= ImGuiWindowFlags_NoResize;
+	flags |= ImGuiWindowFlags_NoMove;
+	flags |= ImGuiWindowFlags_NoSavedSettings;
+	flags |= ImGuiWindowFlags_NoTitleBar;
+
+	if (!ImGui::Begin("Logs", nullptr, flags))
 	{
 		ImGui::PopStyleColor();
 		ImGui::End();

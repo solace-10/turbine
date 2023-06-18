@@ -39,6 +39,8 @@ public:
 	virtual void Render() override;
 	virtual void OnOpen() override;
 
+	static int GetHeight();
+
     void AddOutput(const std::string& category, const std::string& output);
 
 private:

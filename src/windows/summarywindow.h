@@ -39,6 +39,8 @@ public:
 	virtual void Render() override;
 	virtual void OnOpen() override;
 
+    static int GetWidth();
+
 private:
     void RenderCreateBridgeWidget();
     void RenderCreateBridgeBackground();

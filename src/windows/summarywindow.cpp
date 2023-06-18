@@ -43,14 +43,19 @@ m_AnimTimer(0.0f)
 {
 }
 
+int SummaryWindow::GetWidth()
+{
+    return 250;
+}
+
 void SummaryWindow::Render()
 {
     const int menubarHeight = 22;
     ImVec2 pos(ImGui::GetMainViewport()->Pos);
-    pos.x += ImGui::GetMainViewport()->Size.x - 250;
+    pos.x += ImGui::GetMainViewport()->Size.x - GetWidth();
     pos.y += menubarHeight;
 	ImGui::SetNextWindowPos(pos);
-	ImGui::SetNextWindowSize(ImVec2(250, ImGui::GetMainViewport()->Size.y - menubarHeight));
+	ImGui::SetNextWindowSize(ImVec2(GetWidth(), ImGui::GetMainViewport()->Size.y - menubarHeight - 2));
 	ImGui::Begin("Summary window", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoTitleBar);
 
     RenderCreateBridgeWidget();

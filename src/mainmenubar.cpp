@@ -85,12 +85,6 @@ void MainMenuBar::Render()
             {
                 g_pTurbine->GetOverviewWindow()->Show(overviewWindowOpen);
             }
-
-            bool logWindowOpen = g_pTurbine->GetLogWindow()->IsOpen();
-            if (ImGui::MenuItem("Logs", nullptr, &logWindowOpen))
-            {
-                g_pTurbine->GetLogWindow()->Show(logWindowOpen);
-            }
             ImGui::EndMenu();
         }
 
