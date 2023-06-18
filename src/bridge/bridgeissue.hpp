@@ -24,30 +24,43 @@ SOFTWARE.
 
 #pragma once
 
-#include <array>
-
-#include "SDL_opengl.h"
+#include <string>
 
 namespace Turbine
 {
 
-enum class IconId
-{
-	Issue,
-	Server,
-	ServerSmall,
-
-	Count
-};
-
-class Icons
+class BridgeIssue
 {
 public:
-	static void Load();
-	static GLuint GetIcon(IconId id);
+    enum class Type
+    {
+        Warning,
+        Error
+    };
+
+    BridgeIssue(Type type, const std::string& description)
+    : m_Type(type)
+    , m_Description(description)
+    {
+
+    }
+
+    Type GetType() const;
+    const std::string& GetDescription() const;
 
 private:
-	static std::array<GLuint, static_cast<size_t>(IconId::Count)> m_Icons;
+    Type m_Type;
+    std::string m_Description;
 };
 
+inline BridgeIssue::Type BridgeIssue::GetType() const 
+{
+    return m_Type;
 }
+
+inline const std::string& BridgeIssue::GetDescription() const 
+{
+    return m_Description;
+}
+
+} // namespace Turbine

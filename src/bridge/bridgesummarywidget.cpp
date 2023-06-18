@@ -96,12 +96,17 @@ void BridgeSummaryWidget::RenderIcon(Bridge* pBridge)
     if (errorsPresent)
     {
         SetCursorScreenPos(ImVec2(pos.x + 7, pos.y + 6));
-        Image(reinterpret_cast<ImTextureID>(Icons::GetIcon(IconId::TaskError)), ImVec2(26, 26), ImVec2(0, 0), ImVec2(1, 1), ImVec4(1, 0, 0, 1));    
+        Image(reinterpret_cast<ImTextureID>(Icons::GetIcon(IconId::Issue)), ImVec2(26, 26), ImVec2(0, 0), ImVec2(1, 1), ImVec4(1, 0, 0, 1));    
     }
     else if (warningsPresent)
     {
         SetCursorScreenPos(ImVec2(pos.x + 7, pos.y + 6));
-        Image(reinterpret_cast<ImTextureID>(Icons::GetIcon(IconId::TaskError)), ImVec2(26, 26), ImVec2(0, 0), ImVec2(1, 1), ImVec4(1, 0.5, 0, 1));          
+        Image(reinterpret_cast<ImTextureID>(Icons::GetIcon(IconId::Issue)), ImVec2(26, 26), ImVec2(0, 0), ImVec2(1, 1), ImVec4(1, 0.5, 0, 1));          
+    }
+    else if (pBridge->GetTorState() == Bridge::TorState::Running)
+    {
+        SetCursorScreenPos(ImVec2(pos.x + 7, pos.y + 7));
+        Image(reinterpret_cast<ImTextureID>(Icons::GetIcon(IconId::ServerSmall)), ImVec2(26, 26));   
     }
     else
     {

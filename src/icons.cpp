@@ -33,10 +33,9 @@ std::array<GLuint, static_cast<size_t>(IconId::Count)> Icons::m_Icons;
 
 void Icons::Load()
 {
-	m_Icons[static_cast<size_t>(IconId::Pin)] = TextureLoader::LoadTexture("textures/pin.png");
-	m_Icons[static_cast<size_t>(IconId::TaskDisabled)] = TextureLoader::LoadTexture("textures/disabled.png");
-	m_Icons[static_cast<size_t>(IconId::TaskError)] = TextureLoader::LoadTexture("textures/error.png");
+	m_Icons[static_cast<size_t>(IconId::Issue)] = TextureLoader::LoadTexture("textures/issue.png");
 	m_Icons[static_cast<size_t>(IconId::Server)] = TextureLoader::LoadTexture("textures/server.png");
+	m_Icons[static_cast<size_t>(IconId::ServerSmall)] = TextureLoader::LoadTexture("textures/server_small.png");
 }
 
 GLuint Icons::GetIcon(IconId id)

@@ -28,8 +28,10 @@ SOFTWARE.
 #include <memory>
 #include <optional>
 #include <string>
+#include <vector>
 
 #include "bridge/bridge.fwd.hpp"
+#include "bridge/bridgeissue.hpp"
 #include "bridge/bridgesummarywidget.h"
 
 namespace Turbine
@@ -37,6 +39,9 @@ namespace Turbine
 
 class BridgeGeolocation;
 using BridgeGeolocationUniquePtr = std::unique_ptr<BridgeGeolocation>;
+
+using BridgeIssueUniquePtr = std::unique_ptr<BridgeIssue>;
+using BridgeIssues = std::vector<BridgeIssueUniquePtr>;
 
 class BridgeSummaryWidget;
 using BridgeSummaryWidgetUniquePtr = std::unique_ptr<BridgeSummaryWidget>;
@@ -110,6 +115,7 @@ public:
     bool GetError() const;
     const std::string& GetErrorDetail() const;
     std::optional<int> GetUniqueClients() const;
+    const BridgeIssues& GetBridgeIssues() const;
 
     void OnMonitoredDataUpdated();
 
@@ -125,6 +131,8 @@ private:
     void ReadBridgeStats();
     void ReadHeartbeatUsers();
     void RetrieveDistributionMechanism();
+    void AddIssue(BridgeIssue::Type type, const std::string& description);
+    void ClearIssues();
 
     Provider* m_pProvider;
     std::string m_Id;
@@ -149,6 +157,7 @@ private:
     bool m_Error;
     std::string m_ErrorDetail;
     std::optional<int> m_UniqueClients;
+    BridgeIssues m_Issues;
 };
 
 } // namespace Turbine

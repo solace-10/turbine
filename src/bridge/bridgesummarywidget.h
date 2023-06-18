@@ -39,6 +39,7 @@ public:
     void Render(Bridge* pBridge);
 
 private:
+    void RenderIcon(Bridge* pBridge);
     float m_SpinnerTimer;
 };
 

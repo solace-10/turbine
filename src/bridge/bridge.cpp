@@ -27,6 +27,7 @@ SOFTWARE.
 #include <regex>
 
 #include "bridge/bridge.h"
+#include "bridge/bridgeissue.hpp"
 #include "bridge/bridgegeolocation.hpp"
 #include "bridge/bridgestats.hpp"
 #include "bridge/bridgesummarywidget.h"
@@ -160,6 +161,7 @@ void Bridge::RenderSummaryWidget()
 
 void Bridge::OnMonitoredDataUpdated()
 {
+    ClearIssues();
     ReadObfs4ProxyVersion();
     ReadTorProcess();
     ReadTorVersion();
@@ -186,18 +188,20 @@ void Bridge::ReadObfs4ProxyVersion()
 
             if (m_Obfs4ProxyVersion != g_pTurbine->GetLatestObfs4ProxyVersion())
             {
-                Log::Warning("%s: outdated obfs4proxy!", GetName().c_str());
+                AddIssue(BridgeIssue::Type::Warning, "Outdated obfs4proxy.");
             }
         }
         else
         {
             SetError(true, "Failed to read obfs4proxy-version file.");
+            AddIssue(BridgeIssue::Type::Error, "Failed to read obfs4proxy-version file.");
             SetTorState(TorState::Unknown);
         }
     }
     else
     {
         SetError(true, "Failed to read obfs4proxy-version file.");
+        AddIssue(BridgeIssue::Type::Error, "Failed to read obfs4proxy-version file.");
         SetTorState(TorState::Unknown);
     }
 }
@@ -215,6 +219,7 @@ void Bridge::ReadTorProcess()
         if (length == 0)
         {
             SetError(true, "Tor process isn't running.");
+            AddIssue(BridgeIssue::Type::Error, "Tor process isn't running.");
             SetTorState(TorState::Inactive);
         }
         else
@@ -225,6 +230,7 @@ void Bridge::ReadTorProcess()
     }
     else
     {
+        AddIssue(BridgeIssue::Type::Error, "Failed to read tor-process file.");
         SetError(true, "Failed to read tor-process file.");
         SetTorState(TorState::Unknown);
     }
@@ -434,6 +440,34 @@ const std::string& Bridge::GetErrorDetail() const
 std::optional<int> Bridge::GetUniqueClients() const
 {
     return m_UniqueClients;
+}
+
+const BridgeIssues& Bridge::GetBridgeIssues() const
+{
+    return m_Issues;
+}
+
+void Bridge::AddIssue(BridgeIssue::Type type, const std::string& description)
+{
+    if (type == BridgeIssue::Type::Warning)
+    {
+        Log::Warning("%s: %s", GetName().c_str(), description.c_str());
+    }
+    else if (type == BridgeIssue::Type::Error)
+    {
+        Log::Error("%s: %s", GetName().c_str(), description.c_str());
+    }
+    else
+    {
+        SDL_assert(false); // Not implemented.
+    }
+
+    m_Issues.push_back(std::make_unique<BridgeIssue>(type, description));
+}
+
+void Bridge::ClearIssues()
+{
+    m_Issues.clear();
 }
 
 } // namespace Turbine
