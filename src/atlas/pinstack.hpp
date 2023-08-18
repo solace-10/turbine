@@ -24,40 +24,35 @@ SOFTWARE.
 
 #pragma once
 
-#include <array>
-#include <memory>
 #include <string>
+#include <vector>
 
-#include <SDL_opengl.h>
+#include "imgui/imgui.h"
 
-struct SDL_Surface;
-struct SDL_Window;
+#include "bridge/bridge.fwd.hpp"
 
 namespace Turbine
 {
 
-class Atlas;
-using AtlasUniquePtr = std::unique_ptr<Atlas>;
-class MainMenuBar;
-using MainMenuBarUniquePtr = std::unique_ptr<MainMenuBar>;
-
-class TurbineRep
+class PinStack
 {
 public:
-	TurbineRep(SDL_Window* pWindow);
-	~TurbineRep();
+    PinStack(const ImVec2& position, Bridge* pBridge);
 
-	void ProcessEvent(const SDL_Event& event);
-	void Update(float delta);
-	void Render();
+    void Render();
+
+    const ImVec2& GetPosition() const;
+    void AddBridge(Bridge* pBridge);
 
 private:
-	void SetUserInterfaceStyle();
-
-	SDL_Window* m_pWindow;
-	AtlasUniquePtr m_pAtlas;
-	float m_CellSize;
-    MainMenuBarUniquePtr m_pMainMenuBar;
+    ImVec2 m_Position;
+    std::vector<Bridge*> m_Bridges;
+    std::string m_BridgesText;
 };
+
+inline const ImVec2& PinStack::GetPosition() const
+{
+    return m_Position;
+}
 
 } // namespace Turbine

@@ -25,6 +25,7 @@ SOFTWARE.
 #include <SDL.h>
 #include "imgui/imgui.h"
 
+#include "atlas/atlas.h"
 #include "bridge/bridge.h"
 #include "bridge/bridgegeolocation.hpp"
 #include "icons.h"
@@ -47,6 +48,7 @@ m_pWindow(pWindow)
 	int windowWidth;
 	int windowHeight;
 	SDL_GetWindowSize(m_pWindow, &windowWidth, &windowHeight);
+	m_pAtlas = std::make_unique<Atlas>(windowWidth, windowHeight);
     m_pMainMenuBar = std::make_unique<MainMenuBar>();
 
 	SetUserInterfaceStyle();
@@ -161,12 +163,14 @@ void TurbineRep::Render()
 	ImGui::Begin("Turbine", nullptr, flags);
 	ImGui::PopStyleVar();
 
-	ImDrawList* pDrawList = ImGui::GetWindowDrawList();
-	ImVec2 p0 = ImGui::GetCursorScreenPos();
-	ImVec2 p1 = ImVec2(p0.x + windowSize.x, p0.y + windowSize.y);
-	ImU32 colorA = ImGui::GetColorU32(IM_COL32(0, 0, 0, 255));
-	ImU32 colorB = ImGui::GetColorU32(IM_COL32(17, 43, 60, 255));
-	pDrawList->AddRectFilledMultiColor(p0, p1, colorA, colorA, colorB, colorB);
+	// ImDrawList* pDrawList = ImGui::GetWindowDrawList();
+	// ImVec2 p0 = ImGui::GetCursorScreenPos();
+	// ImVec2 p1 = ImVec2(p0.x + windowSize.x, p0.y + windowSize.y);
+	// ImU32 colorA = ImGui::GetColorU32(IM_COL32(0, 0, 0, 255));
+	// ImU32 colorB = ImGui::GetColorU32(IM_COL32(17, 43, 60, 255));
+	// pDrawList->AddRectFilledMultiColor(p0, p1, colorA, colorA, colorB, colorB);
+
+	m_pAtlas->Render();
 
     m_pMainMenuBar->Render();
 	ImGui::End();

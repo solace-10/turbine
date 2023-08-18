@@ -22,42 +22,61 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-#pragma once
-
-#include <array>
-#include <memory>
-#include <string>
-
-#include <SDL_opengl.h>
-
-struct SDL_Surface;
-struct SDL_Window;
+#include "atlas/tile.h"
+#include "textureloader.h"
 
 namespace Turbine
 {
 
-class Atlas;
-using AtlasUniquePtr = std::unique_ptr<Atlas>;
-class MainMenuBar;
-using MainMenuBarUniquePtr = std::unique_ptr<MainMenuBar>;
-
-class TurbineRep
+Tile::Tile() :
+m_X( -1 ),
+m_Y( -1 ),
+m_ZoomLevel( -1 ),
+m_Texture( 0 )
 {
-public:
-	TurbineRep(SDL_Window* pWindow);
-	~TurbineRep();
 
-	void ProcessEvent(const SDL_Event& event);
-	void Update(float delta);
-	void Render();
+}
 
-private:
-	void SetUserInterfaceStyle();
+Tile::Tile( int x, int y, int zoomLevel ) :
+m_X( x ),
+m_Y( y ),
+m_ZoomLevel( zoomLevel ),
+m_Texture( 0 )
+{
 
-	SDL_Window* m_pWindow;
-	AtlasUniquePtr m_pAtlas;
-	float m_CellSize;
-    MainMenuBarUniquePtr m_pMainMenuBar;
-};
+}
+
+Tile::~Tile()
+{
+	if ( m_Texture != 0 )
+	{
+		TextureLoader::UnloadTexture( m_Texture );
+	}
+}
+
+int Tile::X() const
+{
+	return m_X;
+}
+
+int Tile::Y() const
+{
+	return m_Y;
+}
+
+int Tile::ZoomLevel() const
+{
+	return m_ZoomLevel;
+}
+
+GLuint Tile::Texture() const
+{
+	return m_Texture;
+}
+
+void Tile::AssignTexture( GLuint texture )
+{
+	m_Texture = texture;
+}
 
 } // namespace Turbine

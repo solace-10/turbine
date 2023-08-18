@@ -24,40 +24,62 @@ SOFTWARE.
 
 #pragma once
 
-#include <array>
+#include <atomic>
+#include <deque>
+#include <list>
 #include <memory>
-#include <string>
+#include <mutex>
+#include <thread>
+#include <vector>
 
 #include <SDL_opengl.h>
 
-struct SDL_Surface;
-struct SDL_Window;
+#include "atlas/tile.h"
 
 namespace Turbine
 {
 
-class Atlas;
-using AtlasUniquePtr = std::unique_ptr<Atlas>;
-class MainMenuBar;
-using MainMenuBarUniquePtr = std::unique_ptr<MainMenuBar>;
-
-class TurbineRep
+class TileStreamer
 {
 public:
-	TurbineRep(SDL_Window* pWindow);
-	~TurbineRep();
+	TileStreamer();
+	~TileStreamer();
 
-	void ProcessEvent(const SDL_Event& event);
+	// Gets a tile for a given zoom level. If a tile is "static", it will never be streamed out once loaded.
+	TileSharedPtr Get(int x, int y, int zoomLevel, bool isStatic);
+
 	void Update(float delta);
-	void Render();
 
+	static void ShowDebugUI(bool* pOpen);
+	
 private:
-	void SetUserInterfaceStyle();
+	static int TileStreamerThreadMain(TileStreamer* pTileRequester);
+	static bool LoadFromFile(Tile& tile);
+	static bool DownloadFromTileServer(Tile& tile); 
+	void CreateDirectories();
 
-	SDL_Window* m_pWindow;
-	AtlasUniquePtr m_pAtlas;
-	float m_CellSize;
-    MainMenuBarUniquePtr m_pMainMenuBar;
+	struct TileStreamInfo 
+	{
+		TileStreamInfo() 
+		{
+			pTile = nullptr;
+			isStatic = false;
+			accessTimer = 0.0f;
+		}
+
+		TileSharedPtr pTile;
+		bool isStatic;
+		float accessTimer;
+	};
+	using TileStreamInfoDeque = std::deque<TileStreamInfo>;
+	using TileStreamInfoList = std::list<TileStreamInfo>;
+
+	std::mutex m_AccessMutex;
+	TileStreamInfoDeque m_Queue;
+	TileStreamInfoList m_LoadedTiles;
+	TileStreamInfo m_LoadingTile;
+	std::thread m_Thread;
+	std::atomic_bool m_RunThread;
 };
 
 } // namespace Turbine

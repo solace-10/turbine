@@ -24,40 +24,37 @@ SOFTWARE.
 
 #pragma once
 
-#include <array>
+#include <deque>
 #include <memory>
-#include <string>
+#include <vector>
 
 #include <SDL_opengl.h>
-
-struct SDL_Surface;
-struct SDL_Window;
 
 namespace Turbine
 {
 
-class Atlas;
-using AtlasUniquePtr = std::unique_ptr<Atlas>;
-class MainMenuBar;
-using MainMenuBarUniquePtr = std::unique_ptr<MainMenuBar>;
+class Tile;
+using TileSharedPtr = std::shared_ptr< Tile >;
+using TileVector = std::vector< TileSharedPtr >;
 
-class TurbineRep
+class Tile
 {
 public:
-	TurbineRep(SDL_Window* pWindow);
-	~TurbineRep();
+	Tile();
+	Tile( int x, int y, int zoomLevel );
+	~Tile();
+	int X() const;
+	int Y() const;
+	int ZoomLevel() const;
 
-	void ProcessEvent(const SDL_Event& event);
-	void Update(float delta);
-	void Render();
+	void AssignTexture( GLuint texture );
+	GLuint Texture() const;
 
 private:
-	void SetUserInterfaceStyle();
-
-	SDL_Window* m_pWindow;
-	AtlasUniquePtr m_pAtlas;
-	float m_CellSize;
-    MainMenuBarUniquePtr m_pMainMenuBar;
+	int m_X;
+	int m_Y;
+	int m_ZoomLevel;
+	GLuint m_Texture;
 };
 
 } // namespace Turbine

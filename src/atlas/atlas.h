@@ -27,37 +27,60 @@ SOFTWARE.
 #include <array>
 #include <memory>
 #include <string>
+#include <vector>
 
 #include <SDL_opengl.h>
 
-struct SDL_Surface;
-struct SDL_Window;
+#include "atlas/tile.h"
+#include "imgui/imgui.h"
 
 namespace Turbine
 {
 
 class Atlas;
+class Pins;
+class TileStreamer;
 using AtlasUniquePtr = std::unique_ptr<Atlas>;
-class MainMenuBar;
-using MainMenuBarUniquePtr = std::unique_ptr<MainMenuBar>;
 
-class TurbineRep
+static const int sTileSize = 256;
+static const int sMaxZoomLevels = 11;
+
+class Atlas
 {
 public:
-	TurbineRep(SDL_Window* pWindow);
-	~TurbineRep();
+	Atlas( int windowWidth, int windowHeight );
+	~Atlas();
 
-	void ProcessEvent(const SDL_Event& event);
 	void Update(float delta);
 	void Render();
+	ImVec2 GetScreenCoordinates(float longitude, float latitude) const;
+	int GetCurrentZoomLevel() const;
+
+	void OnWindowSizeChanged( int width, int height );
+	void OnMouseDrag( int deltaX, int deltaY );
+	void OnZoomIn();
+	void OnZoomOut();
 
 private:
-	void SetUserInterfaceStyle();
+	void ClampOffset();
+	void CalculateVisibleTiles( TileVector& visibleTiles );
 
-	SDL_Window* m_pWindow;
-	AtlasUniquePtr m_pAtlas;
-	float m_CellSize;
-    MainMenuBarUniquePtr m_pMainMenuBar;
+	using TileTextureIdVector = std::vector< GLuint >;
+	using TileMaps = std::vector< TileTextureIdVector >;
+	TileMaps m_TileMaps;
+	int m_MinimumZoomLevel;
+	int m_CurrentZoomLevel;
+	int m_MaxVisibleTilesX;
+	int m_MaxVisibleTilesY;
+	int m_OffsetX;
+	int m_OffsetY;
+	int m_WindowWidth;
+	int m_WindowHeight;
+
+	std::vector<int> m_TilesToDraw;
+	std::unique_ptr<TileStreamer> m_pTileStreamer;
+
+	std::unique_ptr<Pins> m_pPins;
 };
 
 } // namespace Turbine

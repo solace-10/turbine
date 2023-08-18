@@ -24,40 +24,29 @@ SOFTWARE.
 
 #pragma once
 
-#include <array>
-#include <memory>
-#include <string>
-
-#include <SDL_opengl.h>
-
-struct SDL_Surface;
-struct SDL_Window;
+#include <vector>
 
 namespace Turbine
 {
 
 class Atlas;
-using AtlasUniquePtr = std::unique_ptr<Atlas>;
-class MainMenuBar;
-using MainMenuBarUniquePtr = std::unique_ptr<MainMenuBar>;
+class PinStack;
 
-class TurbineRep
+class Pins
 {
 public:
-	TurbineRep(SDL_Window* pWindow);
-	~TurbineRep();
+    Pins(Atlas* pAtlas);
+    ~Pins();
 
-	void ProcessEvent(const SDL_Event& event);
-	void Update(float delta);
-	void Render();
+    void Update(float delta);
+    void Render();
 
 private:
-	void SetUserInterfaceStyle();
+    float DistanceBetweenSquared(const ImVec2& p1, const ImVec2& p2) const;
 
-	SDL_Window* m_pWindow;
-	AtlasUniquePtr m_pAtlas;
-	float m_CellSize;
-    MainMenuBarUniquePtr m_pMainMenuBar;
+    Atlas* m_pAtlas;
+    using PinStackUniquePtr = std::unique_ptr<PinStack>;
+    std::vector<PinStackUniquePtr> m_PinStacks;
 };
 
-} // namespace Turbine
+}
