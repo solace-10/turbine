@@ -130,7 +130,40 @@ void TurbineRep::SetUserInterfaceStyle()
 
 void TurbineRep::ProcessEvent(const SDL_Event& event)
 {
+	if (event.type == SDL_MOUSEMOTION && ImGui::GetIO().WantCaptureMouse == false)
+	{
+		const SDL_MouseMotionEvent* ev = reinterpret_cast<const SDL_MouseMotionEvent*>(&event);
+		if ((ev->state & SDL_BUTTON_LMASK) > 0)
+		{
+			m_pAtlas->OnMouseDrag(ev->xrel, ev->yrel);
+		}
+	}
+	else if (event.type == SDL_MOUSEWHEEL && ImGui::GetIO().WantCaptureMouse == false)
+	{
+		const SDL_MouseWheelEvent* ev = reinterpret_cast<const SDL_MouseWheelEvent*>(&event);
+		if (ev->y > 0)
+		{
+			m_pAtlas->OnZoomIn();
+		}
+		else if (ev->y <= 0)
+		{
+			m_pAtlas->OnZoomOut();
+		}
+	}
+	else if (event.type == SDL_MOUSEBUTTONDOWN && ImGui::GetIO().WantCaptureMouse == false)
+	{
 
+	}
+	else if (event.type == SDL_WINDOWEVENT)
+	{
+		if (event.window.event == SDL_WINDOWEVENT_RESIZED || event.window.event == SDL_WINDOWEVENT_SIZE_CHANGED)
+		{
+			if (event.window.windowID == 1)
+			{
+				m_pAtlas->OnWindowSizeChanged(event.window.data1, event.window.data2);
+			}
+		}
+	}
 }
 
 void TurbineRep::Update(float delta)

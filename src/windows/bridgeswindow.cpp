@@ -37,6 +37,7 @@ namespace Turbine
 
 void BridgesWindow::Render()
 {
+	return;
 	using namespace ImGui;
 
 	ImGuiViewport* pViewport = GetMainViewport();

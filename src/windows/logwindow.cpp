@@ -48,21 +48,14 @@ int LogWindow::GetHeight()
 
 void LogWindow::Render()
 {
-	int padding = 2;
-    ImVec2 pos(ImGui::GetMainViewport()->Pos);
-	pos.x += padding;
-    pos.y += ImGui::GetMainViewport()->Size.y - GetHeight();
-	ImGui::SetNextWindowPos(pos);
-	ImGui::SetNextWindowSize(ImVec2(ImGui::GetMainViewport()->Size.x - SummaryWindow::GetWidth() - padding * 2, GetHeight() - padding));
+	if (IsOpen() == false)
+	{
+		return;
+	}
 
 	ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(0, 0, 0, 255));
 
 	unsigned int flags = 0;
-	flags |= ImGuiWindowFlags_NoResize;
-	flags |= ImGuiWindowFlags_NoMove;
-	flags |= ImGuiWindowFlags_NoSavedSettings;
-	flags |= ImGuiWindowFlags_NoTitleBar;
-
 	if (!ImGui::Begin("Logs", nullptr, flags))
 	{
 		ImGui::PopStyleColor();
