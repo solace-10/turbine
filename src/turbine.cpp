@@ -35,8 +35,11 @@ SOFTWARE.
 #include "deployment/deployment.h"
 #include "deployment/monitor.hpp"
 #include "ext/json.hpp"
+#include "geolocation/geolocationdata.hpp"
+#include "geolocation/geolocationservice.hpp"
 #include "imgui/imgui.h"
 #include "providers/digitalocean/digitaloceanprovider.h"
+#include "veilid/veilidnetwork.hpp"
 #include "webclient/webclient.h"
 #include "windows/bridgewindow.hpp"
 #include "windows/bridgeswindow.h"
@@ -45,7 +48,6 @@ SOFTWARE.
 #include "windows/overviewwindow.hpp"
 #include "windows/settingswindow.h"
 #include "windows/summarywindow.h"
-#include "geolocationdata.h"
 #include "log.h"
 #include "turbine.h"
 #include "turbinerep.h"
@@ -71,6 +73,7 @@ m_Active(true)
 
 	m_pBridgesWindow = std::make_unique<BridgesWindow>();
 	m_pDeployment = std::make_unique<Deployment>();
+	m_pGeolocationService = std::make_unique<GeolocationService>();
 	m_pMonitor = std::make_unique<Monitor>();
 	m_pCreateBridgeWindow = std::make_unique<CreateBridgeWindow>();
 	m_pLogWindow = std::make_unique<LogWindow>();
@@ -79,6 +82,7 @@ m_Active(true)
 	m_pSummaryWindow = std::make_unique<SummaryWindow>();
 	m_pWebClient = std::make_unique<WebClient>();
 	m_pRep = std::make_unique<TurbineRep>(pWindow);
+	m_pVeilidNetwork = std::make_unique<VeilidNetwork>();
 
 	InitialiseProviders();
 	InitialiseLatestVersions();
@@ -148,6 +152,7 @@ void Turbine::Update()
 	m_pOverviewWindow->Update(delta);
 	m_pSettingsWindow->Update(delta);
 	m_pSummaryWindow->Update(delta);
+	m_pGeolocationService->Update(delta);
 
 	for (auto& pBridgeWindowPair : m_BridgeWindows)
 	{

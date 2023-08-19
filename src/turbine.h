@@ -32,7 +32,7 @@ SOFTWARE.
 #include <SDL.h>
 
 #include "bridge/bridge.h"
-#include "geolocationdata.h"
+#include "geolocation/geolocationdata.hpp"
 #include "json.hpp"
 #include "log.h"
 
@@ -45,20 +45,24 @@ namespace Turbine
 
 class Bridge;
 class Deployment;
+class GeolocationService;
 class Monitor;
 class Settings;
 class Provider;
 class TurbineRep;
+class VeilidNetwork;
 class WebClient;
 class Window;
 
 using BridgeList = std::list<Bridge*>;
 using DeploymentUniquePtr = std::unique_ptr<Deployment>;
+using GeolocationServiceUniquePtr = std::unique_ptr<GeolocationService>;
 using MonitorUniquePtr = std::unique_ptr<Monitor>;
 using SettingsUniquePtr = std::unique_ptr<Settings>;
 using ProviderUniquePtr = std::unique_ptr<Provider>;
 using TurbineRepUniquePtr = std::unique_ptr<TurbineRep>;
 using ProviderVector = std::vector<ProviderUniquePtr>;
+using VeilidNetworkUniquePtr = std::unique_ptr<VeilidNetwork>;
 using WebClientUniquePtr = std::unique_ptr<WebClient>;
 using WindowUniquePtr = std::unique_ptr<Window>;
 
@@ -89,6 +93,7 @@ public:
 	BridgeList GetBridges() const;
 	Deployment* GetDeployment() const;
 	Monitor* GetMonitor() const;
+	GeolocationService* GetGeolocationService() const;
 
 private:
 	void InitialiseLatestVersions();
@@ -120,6 +125,8 @@ private:
 	BridgeWindowMap m_BridgeWindows;
 	DeploymentUniquePtr m_pDeployment;
 	MonitorUniquePtr m_pMonitor;
+	GeolocationServiceUniquePtr m_pGeolocationService;
+	VeilidNetworkUniquePtr m_pVeilidNetwork;
 };
 
 extern Turbine* g_pTurbine;
@@ -187,6 +194,11 @@ inline Deployment* Turbine::GetDeployment() const
 inline Monitor* Turbine::GetMonitor() const
 {
 	return m_pMonitor.get();
+}
+
+inline GeolocationService* Turbine::GetGeolocationService() const
+{
+	return m_pGeolocationService.get();
 }
 
 } // namespace Turbine
