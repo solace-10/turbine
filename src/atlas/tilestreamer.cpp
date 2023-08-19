@@ -222,7 +222,9 @@ bool TileStreamer::LoadFromFile(Tile& tile)
 
 	std::filesystem::path path = g_pTurbine->GetSettings()->GetStoragePath() / "atlas" / std::to_string(tile.ZoomLevel()) / filename.str();
 
-	if (std::filesystem::exists(path) == false)
+	// If the file doesn't exist locally, get it from the tile server.
+	// It is also possible for the file to exist locally but be empty, as result of a failed or interrupted download.
+	if (std::filesystem::exists(path) == false || std::filesystem::file_size(path) == 0)
 	{
 		return false;
 	}
@@ -250,7 +252,7 @@ bool TileStreamer::DownloadFromTileServer(Tile& tile)
 {
 	CURL* pCurlHandle;
 	std::stringstream url;
-	url << "http://a.tile.stamen.com/toner/" << tile.ZoomLevel() << "/" << tile.X() << "/" << tile.Y() << ".png";
+	url << "https://tiles.stadiamaps.com/tiles/stamen_toner/" << tile.ZoomLevel() << "/" << tile.X() << "/" << tile.Y() << ".png";
 
 	std::stringstream filename;
 	filename << tile.X() << "_" << tile.Y() << ".png";
@@ -263,6 +265,7 @@ bool TileStreamer::DownloadFromTileServer(Tile& tile)
 	curl_easy_setopt(pCurlHandle, CURLOPT_URL, url.str().c_str());
 	curl_easy_setopt(pCurlHandle, CURLOPT_NOPROGRESS, 1L);
 	curl_easy_setopt(pCurlHandle, CURLOPT_WRITEFUNCTION, &WriteTileFileCallback);
+	curl_easy_setopt(pCurlHandle, CURLOPT_FOLLOWLOCATION, 1L);
 
 #ifdef _WIN32
 	_wfopen_s(&pTileFile, path.c_str(), L"wb");
