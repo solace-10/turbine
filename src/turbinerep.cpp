@@ -168,7 +168,7 @@ void TurbineRep::ProcessEvent(const SDL_Event& event)
 
 void TurbineRep::Update(float delta)
 {
-
+	m_pAtlas->Update(delta);
 }
 
 void TurbineRep::Render()

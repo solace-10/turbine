@@ -29,7 +29,7 @@ SOFTWARE.
 
 #include "imgui/imgui.h"
 
-#include "bridge/bridge.fwd.hpp"
+#include "atlas/pindata.hpp"
 
 namespace Turbine
 {
@@ -37,17 +37,17 @@ namespace Turbine
 class PinStack
 {
 public:
-    PinStack(const ImVec2& position, Bridge* pBridge);
+    PinStack(const ImVec2& position, const PinData& pinData);
 
     void Render();
 
     const ImVec2& GetPosition() const;
-    void AddBridge(Bridge* pBridge);
+    void Add(const PinData& pinData);
 
 private:
     ImVec2 m_Position;
-    std::vector<Bridge*> m_Bridges;
-    std::string m_BridgesText;
+    std::vector<PinData> m_Data;
+    std::string m_Text;
 };
 
 inline const ImVec2& PinStack::GetPosition() const

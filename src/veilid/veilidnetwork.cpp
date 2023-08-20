@@ -4,6 +4,7 @@
 
 #include "geolocation/geolocationservice.hpp"
 #include "turbine.h"
+#include "veilid/veilidserver.hpp"
 
 namespace Turbine
 {
@@ -28,7 +29,12 @@ VeilidNetwork::~VeilidNetwork()
 
 void VeilidNetwork::OnGeolocationCompleted(const GeolocationQueryResult& result)
 {
-    int a = 0;
+    if (result.IsValid())
+    {
+        ServerSharedPtr pServer = std::make_shared<VeilidServer>();
+        pServer->SetGeolocationData(result.Data.value());
+        g_pTurbine->AddServer(pServer);
+    }
 }
 
 } // namespace Turbine

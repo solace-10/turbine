@@ -49,6 +49,7 @@ class GeolocationService;
 class Monitor;
 class Settings;
 class Provider;
+class Server;
 class TurbineRep;
 class VeilidNetwork;
 class WebClient;
@@ -65,6 +66,8 @@ using ProviderVector = std::vector<ProviderUniquePtr>;
 using VeilidNetworkUniquePtr = std::unique_ptr<VeilidNetwork>;
 using WebClientUniquePtr = std::unique_ptr<WebClient>;
 using WindowUniquePtr = std::unique_ptr<Window>;
+using ServerSharedPtr = std::shared_ptr<Server>;
+using ServerList = std::list<ServerSharedPtr>;
 
 class Turbine
 {
@@ -94,6 +97,8 @@ public:
 	Deployment* GetDeployment() const;
 	Monitor* GetMonitor() const;
 	GeolocationService* GetGeolocationService() const;
+	void AddServer(const ServerSharedPtr pServer);
+	const ServerList& GetServers() const;
 
 private:
 	void InitialiseLatestVersions();
@@ -127,6 +132,7 @@ private:
 	MonitorUniquePtr m_pMonitor;
 	GeolocationServiceUniquePtr m_pGeolocationService;
 	VeilidNetworkUniquePtr m_pVeilidNetwork;
+	ServerList m_Servers;
 };
 
 extern Turbine* g_pTurbine;
@@ -199,6 +205,16 @@ inline Monitor* Turbine::GetMonitor() const
 inline GeolocationService* Turbine::GetGeolocationService() const
 {
 	return m_pGeolocationService.get();
+}
+
+inline void Turbine::AddServer(const ServerSharedPtr pServer)
+{
+	m_Servers.push_back(pServer);
+}
+
+inline const ServerList& Turbine::GetServers() const
+{
+	return m_Servers;
 }
 
 } // namespace Turbine

@@ -27,6 +27,7 @@ SOFTWARE.
 #include "atlas/pinstack.hpp"
 #include "bridge/bridge.h"
 #include "bridge/bridgegeolocation.hpp"
+#include "server.hpp"
 #include "turbine.h"
 
 namespace Turbine
@@ -49,22 +50,49 @@ void Pins::Update(float delta)
 
     const float aggregationThreshold = 32.0f;
     const float aggregationThresholdSquared = aggregationThreshold * aggregationThreshold;
-    for (Bridge* pBridge : g_pTurbine->GetBridges())
+    // for (Bridge* pBridge : g_pTurbine->GetBridges())
+    // {
+    //     BridgeGeolocation* pGeolocation = pBridge->GetGeolocation();
+    //     if (pGeolocation == nullptr)
+    //     {
+    //         continue;
+    //     }
+
+    //     bool pinStackFound = false;
+    //     ImVec2 pinPosition = m_pAtlas->GetScreenCoordinates(pGeolocation->GetLongitude(), pGeolocation->GetLatitude());
+    //     for (PinStackUniquePtr& pPinStack : m_PinStacks)
+    //     {
+    //         const ImVec2 pinStackPosition = pPinStack->GetPosition();
+    //         if (DistanceBetweenSquared(pinPosition, pinStackPosition) < aggregationThresholdSquared)
+    //         {
+    //             pPinStack->AddBridge(pBridge);
+    //             pinStackFound = true;
+    //             break;
+    //         }
+    //     }
+
+    //     if (pinStackFound == false)
+    //     {
+    //         m_PinStacks.push_back(std::move(std::make_unique<PinStack>(pinPosition, pBridge)));
+    //     }
+    // }
+
+    for (const ServerSharedPtr& pServer : g_pTurbine->GetServers())
     {
-        BridgeGeolocation* pGeolocation = pBridge->GetGeolocation();
-        if (pGeolocation == nullptr)
+        std::optional<GeolocationData> pGeolocationData = pServer->GetGeolocationData();
+        if (pGeolocationData.has_value() == false)
         {
             continue;
         }
 
         bool pinStackFound = false;
-        ImVec2 pinPosition = m_pAtlas->GetScreenCoordinates(pGeolocation->GetLongitude(), pGeolocation->GetLatitude());
+        ImVec2 pinPosition = m_pAtlas->GetScreenCoordinates(pGeolocationData->GetLongitude(), pGeolocationData->GetLatitude());
         for (PinStackUniquePtr& pPinStack : m_PinStacks)
         {
             const ImVec2 pinStackPosition = pPinStack->GetPosition();
             if (DistanceBetweenSquared(pinPosition, pinStackPosition) < aggregationThresholdSquared)
             {
-                pPinStack->AddBridge(pBridge);
+                pPinStack->Add(PinData(pGeolocationData->GetIPAddress()));
                 pinStackFound = true;
                 break;
             }
@@ -72,7 +100,7 @@ void Pins::Update(float delta)
 
         if (pinStackFound == false)
         {
-            m_PinStacks.push_back(std::move(std::make_unique<PinStack>(pinPosition, pBridge)));
+            m_PinStacks.push_back(std::move(std::make_unique<PinStack>(pinPosition, pGeolocationData->GetIPAddress())));
         }
     }
 }

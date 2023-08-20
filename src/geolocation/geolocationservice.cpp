@@ -166,10 +166,8 @@ void GeolocationService::ConsumeQueue()
 						size_t locationSeparator = location.find_first_of(',');
 						if (locationSeparator != std::string::npos)
 						{
-							std::string latitude = location.substr(0, locationSeparator);
-							std::string longitude = location.substr(locationSeparator + 1);
-							latitude = static_cast<float>(atof(latitude.c_str()));
-							longitude = static_cast<float>(atof(longitude.c_str()));
+							latitude = static_cast<float>(atof(location.substr(0, locationSeparator).c_str()));
+							longitude = static_cast<float>(atof(location.substr(locationSeparator + 1).c_str()));
 						}
 
 						result.Data = GeolocationData(

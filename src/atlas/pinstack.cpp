@@ -29,10 +29,10 @@ SOFTWARE.
 namespace Turbine
 {
 
-PinStack::PinStack(const ImVec2& position, Bridge* pBridge) :
+PinStack::PinStack(const ImVec2& position, const PinData& pinData) :
 m_Position(position)
 {
-    m_Bridges.push_back(pBridge);
+    m_Data.push_back(pinData);
 }
 
 void PinStack::Render()
@@ -42,25 +42,25 @@ void PinStack::Render()
     pDrawList->AddCircleFilled(m_Position, pinRadius, ImColor(0.0f, 1.0f, 1.0f, 1.0f));
     pDrawList->AddCircle(m_Position, pinRadius, ImColor(0.0f, 0.0f, 0.0f, 1.0f));
     
-    size_t numBridges = m_Bridges.size();
-    if (numBridges > 1)
+    size_t size = m_Data.size();
+    if (size > 1)
     {
         std::stringstream ss;
-        ss << numBridges;
-        m_BridgesText = ss.str();
+        ss << size;
+        m_Text = ss.str();
 
-        ImVec2 textSize = ImGui::CalcTextSize(m_BridgesText.c_str());
+        ImVec2 textSize = ImGui::CalcTextSize(m_Text.c_str());
         ImVec2 textPosition;
         textPosition.x = m_Position.x - textSize.x / 2.0f;
         textPosition.y = m_Position.y - textSize.y / 2.0f;
 
-        pDrawList->AddText(textPosition, ImColor(0.0f, 0.0f, 0.0f, 1.0f), m_BridgesText.c_str());
+        pDrawList->AddText(textPosition, ImColor(0.0f, 0.0f, 0.0f, 1.0f), m_Text.c_str());
     }
 }
 
-void PinStack::AddBridge(Bridge* pBridge)
+void PinStack::Add(const PinData& pinData)
 {
-    m_Bridges.push_back(pBridge);
+    m_Data.push_back(pinData);
 }
 
 } // namespace Turbine
